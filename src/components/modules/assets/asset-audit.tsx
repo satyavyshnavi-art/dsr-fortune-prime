@@ -400,7 +400,7 @@ export function AssetAudit() {
       {activeSubTab === "dashboard" && <AuditDashboard extraScanned={scannedCount} scannedCategories={scannedCategories} realAssets={realAssets} realCategories={realCategories} />}
       {activeSubTab === "audit-report" && <AuditReport />}
       {activeSubTab === "scan-report" && <ScanReport onView={openViewScan} scans={scanResults} />}
-      {activeSubTab === "my-scans" && <MyScans />}
+      {activeSubTab === "my-scans" && <MyScans scans={scanResults} />}
       {activeSubTab === "analytics" && <ScanAnalytics scans={scanResults} />}
       {activeSubTab === "bulk-generator" && (
         <BulkGenerator
@@ -1097,22 +1097,65 @@ function ScanReport({ onView, scans }: { onView: (scan: AuditScanRecord) => void
   );
 }
 
-function MyScans() {
+function MyScans({ scans }: { scans: AuditScanRecord[] }) {
+  const [filterDate, setFilterDate] = useState("");
+
+  // Only show scans by "Demo User" (current user's scans)
+  const myScans = scans.filter(s => s.scannedBy === "Demo User" || s.scannedBy === "Unknown");
+  const filteredScans = filterDate
+    ? myScans.filter(s => s.dateTime.includes(filterDate))
+    : myScans;
+
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <h3 className="text-[13px] font-semibold text-slate-700 flex items-center gap-1.5">
           <ScanLine className="h-3.5 w-3.5" />
           My Scan History
+          <span className="text-[10px] text-slate-400 font-normal ml-1">({myScans.length} scans)</span>
         </h3>
-        <Input type="date" className="w-32 h-7 text-[11px]" placeholder="Select date" />
+        <Input
+          type="date"
+          value={filterDate}
+          onChange={(e) => setFilterDate(e.target.value)}
+          className="w-32 h-7 text-[11px]"
+        />
       </div>
 
-      <EmptyState
-        icon={Loader2}
-        title="No scans found."
-        description="Your scan history will appear here."
-      />
+      {filteredScans.length === 0 ? (
+        <EmptyState
+          icon={ScanLine}
+          title="No scans found"
+          description={filterDate ? "No scans on this date. Try a different date." : "Scan assets to see your history here."}
+        />
+      ) : (
+        <div className="space-y-2">
+          {filteredScans.map((scan, idx) => (
+            <div key={scan.id || idx} className="border border-slate-200 rounded-lg p-3 hover:bg-slate-50/50 transition-colors">
+              <div className="flex items-center justify-between mb-1.5">
+                <div className="flex items-center gap-2">
+                  <span className="text-[12px] font-semibold text-slate-800">{scan.assetName}</span>
+                  <span className="text-[10px] font-mono text-slate-400">{scan.assetTag}</span>
+                </div>
+                <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
+                  scan.condition === "Good" ? "bg-green-50 text-green-700 border border-green-200"
+                    : scan.condition === "Needs Repair" ? "bg-amber-50 text-amber-700 border border-amber-200"
+                    : scan.condition === "Damaged" ? "bg-red-50 text-red-700 border border-red-200"
+                    : "bg-slate-50 text-slate-500 border border-slate-200"
+                }`}>
+                  {scan.condition || "Not assessed"}
+                </span>
+              </div>
+              <div className="flex items-center gap-4 text-[10px] text-slate-400">
+                <span>{scan.dateTime}</span>
+                <span>{scan.blockType !== "-" ? scan.blockType : ""}</span>
+                {scan.gps && <span className="text-green-500">📍 GPS</span>}
+                {scan.notes && <span className="italic text-slate-500">"{scan.notes}"</span>}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
