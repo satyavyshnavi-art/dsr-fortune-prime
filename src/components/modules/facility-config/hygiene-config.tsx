@@ -156,16 +156,41 @@ const GARDENING_ACTIVITIES = [
   "WATERING", "LAWN MOWING", "MANURE APPLY", "MEDICINES", "DRY LEAVES CLEANING",
 ] as const;
 
-const GARDENING_ZONES = [
-  { location: "Phase - 1 Park 1", activities: ["Monthly", "Monthly", "Weekly", "Daily", "Monthly", "Weekly", "Weekly", "Daily"] },
-  { location: "Phase - 1 Park 2", activities: ["Monthly", "Monthly", "Weekly", "Daily", "Monthly", "Weekly", "Weekly", "Daily"] },
-  { location: "Phase - 1 Park 3", activities: ["Monthly", "Monthly", "Weekly", "Daily", "Monthly", "Weekly", "Weekly", "Daily"] },
-  { location: "Phase - 1 Park 4", activities: ["Monthly", "Monthly", "Weekly", "Daily", "Monthly", "Weekly", "Weekly", "Daily"] },
-  { location: "Phase - 1 Park 5", activities: ["Monthly", "Monthly", "Weekly", "Daily", "Monthly", "Weekly", "Weekly", "Daily"] },
-  { location: "Phase - 1 Park 12", activities: ["Monthly", "Monthly", "Weekly", "Daily", "Monthly", "Weekly", "Weekly", "Daily"] },
-  { location: "Phase - 1 Park 13", activities: ["Monthly", "Monthly", "Weekly", "Daily", "Monthly", "Weekly", "Weekly", "Daily"] },
-  { location: "Phase - 1 Park A1", activities: ["Monthly", "Monthly", "Weekly", "Daily", "Monthly", "Weekly", "Weekly", "Daily"] },
-];
+const GARDENING_ZONE_DATA: Record<string, { label: string; locations: { location: string; activities: string[] }[] }> = {
+  "zone-1": {
+    label: "Zone - 1 - Phase D1 - Park 1 to 5, 12, 13 & A1",
+    locations: [
+      { location: "Phase - 1 Park 1", activities: ["Monthly", "Monthly", "Weekly", "Daily", "Monthly", "Weekly", "Weekly", "Daily"] },
+      { location: "Phase - 1 Park 2", activities: ["Monthly", "Monthly", "Weekly", "Daily", "Monthly", "Weekly", "Weekly", "Daily"] },
+      { location: "Phase - 1 Park 3", activities: ["Monthly", "Monthly", "Weekly", "Daily", "Monthly", "Weekly", "Weekly", "Daily"] },
+      { location: "Phase - 1 Park 4", activities: ["Monthly", "Monthly", "Weekly", "Daily", "Monthly", "Weekly", "Weekly", "Daily"] },
+      { location: "Phase - 1 Park 5", activities: ["Monthly", "Monthly", "Weekly", "Daily", "Monthly", "Weekly", "Weekly", "Daily"] },
+      { location: "Phase - 1 Park 12", activities: ["Monthly", "Monthly", "Weekly", "Daily", "Monthly", "Weekly", "Weekly", "Daily"] },
+      { location: "Phase - 1 Park 13", activities: ["Monthly", "Monthly", "Weekly", "Daily", "Monthly", "Weekly", "Weekly", "Daily"] },
+      { location: "Phase - 1 Park A1", activities: ["Monthly", "Monthly", "Weekly", "Daily", "Monthly", "Weekly", "Weekly", "Daily"] },
+    ],
+  },
+  "zone-2": {
+    label: "Zone - 2 - Phase D2 - Park 6 to 11",
+    locations: [
+      { location: "Phase - 2 Park 6", activities: ["Monthly", "Weekly", "Weekly", "Daily", "Monthly", "Monthly", "Monthly", "Daily"] },
+      { location: "Phase - 2 Park 7", activities: ["Monthly", "Weekly", "Weekly", "Daily", "Weekly", "Monthly", "Monthly", "Daily"] },
+      { location: "Phase - 2 Park 8", activities: ["Monthly", "Weekly", "Monthly", "Daily", "Monthly", "Monthly", "Weekly", "Daily"] },
+      { location: "Phase - 2 Park 9", activities: ["Monthly", "Weekly", "Weekly", "Daily", "Monthly", "Monthly", "Monthly", "Weekly"] },
+      { location: "Phase - 2 Park 10", activities: ["Monthly", "Monthly", "Weekly", "Daily", "Weekly", "Monthly", "Monthly", "Daily"] },
+      { location: "Phase - 2 Park 11", activities: ["Monthly", "Weekly", "Weekly", "Daily", "Monthly", "Monthly", "Weekly", "Daily"] },
+    ],
+  },
+  "zone-3": {
+    label: "Zone - 3 - Clubhouse & Common Areas",
+    locations: [
+      { location: "Clubhouse Garden", activities: ["Weekly", "Weekly", "Daily", "Daily", "Weekly", "Monthly", "Monthly", "Daily"] },
+      { location: "Main Entrance", activities: ["Monthly", "Weekly", "Weekly", "Daily", "Weekly", "Monthly", "Monthly", "Daily"] },
+      { location: "Pool Area", activities: ["Weekly", "Weekly", "Weekly", "Daily", "Monthly", "Monthly", "Weekly", "Daily"] },
+      { location: "Children Play Area", activities: ["Monthly", "Monthly", "Weekly", "Daily", "Weekly", "Monthly", "Monthly", "Daily"] },
+    ],
+  },
+};
 
 function FrequencyBadge({ freq }: { freq: string }) {
   const colors = {
@@ -181,8 +206,9 @@ function FrequencyBadge({ freq }: { freq: string }) {
 }
 
 function GardeningSection() {
-  const [version, setVersion] = useState("v2 (Active)");
-  const [zone, setZone] = useState("Zone - 1 - Phase D1 - Park 1 to 5, 12,13 & A1");
+  const [selectedZone, setSelectedZone] = useState("zone-1");
+  const zoneData = GARDENING_ZONE_DATA[selectedZone];
+  const zoneKeys = Object.keys(GARDENING_ZONE_DATA);
 
   return (
     <div className="col-span-1 lg:col-span-2 space-y-3 mt-4">
@@ -191,15 +217,13 @@ function GardeningSection() {
           <span className="text-lg">🌿</span>
           <h3 className="text-[14px] font-semibold text-slate-800">Gardening</h3>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            className="flex items-center gap-1 text-[11px] text-blue-600 hover:text-blue-700 font-medium"
-            onClick={() => toast.success("Downloading QR codes for Gardening...")}
-          >
-            <Download className="h-3 w-3" />
-            Download QRs
-          </button>
-        </div>
+        <button
+          className="flex items-center gap-1 text-[11px] text-blue-600 hover:text-blue-700 font-medium"
+          onClick={() => toast.success("Downloading QR codes for Gardening...")}
+        >
+          <Download className="h-3 w-3" />
+          Download QRs
+        </button>
       </div>
 
       {/* Version / Zone selectors */}
@@ -207,15 +231,20 @@ function GardeningSection() {
         <div className="flex items-center gap-1.5">
           <span className="text-[11px] text-slate-500">Version:</span>
           <select className="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px]">
-            <option>v2 (Active) · 8 zones</option>
+            <option>v2 (Active) · {zoneKeys.length} zones</option>
             <option>v1</option>
           </select>
         </div>
         <div className="flex items-center gap-1.5">
           <span className="text-[11px] text-slate-500">Zone:</span>
-          <select className="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] min-w-[280px]">
-            <option>Zone - 1 - Phase D1 - Park 1 to 5, 12,13 &amp; A1</option>
-            <option>Zone - 2 - Phase D2</option>
+          <select
+            value={selectedZone}
+            onChange={(e) => setSelectedZone(e.target.value)}
+            className="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] min-w-[320px]"
+          >
+            {zoneKeys.map((key) => (
+              <option key={key} value={key}>{GARDENING_ZONE_DATA[key].label}</option>
+            ))}
           </select>
         </div>
         <div className="ml-auto flex items-center gap-2">
@@ -236,11 +265,11 @@ function GardeningSection() {
         </div>
       </div>
 
-      {/* Zone Schedule Header */}
+      {/* Zone Schedule Table */}
       <Card className="shadow-none border border-slate-200 rounded-lg overflow-hidden">
         <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-200">
           <h4 className="text-[12px] font-semibold text-slate-700">
-            Zone - 1 : Phase D1 - Park 1 to 5, 12,13 &amp; A1
+            {zoneData.label}
           </h4>
         </div>
 
@@ -257,12 +286,12 @@ function GardeningSection() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {GARDENING_ZONES.map((zone, idx) => (
+              {zoneData.locations.map((loc, idx) => (
                 <tr key={idx} className="hover:bg-slate-50/50">
                   <td className="py-2.5 px-3 text-[12px] font-medium text-slate-800 sticky left-0 bg-white">
-                    {zone.location}
+                    {loc.location}
                   </td>
-                  {zone.activities.map((freq, i) => (
+                  {loc.activities.map((freq, i) => (
                     <td key={i} className="py-2.5 px-2 text-center">
                       <FrequencyBadge freq={freq} />
                     </td>
