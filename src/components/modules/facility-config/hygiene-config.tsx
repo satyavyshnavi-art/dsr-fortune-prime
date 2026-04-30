@@ -4,6 +4,12 @@ import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   Download,
   Plus,
   RefreshCw,
@@ -13,7 +19,11 @@ import {
   SprayCan,
   Bug,
   Loader2,
+  CheckCircle2,
+  Printer,
+  QrCode,
 } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 import { toast } from "sonner";
 
 interface TemplateFile {
@@ -139,10 +149,10 @@ const mockHygieneData: HygieneCategory[] = [
   },
 ];
 
-function TemplateRow({ template, onEdit, onDelete }: { template: TemplateFile; onEdit: (t: TemplateFile) => void; onDelete: (t: TemplateFile) => void }) {
+function TemplateRow({ template, onEdit, onDelete, onView }: { template: TemplateFile; onEdit: (t: TemplateFile) => void; onDelete: (t: TemplateFile) => void; onView: (t: TemplateFile) => void }) {
   return (
     <div className="flex items-center justify-between py-1.5 px-2 rounded hover:bg-slate-50 transition-colors">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 cursor-pointer" onClick={() => onView(template)}>
         <FileSpreadsheet className="h-3.5 w-3.5 text-green-600 shrink-0" />
         <div>
           <p className="text-[12px] font-medium text-slate-700 leading-tight">{template.name}</p>
@@ -177,7 +187,7 @@ function TemplateRow({ template, onEdit, onDelete }: { template: TemplateFile; o
   );
 }
 
-function ChecklistSectionCard({ section, onEdit, onDelete }: { section: ChecklistSection; onEdit: (t: TemplateFile) => void; onDelete: (t: TemplateFile) => void }) {
+function ChecklistSectionCard({ section, onEdit, onDelete, onView }: { section: ChecklistSection; onEdit: (t: TemplateFile) => void; onDelete: (t: TemplateFile) => void; onView: (t: TemplateFile) => void }) {
   return (
     <div className="space-y-0.5">
       <div className="flex items-center justify-between px-1">
@@ -190,7 +200,7 @@ function ChecklistSectionCard({ section, onEdit, onDelete }: { section: Checklis
       </div>
       <div>
         {section.templates.map((template) => (
-          <TemplateRow key={template.id} template={template} onEdit={onEdit} onDelete={onDelete} />
+          <TemplateRow key={template.id} template={template} onEdit={onEdit} onDelete={onDelete} onView={onView} />
         ))}
       </div>
       <div className="flex items-center gap-3 pt-0.5 px-1">
@@ -254,6 +264,49 @@ export function HygieneConfig() {
       }))
     );
     toast.success(`Template "${template.name}" deleted`);
+  };
+
+  // View template detail modal
+  const [viewTemplate, setViewTemplate] = useState<{ template: TemplateFile; categoryName: string } | null>(null);
+
+  const handleViewTemplate = (template: TemplateFile) => {
+    // Find which category this template belongs to
+    const cat = categories.find(c => c.sections.some(s => s.templates.some(t => t.id === template.id)));
+    setViewTemplate({ template, categoryName: cat?.name || "Housekeeping" });
+  };
+
+  // Sample task names per template (would come from DB in production)
+  const getTasksForTemplate = (template: TemplateFile): string[] => {
+    const taskMap: Record<string, string[]> = {
+      "HOUSEKEEPING CHECKLIST": [
+        "Check the deployment and availability of manpower on your floor",
+        "Grooming of employees on floor and quality of the tools they use",
+        "Availability of Floor mops, Bucket and Wipers",
+        "All the respective floors is been swepted properly",
+        "Garbage is collected from each flat",
+        "All floors are well mopped",
+        "Dusting of all fire safety equipments",
+        "Have a closer look at the flooring, walls, window glasses",
+        "Light fittings and fixtures are clean and working",
+        "Look down at all common corridors for stains on the flooring area",
+        "Check dustbins are not overflowing",
+        "Lift lobby area is clean",
+        "Staircase cleaning done",
+      ],
+      "CLUB-HOUSE CHECKLIST": [
+        "Swimming pool area cleaning", "Gym equipment wiped", "Reception area tidy",
+        "Restrooms cleaned", "Common hall mopped", "Windows cleaned",
+        "AC vents dusted", "Furniture arranged", "Lobby flowers refreshed", "Parking area swept",
+      ],
+      "BLOCK CHECKLIST": [
+        "Corridor mopping", "Staircase cleaning", "Lift area cleaned",
+        "Terrace swept", "Basement parking", "Fire exit clear",
+        "Notice board updated", "Mailbox area clean", "Entry gate clean",
+        "Intercom panel wiped", "Transformer room checked", "Meter room swept",
+        "Garden pathway", "Compound wall clean",
+      ],
+    };
+    return taskMap[template.name] || Array.from({ length: template.tasks }, (_, i) => `Task ${i + 1}`);
   };
 
   const fetchTemplates = useCallback(async () => {
@@ -320,13 +373,96 @@ export function HygieneConfig() {
             <Card className="shadow-none border-slate-200">
               <CardContent className="p-3 space-y-3">
                 {category.sections.map((section) => (
-                  <ChecklistSectionCard key={section.title} section={section} onEdit={handleEditTemplate} onDelete={handleDeleteTemplate} />
+                  <ChecklistSectionCard key={section.title} section={section} onEdit={handleEditTemplate} onDelete={handleDeleteTemplate} onView={handleViewTemplate} />
                 ))}
               </CardContent>
             </Card>
           </div>
         ))}
       </div>
+
+      {/* ===== TEMPLATE DETAIL MODAL ===== */}
+      <Dialog open={!!viewTemplate} onOpenChange={(open) => { if (!open) setViewTemplate(null); }}>
+        <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
+          {viewTemplate && (() => {
+            const { template, categoryName } = viewTemplate;
+            const qrValue = `template_${template.id}_${template.name.replace(/\s+/g, "_")}_${categoryName}`;
+            const tasks = getTasksForTemplate(template);
+            return (
+              <>
+                <DialogHeader>
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-lg bg-blue-50">
+                      <QrCode className="h-4 w-4 text-blue-600" />
+                    </div>
+                    <div>
+                      <DialogTitle className="text-[15px]">{template.name} - {categoryName}</DialogTitle>
+                      <p className="text-[11px] text-slate-400 mt-0.5">
+                        {template.tasks} tasks · v{template.version} · Code: {template.name.replace(/\s+/g, "_")}
+                      </p>
+                    </div>
+                  </div>
+                </DialogHeader>
+
+                <div className="space-y-4 pt-2">
+                  {/* QR Code */}
+                  <div className="bg-slate-50 rounded-xl p-5 text-center">
+                    <p className="text-[13px] font-semibold text-slate-700 mb-1">QR Code</p>
+                    <p className="text-[11px] text-slate-400 mb-4">Scan this QR code to open & review this daily template</p>
+                    <div className="inline-block bg-white p-4 rounded-lg border border-slate-200">
+                      <QRCodeSVG value={qrValue} size={160} level="M" />
+                    </div>
+                    <p className="text-[10px] text-slate-400 mt-3 font-mono break-all px-4">QR ID: {qrValue}</p>
+                    <p className="text-[10px] text-slate-400 mt-1">
+                      Template: <span className="font-medium">{template.name}</span> · Department: <span className="font-medium">{categoryName}</span>
+                    </p>
+                  </div>
+
+                  {/* Buttons */}
+                  <div className="flex gap-2">
+                    <Button
+                      className="flex-1 h-9 text-[12px] bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+                      onClick={() => toast.success("QR code downloaded")}
+                    >
+                      <Download className="h-3.5 w-3.5 mr-1.5" />
+                      Download QR (PNG)
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="flex-1 h-9 text-[12px] rounded-lg"
+                      onClick={() => {
+                        const w = window.open("", "_blank");
+                        if (w) {
+                          w.document.write(`<html><head><title>QR - ${template.name}</title><style>body{font-family:Arial;text-align:center;padding:20px}h2{font-size:14px}p{font-size:11px;color:#666}</style></head><body><h2>${template.name}</h2><p>${categoryName}</p><img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrValue)}" /><p style="margin-top:10px;font-size:9px">${qrValue}</p></body></html>`);
+                          w.document.close();
+                          setTimeout(() => w.print(), 500);
+                        }
+                      }}
+                    >
+                      <Printer className="h-3.5 w-3.5 mr-1.5" />
+                      Print Sticker (4 x 1.5&quot;)
+                    </Button>
+                  </div>
+
+                  {/* Task List */}
+                  <div>
+                    <h4 className="text-[13px] font-semibold text-slate-700 mb-2">Tasks in this Template ({tasks.length})</h4>
+                    <div className="space-y-1">
+                      {tasks.map((task, idx) => (
+                        <div key={idx} className="flex items-start gap-2 py-1.5 px-2 rounded hover:bg-slate-50">
+                          <span className="text-[11px] text-slate-400 font-medium mt-0.5 w-5 shrink-0">{idx + 1}</span>
+                          <p className="text-[12px] text-slate-700 flex-1">{task}</p>
+                          <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </>
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
