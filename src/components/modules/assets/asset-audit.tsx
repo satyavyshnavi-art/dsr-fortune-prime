@@ -48,6 +48,7 @@ import {
   Eye,
   CheckCircle,
 } from "lucide-react";
+import { toast } from "sonner";
 
 type AuditSubTab =
   | "dashboard"
@@ -92,8 +93,15 @@ export function AssetAudit() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [dismissedAlerts, setDismissedAlerts] = useState<number[]>([]);
 
+  // --- Scan results tracking ---
+  const [scanResults, setScanResults] = useState<AuditScanRecord[]>([...mockAuditScans]);
+  const [scannedCount, setScannedCount] = useState(0);
+
   const handleAddConfig = () => {
-    if (!newConfigCategory || !newConfigFrequency) return;
+    if (!newConfigCategory || !newConfigFrequency) {
+      toast.error("Please select both category and frequency");
+      return;
+    }
     const newConfig: AuditConfig = {
       id: `ac-${Date.now()}`,
       category: newConfigCategory,
@@ -104,6 +112,7 @@ export function AssetAudit() {
     setNewConfigCategory("");
     setNewConfigFrequency("");
     setShowAddConfigModal(false);
+    toast.success("Audit config added");
   };
 
   const openEditConfig = (cfg: AuditConfig) => {
@@ -123,6 +132,7 @@ export function AssetAudit() {
       )
     );
     setShowEditConfigModal(false);
+    toast.success("Audit config updated");
   };
 
   const openDeleteConfig = (cfg: AuditConfig) => {
@@ -134,10 +144,14 @@ export function AssetAudit() {
     if (!deleteConfigId) return;
     setConfigs((prev) => prev.filter((c) => c.id !== deleteConfigId));
     setShowDeleteConfigModal(false);
+    toast.success("Audit config deleted");
   };
 
   const handleStartScan = () => {
-    if (!scanCategory) return;
+    if (!scanCategory) {
+      toast.error("Please select a category to scan");
+      return;
+    }
     setScanning(true);
     setScanProgress(0);
     setScanComplete(false);
@@ -148,6 +162,27 @@ export function AssetAudit() {
     if (scanProgress >= 100) {
       setScanning(false);
       setScanComplete(true);
+      // Add scan results to the scan report
+      const now = new Date();
+      const dateStr = now.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) + ", " + now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true });
+      const categoryAssets = mockCategories.find(c => c.name === scanCategory);
+      const count = categoryAssets?.totalAssets || 5;
+      const newScans: AuditScanRecord[] = Array.from({ length: Math.min(count, 5) }, (_, i) => ({
+        id: `scan-new-${Date.now()}-${i}`,
+        assetTag: `${scanCategory.slice(0, 4).toUpperCase()}_${i + 1}`,
+        assetName: `${scanCategory} Asset ${i + 1}`,
+        blockType: "-",
+        block: "-",
+        floor: "-",
+        condition: "Good" as const,
+        scannedBy: "Demo User",
+        dateTime: dateStr,
+        notes: "",
+        gps: true,
+      }));
+      setScanResults(prev => [...newScans, ...prev]);
+      setScannedCount(prev => prev + newScans.length);
+      toast.success(`Scan complete! ${newScans.length} assets scanned in ${scanCategory}`);
       return;
     }
     const timer = setTimeout(() => {
@@ -218,7 +253,10 @@ export function AssetAudit() {
           variant="outline"
           size="sm"
           className={`h-7 text-[11px] px-2.5 ${notificationsEnabled ? "bg-green-50 border-green-200 text-green-700" : ""}`}
-          onClick={() => setNotificationsEnabled(!notificationsEnabled)}
+          onClick={() => {
+            setNotificationsEnabled(!notificationsEnabled);
+            toast.success(notificationsEnabled ? "Notifications disabled" : "Notifications enabled — you'll be alerted for pending audits");
+          }}
         >
           <Bell className="h-3 w-3 mr-1" />
           {notificationsEnabled ? "Notifications On" : "Enable Notifications"}
@@ -250,7 +288,10 @@ export function AssetAudit() {
                 variant="ghost"
                 size="icon"
                 className="h-5 w-5"
-                onClick={() => setDismissedAlerts((prev) => [...prev, origIdx])}
+                onClick={() => {
+                  setDismissedAlerts((prev) => [...prev, origIdx]);
+                  toast.info("Alert dismissed");
+                }}
               >
                 <X className="h-3 w-3 text-slate-400" />
               </Button>
@@ -260,11 +301,11 @@ export function AssetAudit() {
       </div>
 
       {/* Content based on sub-tab */}
-      {activeSubTab === "dashboard" && <AuditDashboard />}
+      {activeSubTab === "dashboard" && <AuditDashboard extraScanned={scannedCount} />}
       {activeSubTab === "audit-report" && <AuditReport />}
-      {activeSubTab === "scan-report" && <ScanReport onView={openViewScan} />}
+      {activeSubTab === "scan-report" && <ScanReport onView={openViewScan} scans={scanResults} />}
       {activeSubTab === "my-scans" && <MyScans />}
-      {activeSubTab === "analytics" && <ScanAnalytics />}
+      {activeSubTab === "analytics" && <ScanAnalytics scans={scanResults} />}
       {activeSubTab === "bulk-generator" && (
         <BulkGenerator
           fileRef={bulkFileRef}
@@ -544,7 +585,7 @@ export function AssetAudit() {
 
 // -------- Sub-tab components --------
 
-function AuditDashboard() {
+function AuditDashboard({ extraScanned = 0 }: { extraScanned?: number }) {
   const [data, setData] = useState(auditDashboardSummary);
 
   // Fetch real asset counts from API
@@ -555,10 +596,10 @@ function AuditDashboard() {
         if (Array.isArray(assets) && assets.length > 0) {
           const totalAssets = assets.length;
           // Use mock scanned/remaining ratios scaled to real count
-          const scannedRatio = auditDashboardSummary.scanned / (auditDashboardSummary.totalAssets || 1);
-          const scanned = Math.round(totalAssets * scannedRatio);
-          const remaining = totalAssets - scanned;
-          const overallCompletion = totalAssets > 0 ? Math.round((scanned / totalAssets) * 100) : 0;
+          const baseScanned = auditDashboardSummary.scanned;
+          const scanned = baseScanned + extraScanned;
+          const remaining = Math.max(0, totalAssets - scanned);
+          const overallCompletion = totalAssets > 0 ? Math.min(100, Math.round((scanned / totalAssets) * 100)) : 0;
           setData((prev) => ({
             ...prev,
             totalAssets,
@@ -768,8 +809,8 @@ function AuditReport() {
   );
 }
 
-function ScanReport({ onView }: { onView: (scan: AuditScanRecord) => void }) {
-  const scans = mockAuditScans;
+function ScanReport({ onView, scans }: { onView: (scan: AuditScanRecord) => void; scans: AuditScanRecord[] }) {
+  // Use scans from props (live state, includes new scan results)
   const [filterDate, setFilterDate] = useState("");
 
   const filteredScans = filterDate
@@ -883,7 +924,7 @@ function MyScans() {
   );
 }
 
-function ScanAnalytics() {
+function ScanAnalytics({ scans = mockAuditScans }: { scans?: AuditScanRecord[] }) {
   const [analyticsYear, setAnalyticsYear] = useState("2026");
 
   // Mock monthly scan counts
@@ -891,9 +932,9 @@ function ScanAnalytics() {
   const maxVal = Math.max(...monthlyData, 1);
 
   // Condition breakdown from mock scans
-  const goodCount = mockAuditScans.filter((s) => s.condition === "Good").length;
-  const emptyCount = mockAuditScans.filter((s) => !s.condition).length;
-  const totalScans = mockAuditScans.length;
+  const goodCount = scans.filter((s) => s.condition === "Good").length;
+  const emptyCount = scans.filter((s) => !s.condition).length;
+  const totalScans = scans.length;
 
   const complianceData = [
     { name: "Earthing pits", rate: 13, expected: "1/10" },
