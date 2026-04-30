@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "sonner";
 import { MOCK_EMPLOYEES, DESIGNATIONS } from "./mock-data";
 
 type AttendanceStatus = "P" | "A" | "HD" | "L" | "WO" | "";
@@ -75,7 +76,6 @@ export function ManualEntry() {
     new Set()
   );
   const [notes, setNotes] = useState<Record<string, string>>({});
-  const [saveToast, setSaveToast] = useState(false);
 
   // attendance grid keyed by "empId::date" -> status
   const [grid, setGrid] = useState<Record<string, AttendanceStatus>>({});
@@ -140,8 +140,7 @@ export function ManualEntry() {
 
   // Save handler
   const handleSave = useCallback(() => {
-    setSaveToast(true);
-    setTimeout(() => setSaveToast(false), 2500);
+    toast.success("Attendance saved successfully");
   }, []);
 
   // Select all toggle
@@ -414,11 +413,6 @@ export function ManualEntry() {
           &middot; {dateColumns.length} day{dateColumns.length !== 1 ? "s" : ""}
         </span>
         <div className="flex items-center gap-2">
-          {saveToast && (
-            <span className="text-[11px] text-green-600 font-medium animate-in fade-in slide-in-from-right-2 duration-200">
-              Attendance saved successfully
-            </span>
-          )}
           <Button
             className="h-7 text-[11px] px-3 bg-blue-600 hover:bg-blue-700 text-white"
             onClick={handleSave}

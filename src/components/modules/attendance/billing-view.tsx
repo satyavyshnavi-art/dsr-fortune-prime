@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from "sonner";
 import { MOCK_EMPLOYEES, MOCK_ATTENDANCE } from "./mock-data";
 import { exportCSV, exportPDF } from "@/lib/export";
 
@@ -41,6 +42,7 @@ export function BillingView() {
   const handleGo = useCallback(() => {
     setAppliedStart(startDate);
     setAppliedEnd(endDate);
+    toast.success("Billing data refreshed");
   }, [startDate, endDate]);
 
   const dayCount = useMemo(() => {
@@ -149,8 +151,10 @@ export function BillingView() {
     const filename = `Billing_Summary_${appliedStart}_to_${appliedEnd}`;
     if (type === "csv") {
       exportCSV(rows, filename);
+      toast.success("CSV downloaded");
     } else {
       exportPDF(rows, filename, "Attendance Billing Summary");
+      toast.success("PDF downloaded");
     }
     setTimeout(() => setDownloading(null), 500);
   }, [billingData, showAgreed, appliedStart, appliedEnd]);

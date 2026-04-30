@@ -2,6 +2,7 @@
 
 import { useState, useRef, type KeyboardEvent } from "react";
 import { Send } from "lucide-react";
+import { toast } from "sonner";
 
 interface ChatInputProps {
   onSend: (message: string) => void;
@@ -14,7 +15,10 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
 
   function handleSend() {
     const trimmed = value.trim();
-    if (!trimmed) return;
+    if (!trimmed) {
+      toast.error("Please enter a message");
+      return;
+    }
     onSend(trimmed);
     setValue("");
     inputRef.current?.focus();

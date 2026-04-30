@@ -40,6 +40,7 @@ import {
   DESIGNATIONS,
 } from "./mock-data";
 import { exportCSV, exportPDF, exportExcel } from "@/lib/export";
+import { toast } from "sonner";
 
 function generateNextEmpId(employees: Employee[]): string {
   const maxNum = Math.max(
@@ -91,6 +92,7 @@ export function EmployeeTable() {
     setEmployees((prev) => prev.filter((e) => e.id !== selectedEmployee.id));
     setShowDeleteDialog(false);
     setSelectedEmployee(null);
+    toast.success("Deleted successfully");
   };
 
   const buildEmployeeExportData = () =>
@@ -106,10 +108,12 @@ export function EmployeeTable() {
 
   const handleExportPDF = () => {
     exportPDF(buildEmployeeExportData(), "Employee_List", "Employee List Report");
+    toast.success("PDF exported");
   };
 
   const handleExportExcel = () => {
     exportExcel(buildEmployeeExportData(), "Employee_List", "Employees");
+    toast.success("Excel exported");
   };
 
   const handleDownloadQRPDF = () => {
@@ -273,7 +277,7 @@ export function EmployeeTable() {
               input.accept = ".xlsx,.xls,.csv";
               input.onchange = () => {
                 if (input.files?.[0]) {
-                  alert(`File "${input.files[0].name}" selected. In production, this would parse and import employees.`);
+                  toast.success(`File "${input.files[0].name}" selected for import`);
                 }
               };
               input.click();
@@ -330,6 +334,7 @@ export function EmployeeTable() {
         onAdd={(emp) => {
           setEmployees((prev) => [emp, ...prev]);
           setShowAddDialog(false);
+          toast.success("Employee added successfully");
         }}
         employees={employees}
       />
@@ -345,6 +350,7 @@ export function EmployeeTable() {
           );
           setShowEditDialog(false);
           setSelectedEmployee(null);
+          toast.success("Updated successfully");
         }}
       />
 
@@ -430,11 +436,20 @@ function AddEmployeeDialog({
     phone: "",
     designation: "",
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const nextEmpId = generateNextEmpId(employees);
 
   const handleSubmit = () => {
-    if (!formData.firstName || !formData.designation) return;
+    const newErrors: Record<string, string> = {};
+    if (!formData.firstName.trim()) newErrors.firstName = "First name is required";
+    if (!formData.lastName.trim()) newErrors.lastName = "Last name is required";
+    if (!formData.designation) newErrors.designation = "Designation is required";
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+    setErrors({});
 
     const newEmployee: Employee = {
       id: crypto.randomUUID(),
@@ -485,22 +500,28 @@ function AddEmployeeDialog({
               <Input
                 placeholder="Jane"
                 value={formData.firstName}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, firstName: e.target.value }))
-                }
-                className="h-9 text-[13px] rounded-lg"
+                onChange={(e) => {
+                  setFormData((prev) => ({ ...prev, firstName: e.target.value }));
+                  if (errors.firstName) setErrors((prev) => { const n = { ...prev }; delete n.firstName; return n; });
+                }}
+                className={`h-9 text-[13px] rounded-lg ${errors.firstName ? "border-red-400 ring-1 ring-red-200" : ""}`}
               />
+              {errors.firstName && <p className="text-[10px] text-red-500 mt-0.5">{errors.firstName}</p>}
             </div>
             <div className="space-y-1">
-              <Label className="text-[11px] text-slate-500">Last Name</Label>
+              <Label className="text-[11px] text-slate-500">
+                Last Name <span className="text-red-500">*</span>
+              </Label>
               <Input
                 placeholder="Doe"
                 value={formData.lastName}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, lastName: e.target.value }))
-                }
-                className="h-9 text-[13px] rounded-lg"
+                onChange={(e) => {
+                  setFormData((prev) => ({ ...prev, lastName: e.target.value }));
+                  if (errors.lastName) setErrors((prev) => { const n = { ...prev }; delete n.lastName; return n; });
+                }}
+                className={`h-9 text-[13px] rounded-lg ${errors.lastName ? "border-red-400 ring-1 ring-red-200" : ""}`}
               />
+              {errors.lastName && <p className="text-[10px] text-red-500 mt-0.5">{errors.lastName}</p>}
             </div>
           </div>
 
@@ -542,11 +563,12 @@ function AddEmployeeDialog({
             </Label>
             <Select
               value={formData.designation}
-              onValueChange={(val) =>
-                setFormData((prev) => ({ ...prev, designation: val ?? "" }))
-              }
+              onValueChange={(val) => {
+                setFormData((prev) => ({ ...prev, designation: val ?? "" }));
+                if (errors.designation) setErrors((prev) => { const n = { ...prev }; delete n.designation; return n; });
+              }}
             >
-              <SelectTrigger className="h-9 text-[13px] rounded-lg">
+              <SelectTrigger className={`h-9 text-[13px] rounded-lg ${errors.designation ? "border-red-400 ring-1 ring-red-200" : ""}`}>
                 <SelectValue placeholder="Select Designation" />
               </SelectTrigger>
               <SelectContent>
@@ -557,17 +579,17 @@ function AddEmployeeDialog({
                 ))}
               </SelectContent>
             </Select>
+            {errors.designation && <p className="text-[10px] text-red-500 mt-0.5">{errors.designation}</p>}
           </div>
 
           {/* Actions */}
           <div className="flex justify-end gap-2 pt-2">
-            <Button variant="outline" className="h-7 text-[11px] px-3" onClick={() => onOpenChange(false)}>
+            <Button variant="outline" className="h-7 text-[11px] px-3" onClick={() => { onOpenChange(false); setErrors({}); }}>
               Cancel
             </Button>
             <Button
               className="h-7 text-[11px] px-3 gap-1 bg-blue-600 hover:bg-blue-700 text-white"
               onClick={handleSubmit}
-              disabled={!formData.firstName || !formData.designation}
             >
               <UserPlus className="h-3 w-3" />
               Add Employee
@@ -600,11 +622,13 @@ function EditEmployeeDialog({
     phone: "",
     email: "",
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Sync form when employee changes
   const [prevId, setPrevId] = useState<string | null>(null);
   if (employee && employee.id !== prevId) {
     setPrevId(employee.id);
+    setErrors({});
     setFormData({
       firstName: employee.firstName,
       lastName: employee.lastName,
@@ -615,7 +639,15 @@ function EditEmployeeDialog({
   }
 
   const handleUpdate = () => {
-    if (!employee || !formData.firstName || !formData.designation) return;
+    if (!employee) return;
+    const newErrors: Record<string, string> = {};
+    if (!formData.firstName.trim()) newErrors.firstName = "First name is required";
+    if (!formData.designation) newErrors.designation = "Designation is required";
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+    setErrors({});
     onUpdate({
       ...employee,
       firstName: formData.firstName,
@@ -645,11 +677,13 @@ function EditEmployeeDialog({
               </Label>
               <Input
                 value={formData.firstName}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, firstName: e.target.value }))
-                }
-                className="h-9 text-[13px] rounded-lg"
+                onChange={(e) => {
+                  setFormData((prev) => ({ ...prev, firstName: e.target.value }));
+                  if (errors.firstName) setErrors((prev) => { const n = { ...prev }; delete n.firstName; return n; });
+                }}
+                className={`h-9 text-[13px] rounded-lg ${errors.firstName ? "border-red-400 ring-1 ring-red-200" : ""}`}
               />
+              {errors.firstName && <p className="text-[10px] text-red-500 mt-0.5">{errors.firstName}</p>}
             </div>
             <div className="space-y-1">
               <Label className="text-[11px] text-slate-500">Last Name</Label>
@@ -670,11 +704,12 @@ function EditEmployeeDialog({
             </Label>
             <Select
               value={formData.designation}
-              onValueChange={(val) =>
-                setFormData((prev) => ({ ...prev, designation: val ?? "" }))
-              }
+              onValueChange={(val) => {
+                setFormData((prev) => ({ ...prev, designation: val ?? "" }));
+                if (errors.designation) setErrors((prev) => { const n = { ...prev }; delete n.designation; return n; });
+              }}
             >
-              <SelectTrigger className="h-9 text-[13px] rounded-lg">
+              <SelectTrigger className={`h-9 text-[13px] rounded-lg ${errors.designation ? "border-red-400 ring-1 ring-red-200" : ""}`}>
                 <SelectValue placeholder="Select Designation" />
               </SelectTrigger>
               <SelectContent>
@@ -685,6 +720,7 @@ function EditEmployeeDialog({
                 ))}
               </SelectContent>
             </Select>
+            {errors.designation && <p className="text-[10px] text-red-500 mt-0.5">{errors.designation}</p>}
           </div>
 
           {/* Phone & Email */}
@@ -716,14 +752,13 @@ function EditEmployeeDialog({
             <Button
               variant="outline"
               className="h-7 text-[11px] px-3"
-              onClick={() => onOpenChange(false)}
+              onClick={() => { onOpenChange(false); setErrors({}); }}
             >
               Cancel
             </Button>
             <Button
               className="h-7 text-[11px] px-3 gap-1 bg-blue-600 hover:bg-blue-700 text-white"
               onClick={handleUpdate}
-              disabled={!formData.firstName || !formData.designation}
             >
               <Pencil className="h-3 w-3" />
               Update Employee

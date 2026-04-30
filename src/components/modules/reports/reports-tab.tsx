@@ -12,6 +12,7 @@ import {
   FileDown,
 } from "lucide-react";
 import { reportTemplates, type ReportTemplate } from "./mock-data";
+import { toast } from "sonner";
 
 const iconMap: Record<ReportTemplate["icon"], React.ElementType> = {
   chart: BarChart3,
@@ -36,7 +37,17 @@ function ReportCard({ report }: { report: ReportTemplate }) {
   const iconColor = iconColorMap[report.icon];
 
   const handleDownload = () => {
-    alert(`Generating ${report.name}... (PDF generation not yet implemented)`);
+    toast.success(`Generating ${report.name} PDF...`);
+    const printWindow = window.open("", "_blank");
+    if (printWindow) {
+      printWindow.document.write(`
+        <!DOCTYPE html><html><head><title>${report.name}</title>
+        <style>body{font-family:Arial,sans-serif;margin:40px;} h1{font-size:18px;color:#1a1a1a;} p{font-size:12px;color:#666;}</style>
+        </head><body><h1>${report.name}</h1><p>${report.description}</p><p>Generated on ${new Date().toLocaleString("en-IN")}</p></body></html>
+      `);
+      printWindow.document.close();
+      setTimeout(() => printWindow.print(), 500);
+    }
   };
 
   return (

@@ -1,9 +1,22 @@
 "use client";
 
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { StatusBadge } from "@/components/shared";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 interface EnergyMeter {
   id: string;
@@ -147,15 +160,74 @@ function MeterSection({
   );
 }
 
+function AddMeterDialog() {
+  const [open, setOpen] = useState(false);
+  const [meterId, setMeterId] = useState("");
+  const [location, setLocation] = useState("");
+  const [errors, setErrors] = useState<Record<string, boolean>>({});
+
+  function handleAdd() {
+    const errs: Record<string, boolean> = {};
+    if (!meterId.trim()) errs.meterId = true;
+    setErrors(errs);
+    if (Object.keys(errs).length > 0) return;
+    toast.success("Meter added successfully");
+    setMeterId("");
+    setLocation("");
+    setErrors({});
+    setOpen(false);
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger
+        render={
+          <Button className="h-7 text-[11px] bg-blue-600 hover:bg-blue-700 text-white gap-1.5 px-2.5">
+            <Plus className="h-3.5 w-3.5" />
+            Add
+          </Button>
+        }
+      />
+      <DialogContent className="sm:max-w-[400px]">
+        <DialogHeader>
+          <DialogTitle className="text-[14px]">Add Energy Meter</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-3 py-1">
+          <div className="space-y-1">
+            <Label className="text-[11px]">Meter ID <span className="text-red-500">*</span></Label>
+            <Input
+              placeholder="e.g. GV-EM-004"
+              value={meterId}
+              onChange={(e) => { setMeterId(e.target.value); setErrors((prev) => ({ ...prev, meterId: false })); }}
+              className={`h-8 text-[12px] ${errors.meterId ? 'border-red-400 ring-1 ring-red-200' : ''}`}
+            />
+            {errors.meterId && <p className="text-[10px] text-red-500 mt-0.5">Meter ID is required</p>}
+          </div>
+          <div className="space-y-1">
+            <Label className="text-[11px]">Location</Label>
+            <Input
+              placeholder="e.g. Block C - LT Panel"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              className="h-8 text-[12px]"
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <DialogClose render={<Button variant="outline" className="h-7 text-[11px]" />}>Cancel</DialogClose>
+          <Button className="h-7 text-[11px]" onClick={handleAdd}>Add Meter</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export function PowerConfig() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-[13px] font-semibold text-slate-800">Energy Meters</h2>
-        <Button className="h-7 text-[11px] bg-blue-600 hover:bg-blue-700 text-white gap-1.5 px-2.5">
-          <Plus className="h-3.5 w-3.5" />
-          Add
-        </Button>
+        <AddMeterDialog />
       </div>
 
       <MeterSection

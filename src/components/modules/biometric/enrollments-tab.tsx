@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link2, UserPlus } from "lucide-react";
 import { ColumnDef } from "@tanstack/react-table";
+import { toast } from "sonner";
 
 interface Enrollment {
   id: string;
@@ -69,9 +70,18 @@ export function EnrollmentsTab() {
   const [employeeName, setEmployeeName] = useState("");
   const [empId, setEmpId] = useState("");
   const [deviceName, setDeviceName] = useState("");
+  const [errors, setErrors] = useState<Record<string, boolean>>({});
 
   function handleAddEnrollment() {
-    if (!employeeName.trim() || !empId.trim() || !deviceName.trim()) return;
+    const errs: Record<string, boolean> = {};
+    if (!employeeName.trim()) errs.employeeName = true;
+    if (!empId.trim()) errs.empId = true;
+    if (!deviceName.trim()) errs.deviceName = true;
+    setErrors(errs);
+    if (Object.keys(errs).length > 0) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
 
     const newEnrollment: Enrollment = {
       id: crypto.randomUUID(),
@@ -86,7 +96,9 @@ export function EnrollmentsTab() {
     setEmployeeName("");
     setEmpId("");
     setDeviceName("");
+    setErrors({});
     setDialogOpen(false);
+    toast.success("Employee linked successfully");
   }
 
   return (
@@ -118,36 +130,39 @@ export function EnrollmentsTab() {
 
             <div className="space-y-3 py-1">
               <div className="space-y-1">
-                <Label htmlFor="emp-id" className="text-[11px]">Employee ID</Label>
+                <Label htmlFor="emp-id" className="text-[11px]">Employee ID <span className="text-red-500">*</span></Label>
                 <Input
                   id="emp-id"
                   placeholder="e.g. EMP-001"
                   value={empId}
-                  onChange={(e) => setEmpId(e.target.value)}
-                  className="h-8 text-[12px]"
+                  onChange={(e) => { setEmpId(e.target.value); setErrors((prev) => ({ ...prev, empId: false })); }}
+                  className={`h-8 text-[12px] ${errors.empId ? 'border-red-400 ring-1 ring-red-200' : ''}`}
                 />
+                {errors.empId && <p className="text-[10px] text-red-500 mt-0.5">Employee ID is required</p>}
               </div>
 
               <div className="space-y-1">
-                <Label htmlFor="emp-name" className="text-[11px]">Employee Name</Label>
+                <Label htmlFor="emp-name" className="text-[11px]">Employee Name <span className="text-red-500">*</span></Label>
                 <Input
                   id="emp-name"
                   placeholder="e.g. Ravi Kumar"
                   value={employeeName}
-                  onChange={(e) => setEmployeeName(e.target.value)}
-                  className="h-8 text-[12px]"
+                  onChange={(e) => { setEmployeeName(e.target.value); setErrors((prev) => ({ ...prev, employeeName: false })); }}
+                  className={`h-8 text-[12px] ${errors.employeeName ? 'border-red-400 ring-1 ring-red-200' : ''}`}
                 />
+                {errors.employeeName && <p className="text-[10px] text-red-500 mt-0.5">Employee name is required</p>}
               </div>
 
               <div className="space-y-1">
-                <Label htmlFor="device-name" className="text-[11px]">Device Name</Label>
+                <Label htmlFor="device-name" className="text-[11px]">Device Name <span className="text-red-500">*</span></Label>
                 <Input
                   id="device-name"
                   placeholder="e.g. Main Gate Reader"
                   value={deviceName}
-                  onChange={(e) => setDeviceName(e.target.value)}
-                  className="h-8 text-[12px]"
+                  onChange={(e) => { setDeviceName(e.target.value); setErrors((prev) => ({ ...prev, deviceName: false })); }}
+                  className={`h-8 text-[12px] ${errors.deviceName ? 'border-red-400 ring-1 ring-red-200' : ''}`}
                 />
+                {errors.deviceName && <p className="text-[10px] text-red-500 mt-0.5">Device name is required</p>}
               </div>
             </div>
 

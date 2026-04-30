@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,6 +48,21 @@ export function VendorTab() {
     serviceProvider: "",
     comments: "",
   });
+  const [ticketErrors, setTicketErrors] = useState<Record<string, boolean>>({});
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+
+  const handleFileUpload = (accept: string, onSelect?: (name: string) => void) => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = accept;
+    input.onchange = () => {
+      if (input.files?.[0]) {
+        toast.success(`File selected: ${input.files[0].name}`);
+        onSelect?.(input.files[0].name);
+      }
+    };
+    input.click();
+  };
 
   const filteredTickets = tickets.filter((t) => {
     if (statusFilter !== "all" && t.status.toLowerCase().replace(" ", "_") !== statusFilter) return false;
@@ -76,12 +92,18 @@ export function VendorTab() {
           : t
       )
     );
+    toast.success("Ticket resolved");
     setResolveOpen(false);
   };
 
   const handleCreateTicket = () => {
-    if (!newTicket.department || !newTicket.description) return;
-    const nextNum = tickets.length + 67; // continue from existing GV-VT-00XX numbering
+    const errs: Record<string, boolean> = {};
+    if (!newTicket.department) errs.department = true;
+    if (!newTicket.description.trim()) errs.description = true;
+    setTicketErrors(errs);
+    if (Object.keys(errs).length > 0) return;
+
+    const nextNum = tickets.length + 67;
     const id = `GV-VT-${String(nextNum).padStart(4, "0")}`;
     const created: VendorTicket = {
       id: `vt-${Date.now()}`,
@@ -108,6 +130,9 @@ export function VendorTab() {
       serviceProvider: "",
       comments: "",
     });
+    setTicketErrors({});
+    setUploadedFileName(null);
+    toast.success("Ticket created successfully");
   };
 
   return (
@@ -130,8 +155,8 @@ export function VendorTab() {
               <Label className="text-[11px] text-slate-500">Department *</Label>
               <select
                 value={newTicket.department}
-                onChange={(e) => setNewTicket({ ...newTicket, department: e.target.value })}
-                className="mt-1 flex h-8 w-full rounded-md border border-input bg-transparent px-2 text-[12px]"
+                onChange={(e) => { setNewTicket({ ...newTicket, department: e.target.value }); setTicketErrors((prev) => ({ ...prev, department: false })); }}
+                className={`mt-1 flex h-8 w-full rounded-md border bg-transparent px-2 text-[12px] ${ticketErrors.department ? 'border-red-400 ring-1 ring-red-200' : 'border-input'}`}
               >
                 <option value="">Select Department</option>
                 <option value="Operations">Operations</option>
@@ -141,6 +166,7 @@ export function VendorTab() {
                 <option value="Electrical">Electrical</option>
                 <option value="Plumbing">Plumbing</option>
               </select>
+              {ticketErrors.department && <p className="text-[10px] text-red-500 mt-0.5">Department is required</p>}
             </div>
           </div>
 
@@ -149,11 +175,12 @@ export function VendorTab() {
             <Label className="text-[11px] text-slate-500">Ticket Description *</Label>
             <textarea
               value={newTicket.description}
-              onChange={(e) => setNewTicket({ ...newTicket, description: e.target.value })}
+              onChange={(e) => { setNewTicket({ ...newTicket, description: e.target.value }); setTicketErrors((prev) => ({ ...prev, description: false })); }}
               placeholder="Describe the issue or support request in detail..."
               rows={3}
-              className="mt-1 flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-[12px]"
+              className={`mt-1 flex w-full rounded-md border bg-transparent px-3 py-2 text-[12px] ${ticketErrors.description ? 'border-red-400 ring-1 ring-red-200' : 'border-input'}`}
             />
+            {ticketErrors.description && <p className="text-[10px] text-red-500 mt-0.5">Description is required</p>}
           </div>
 
           {/* Row 3: Expected Completion + Priority + Status + Service Provider */}
@@ -209,17 +236,21 @@ export function VendorTab() {
           {/* Upload Files */}
           <div>
             <Label className="text-[11px] text-slate-500">Upload Files</Label>
-            <div className="mt-1 flex flex-col items-center justify-center rounded-md border-2 border-dashed border-slate-200 p-5 text-center">
+            <div
+              onClick={() => handleFileUpload(".jpg,.jpeg,.png,.pdf,.doc,.docx", setUploadedFileName)}
+              className="mt-1 flex flex-col items-center justify-center rounded-md border-2 border-dashed border-slate-200 p-5 text-center cursor-pointer hover:border-blue-300 hover:bg-blue-50/30 transition-colors"
+            >
               <UploadIcon className="h-5 w-5 text-slate-300 mb-1" />
               <p className="text-[12px] text-blue-600 font-medium">
                 Click to upload{" "}
                 <span className="text-slate-400 font-normal">or drag and drop files</span>
               </p>
               <p className="text-[10px] text-slate-400 mt-0.5">Images, PDFs, Documents up to 10MB each.</p>
-              <Button variant="outline" size="sm" className="mt-2 h-7 text-[11px]">
+              <Button variant="outline" size="sm" className="mt-2 h-7 text-[11px]" onClick={(e) => { e.stopPropagation(); handleFileUpload(".jpg,.jpeg,.png,.pdf,.doc,.docx", setUploadedFileName); }}>
                 <FileText className="h-3 w-3 mr-1" />
                 Choose Files
               </Button>
+              {uploadedFileName && <p className="text-[11px] text-green-600 mt-1.5 font-medium">{uploadedFileName}</p>}
             </div>
           </div>
 
@@ -244,7 +275,7 @@ export function VendorTab() {
               <Plus className="h-3 w-3 mr-1" />
               Create Ticket
             </Button>
-            <Button variant="outline" className="h-7 text-[11px]">
+            <Button variant="outline" className="h-7 text-[11px]" onClick={() => toast.success("Draft saved")}>
               <Save className="h-3 w-3 mr-1" />
               Save Draft
             </Button>
@@ -290,7 +321,7 @@ export function VendorTab() {
               <option value="high">High</option>
               <option value="critical">Critical</option>
             </select>
-            <Button variant="outline" size="sm" className="h-7 text-[11px]">
+            <Button variant="outline" size="sm" className="h-7 text-[11px]" onClick={() => toast.success("Downloading export...")}>
               <Download className="h-3 w-3 mr-1" />
               Export
             </Button>

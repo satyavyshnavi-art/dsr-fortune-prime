@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -66,6 +67,11 @@ export function ProjectsTab() {
 
   const handleEdit = () => {
     if (!selectedProject) return;
+    const errs: Record<string, boolean> = {};
+    if (!editForm.name.trim()) errs.name = true;
+    setEditErrors(errs);
+    if (Object.keys(errs).length > 0) return;
+
     const dates = `${editForm.startDate} - ${editForm.endDate}`;
     setProjects((prev) =>
       prev.map((p) =>
@@ -74,12 +80,14 @@ export function ProjectsTab() {
           : p
       )
     );
+    toast.success("Project updated successfully");
     setEditOpen(false);
   };
 
   const handleDuplicate = (p: Project) => {
     const copy: Project = { ...p, id: `project-copy-${Date.now()}`, name: `${p.name} (Copy)` };
     setProjects((prev) => [copy, ...prev]);
+    toast.success("Project duplicated");
   };
 
   const openDeleteDialog = (p: Project) => {
@@ -90,6 +98,7 @@ export function ProjectsTab() {
   const handleDelete = () => {
     if (!selectedProject) return;
     setProjects((prev) => prev.filter((p) => p.id !== selectedProject.id));
+    toast.success("Project deleted");
     setDeleteOpen(false);
   };
 
@@ -108,6 +117,22 @@ export function ProjectsTab() {
   const [milestones, setMilestones] = useState([
     { description: "", targetDate: "" },
   ]);
+  const [addErrors, setAddErrors] = useState<Record<string, boolean>>({});
+  const [editErrors, setEditErrors] = useState<Record<string, boolean>>({});
+  const [photoName, setPhotoName] = useState<string | null>(null);
+
+  const handleFileUpload = (accept: string, onSelect?: (name: string) => void) => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = accept;
+    input.onchange = () => {
+      if (input.files?.[0]) {
+        toast.success(`File selected: ${input.files[0].name}`);
+        onSelect?.(input.files[0].name);
+      }
+    };
+    input.click();
+  };
 
   const addMilestone = () => {
     setMilestones([...milestones, { description: "", targetDate: "" }]);
@@ -124,7 +149,15 @@ export function ProjectsTab() {
   };
 
   const handleAddProject = () => {
-    if (!newProject.name) return;
+    const errs: Record<string, boolean> = {};
+    if (!newProject.name.trim()) errs.name = true;
+    if (!newProject.description.trim()) errs.description = true;
+    if (!newProject.manager) errs.manager = true;
+    if (!newProject.startDate) errs.startDate = true;
+    if (!newProject.endDate) errs.endDate = true;
+    setAddErrors(errs);
+    if (Object.keys(errs).length > 0) return;
+
     const formatDate = (d: string) => {
       if (!d) return "—";
       const date = new Date(d);
@@ -146,6 +179,9 @@ export function ProjectsTab() {
       status: "Planning", dependencies: "", approvalMechanism: "Single Level",
     });
     setMilestones([{ description: "", targetDate: "" }]);
+    setAddErrors({});
+    setPhotoName(null);
+    toast.success("Project created successfully");
     setActiveView("list");
   };
 
@@ -312,21 +348,23 @@ export function ProjectsTab() {
                 <Label className="text-[12px] text-slate-600 mb-1.5 block">Project Name *</Label>
                 <Input
                   value={newProject.name}
-                  onChange={(e) => setNewProject({ ...newProject, name: e.target.value })}
-                  className="h-9 text-[13px] rounded-lg"
+                  onChange={(e) => { setNewProject({ ...newProject, name: e.target.value }); setAddErrors((prev) => ({ ...prev, name: false })); }}
+                  className={`h-9 text-[13px] rounded-lg ${addErrors.name ? 'border-red-400 ring-1 ring-red-200' : 'border-slate-200'}`}
                 />
+                {addErrors.name && <p className="text-[10px] text-red-500 mt-0.5">Project name is required</p>}
               </div>
               <div>
                 <Label className="text-[12px] text-slate-600 mb-1.5 block">Project Manager *</Label>
                 <select
                   value={newProject.manager}
-                  onChange={(e) => setNewProject({ ...newProject, manager: e.target.value })}
-                  className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 text-[13px]"
+                  onChange={(e) => { setNewProject({ ...newProject, manager: e.target.value }); setAddErrors((prev) => ({ ...prev, manager: false })); }}
+                  className={`flex h-9 w-full rounded-lg border bg-transparent px-3 text-[13px] ${addErrors.manager ? 'border-red-400 ring-1 ring-red-200' : 'border-input'}`}
                 >
                   <option value="">Select a Manager</option>
                   <option value="Facility Manager">Facility Manager</option>
                   <option value="Operations Head">Operations Head</option>
                 </select>
+                {addErrors.manager && <p className="text-[10px] text-red-500 mt-0.5">Manager is required</p>}
               </div>
             </div>
 
@@ -335,10 +373,11 @@ export function ProjectsTab() {
               <Label className="text-[12px] text-slate-600 mb-1.5 block">Project Description *</Label>
               <textarea
                 value={newProject.description}
-                onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
+                onChange={(e) => { setNewProject({ ...newProject, description: e.target.value }); setAddErrors((prev) => ({ ...prev, description: false })); }}
                 rows={3}
-                className="flex w-full rounded-lg border border-input bg-transparent px-3 py-2 text-[13px]"
+                className={`flex w-full rounded-lg border bg-transparent px-3 py-2 text-[13px] ${addErrors.description ? 'border-red-400 ring-1 ring-red-200' : 'border-input'}`}
               />
+              {addErrors.description && <p className="text-[10px] text-red-500 mt-0.5">Description is required</p>}
             </div>
 
             {/* Row 3: Start Date + End Date + Status */}
@@ -348,18 +387,20 @@ export function ProjectsTab() {
                 <Input
                   type="date"
                   value={newProject.startDate}
-                  onChange={(e) => setNewProject({ ...newProject, startDate: e.target.value })}
-                  className="h-9 text-[13px] rounded-lg"
+                  onChange={(e) => { setNewProject({ ...newProject, startDate: e.target.value }); setAddErrors((prev) => ({ ...prev, startDate: false })); }}
+                  className={`h-9 text-[13px] rounded-lg ${addErrors.startDate ? 'border-red-400 ring-1 ring-red-200' : 'border-slate-200'}`}
                 />
+                {addErrors.startDate && <p className="text-[10px] text-red-500 mt-0.5">Start date is required</p>}
               </div>
               <div>
                 <Label className="text-[12px] text-slate-600 mb-1.5 block">End Date *</Label>
                 <Input
                   type="date"
                   value={newProject.endDate}
-                  onChange={(e) => setNewProject({ ...newProject, endDate: e.target.value })}
-                  className="h-9 text-[13px] rounded-lg"
+                  onChange={(e) => { setNewProject({ ...newProject, endDate: e.target.value }); setAddErrors((prev) => ({ ...prev, endDate: false })); }}
+                  className={`h-9 text-[13px] rounded-lg ${addErrors.endDate ? 'border-red-400 ring-1 ring-red-200' : 'border-slate-200'}`}
                 />
+                {addErrors.endDate && <p className="text-[10px] text-red-500 mt-0.5">End date is required</p>}
               </div>
               <div>
                 <Label className="text-[12px] text-slate-600 mb-1.5 block">Status</Label>
@@ -433,13 +474,17 @@ export function ProjectsTab() {
             {/* Upload Photos */}
             <div>
               <Label className="text-[12px] text-slate-600 mb-1.5 block">Upload Photos</Label>
-              <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-200 p-6 text-center">
+              <div
+                onClick={() => handleFileUpload(".jpg,.jpeg,.png,.gif", setPhotoName)}
+                className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-200 p-6 text-center cursor-pointer hover:border-blue-300 hover:bg-blue-50/30 transition-colors"
+              >
                 <UploadIcon className="h-6 w-6 text-slate-300 mb-1.5" />
                 <p className="text-[12px] text-blue-600 font-medium">
                   Click to upload{" "}
                   <span className="text-slate-400 font-normal">or drag and drop</span>
                 </p>
                 <p className="text-[10px] text-slate-400 mt-0.5">PNG, JPG, GIF up to 10MB</p>
+                {photoName && <p className="text-[11px] text-green-600 mt-1.5 font-medium">{photoName}</p>}
               </div>
             </div>
 
@@ -502,8 +547,9 @@ export function ProjectsTab() {
           </DialogHeader>
           <div className="space-y-3 pt-2">
             <div>
-              <Label className="text-[12px] text-slate-600 mb-1.5 block">Project Name</Label>
-              <Input value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className="h-9 text-[13px] rounded-lg" />
+              <Label className="text-[12px] text-slate-600 mb-1.5 block">Project Name *</Label>
+              <Input value={editForm.name} onChange={(e) => { setEditForm({ ...editForm, name: e.target.value }); setEditErrors((prev) => ({ ...prev, name: false })); }} className={`h-9 text-[13px] rounded-lg ${editErrors.name ? 'border-red-400 ring-1 ring-red-200' : 'border-slate-200'}`} />
+              {editErrors.name && <p className="text-[10px] text-red-500 mt-0.5">Project name is required</p>}
             </div>
             <div>
               <Label className="text-[12px] text-slate-600 mb-1.5 block">Manager</Label>
@@ -529,7 +575,7 @@ export function ProjectsTab() {
               </div>
             </div>
             <div className="flex justify-end gap-2 pt-1">
-              <Button variant="outline" onClick={() => setEditOpen(false)} className="h-9 text-[13px] rounded-lg">Cancel</Button>
+              <Button variant="outline" onClick={() => { setEditOpen(false); setEditErrors({}); }} className="h-9 text-[13px] rounded-lg">Cancel</Button>
               <Button onClick={handleEdit} className="h-9 text-[13px] rounded-lg bg-blue-600 hover:bg-blue-700 text-white">Update Project</Button>
             </div>
           </div>

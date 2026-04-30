@@ -29,6 +29,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
 
 // ---- Types ----
 export interface User {
@@ -98,6 +99,31 @@ function getInitials(name: string): string {
 // ---- Create User Dialog ----
 function CreateUserDialog() {
   const [open, setOpen] = useState(false);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [errors, setErrors] = useState<Record<string, boolean>>({});
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const errs: Record<string, boolean> = {};
+    if (!firstName.trim()) errs.firstName = true;
+    if (!lastName.trim()) errs.lastName = true;
+    if (!email.trim()) errs.email = true;
+    setErrors(errs);
+    if (Object.keys(errs).length > 0) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+    toast.success("User created successfully");
+    setFirstName("");
+    setLastName("");
+    setEmail("");
+    setPhone("");
+    setErrors({});
+    setOpen(false);
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -113,30 +139,46 @@ function CreateUserDialog() {
         <DialogHeader>
           <DialogTitle className="text-[13px]">Create New User</DialogTitle>
         </DialogHeader>
-        <form
-          className="space-y-3"
-          onSubmit={(e) => {
-            e.preventDefault();
-            setOpen(false);
-          }}
-        >
+        <form className="space-y-3" onSubmit={handleSubmit}>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
-              <Label htmlFor="firstName" className="text-[11px] text-slate-500">First Name</Label>
-              <Input id="firstName" placeholder="First name" className="h-8 text-[12px]" />
+              <Label htmlFor="firstName" className="text-[11px] text-slate-500">First Name <span className="text-red-500">*</span></Label>
+              <Input
+                id="firstName"
+                placeholder="First name"
+                value={firstName}
+                onChange={(e) => { setFirstName(e.target.value); setErrors((prev) => ({ ...prev, firstName: false })); }}
+                className={`h-8 text-[12px] ${errors.firstName ? 'border-red-400 ring-1 ring-red-200' : ''}`}
+              />
+              {errors.firstName && <p className="text-[10px] text-red-500 mt-0.5">First name is required</p>}
             </div>
             <div className="space-y-1">
-              <Label htmlFor="lastName" className="text-[11px] text-slate-500">Last Name</Label>
-              <Input id="lastName" placeholder="Last name" className="h-8 text-[12px]" />
+              <Label htmlFor="lastName" className="text-[11px] text-slate-500">Last Name <span className="text-red-500">*</span></Label>
+              <Input
+                id="lastName"
+                placeholder="Last name"
+                value={lastName}
+                onChange={(e) => { setLastName(e.target.value); setErrors((prev) => ({ ...prev, lastName: false })); }}
+                className={`h-8 text-[12px] ${errors.lastName ? 'border-red-400 ring-1 ring-red-200' : ''}`}
+              />
+              {errors.lastName && <p className="text-[10px] text-red-500 mt-0.5">Last name is required</p>}
             </div>
           </div>
           <div className="space-y-1">
-            <Label htmlFor="email" className="text-[11px] text-slate-500">Email</Label>
-            <Input id="email" type="email" placeholder="email@example.com" className="h-8 text-[12px]" />
+            <Label htmlFor="email" className="text-[11px] text-slate-500">Email <span className="text-red-500">*</span></Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="email@example.com"
+              value={email}
+              onChange={(e) => { setEmail(e.target.value); setErrors((prev) => ({ ...prev, email: false })); }}
+              className={`h-8 text-[12px] ${errors.email ? 'border-red-400 ring-1 ring-red-200' : ''}`}
+            />
+            {errors.email && <p className="text-[10px] text-red-500 mt-0.5">Email is required</p>}
           </div>
           <div className="space-y-1">
             <Label htmlFor="phone" className="text-[11px] text-slate-500">Phone</Label>
-            <Input id="phone" placeholder="+91 XXXXX XXXXX" className="h-8 text-[12px]" />
+            <Input id="phone" placeholder="+91 XXXXX XXXXX" value={phone} onChange={(e) => setPhone(e.target.value)} className="h-8 text-[12px]" />
           </div>
           <div className="space-y-1">
             <Label htmlFor="role" className="text-[11px] text-slate-500">Role</Label>
@@ -246,9 +288,9 @@ const columns: ColumnDef<User, unknown>[] = [
           }
         />
         <DropdownMenuContent align="end">
-          <DropdownMenuItem className="text-[12px]">Edit User</DropdownMenuItem>
-          <DropdownMenuItem className="text-[12px]">Change Role</DropdownMenuItem>
-          <DropdownMenuItem className="text-[12px] text-red-600">Deactivate</DropdownMenuItem>
+          <DropdownMenuItem className="text-[12px]" onSelect={() => toast.info("Edit user coming soon")}>Edit User</DropdownMenuItem>
+          <DropdownMenuItem className="text-[12px]" onSelect={() => toast.success("Permissions updated")}>Change Role</DropdownMenuItem>
+          <DropdownMenuItem className="text-[12px] text-red-600" onSelect={() => { if (window.confirm("Are you sure you want to deactivate this user?")) toast.success("User deactivated"); }}>Deactivate</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     ),

@@ -25,6 +25,7 @@ import {
   FileText,
   CheckCircle2,
 } from "lucide-react";
+import { toast } from "sonner";
 
 export function BreakdownService() {
   const [breakdowns, setBreakdowns] = useState<BreakdownRecord[]>(mockBreakdowns);
@@ -38,6 +39,11 @@ export function BreakdownService() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [selectedBreakdown, setSelectedBreakdown] = useState<BreakdownRecord | null>(null);
   const [incidentSubmitted, setIncidentSubmitted] = useState(false);
+
+  // Validation errors
+  const [addErrors, setAddErrors] = useState<Record<string, string>>({});
+  const [editErrors, setEditErrors] = useState<Record<string, string>>({});
+  const [incidentErrors, setIncidentErrors] = useState<Record<string, string>>({});
 
   // Add form
   const [addForm, setAddForm] = useState({
@@ -75,9 +81,23 @@ export function BreakdownService() {
   const totalCost = breakdowns.reduce((sum, b) => sum + b.cost, 0);
   const serviceProviders = new Set(breakdowns.map((b) => b.serviceProvider)).size;
 
+  // Error helpers
+  const clearAddError = (field: string) => {
+    if (addErrors[field]) setAddErrors((prev) => { const n = { ...prev }; delete n[field]; return n; });
+  };
+  const clearEditError = (field: string) => {
+    if (editErrors[field]) setEditErrors((prev) => { const n = { ...prev }; delete n[field]; return n; });
+  };
+  const clearIncidentError = (field: string) => {
+    if (incidentErrors[field]) setIncidentErrors((prev) => { const n = { ...prev }; delete n[field]; return n; });
+  };
+
   // Add handler
   const handleAdd = () => {
-    if (!addForm.type || !addForm.asset) return;
+    const errs: Record<string, string> = {};
+    if (!addForm.type) errs.type = "Service type is required";
+    if (!addForm.asset.trim()) errs.asset = "Asset is required";
+    if (Object.keys(errs).length) { setAddErrors(errs); return; }
     const newRecord: BreakdownRecord = {
       id: `bd-${Date.now()}`,
       title: `${addForm.type} - ${addForm.asset}`,
@@ -93,7 +113,9 @@ export function BreakdownService() {
     };
     setBreakdowns((prev) => [newRecord, ...prev]);
     setAddForm({ type: "", asset: "", serviceProvider: "", cost: "", date: "", status: "Pending" });
+    setAddErrors({});
     setShowAddModal(false);
+    toast.success("Service record added successfully");
   };
 
   // View handler
@@ -113,11 +135,16 @@ export function BreakdownService() {
       date: bd.date,
       status: bd.status,
     });
+    setEditErrors({});
     setEditOpen(true);
   };
 
   const handleEdit = () => {
     if (!selectedBreakdown) return;
+    const errs: Record<string, string> = {};
+    if (!editForm.type) errs.type = "Service type is required";
+    if (!editForm.asset.trim()) errs.asset = "Asset is required";
+    if (Object.keys(errs).length) { setEditErrors(errs); return; }
     setBreakdowns((prev) =>
       prev.map((b) =>
         b.id === selectedBreakdown.id
@@ -135,6 +162,7 @@ export function BreakdownService() {
       )
     );
     setEditOpen(false);
+    toast.success("Service record updated successfully");
   };
 
   // Delete handlers
@@ -147,11 +175,15 @@ export function BreakdownService() {
     if (!selectedBreakdown) return;
     setBreakdowns((prev) => prev.filter((b) => b.id !== selectedBreakdown.id));
     setDeleteOpen(false);
+    toast.success("Service record deleted successfully");
   };
 
   // Incident submit
   const handleIncidentSubmit = () => {
-    if (!incidentForm.title || !incidentForm.description) return;
+    const errs: Record<string, string> = {};
+    if (!incidentForm.title.trim()) errs.title = "Title is required";
+    if (!incidentForm.description.trim()) errs.description = "Description is required";
+    if (Object.keys(errs).length) { setIncidentErrors(errs); return; }
     const report: IncidentReport = {
       id: `inc-${Date.now()}`,
       title: incidentForm.title,
@@ -172,7 +204,9 @@ export function BreakdownService() {
       correctiveAction: "",
       preventiveAction: "",
     });
+    setIncidentErrors({});
     setIncidentSubmitted(true);
+    toast.success("Incident report submitted successfully");
     setTimeout(() => setIncidentSubmitted(false), 3000);
   };
 
@@ -217,7 +251,7 @@ export function BreakdownService() {
               <Button
                 size="sm"
                 className="h-7 text-[11px] px-2.5 bg-blue-600 hover:bg-blue-700 text-white"
-                onClick={() => setShowAddModal(true)}
+                onClick={() => { setAddErrors({}); setShowAddModal(true); }}
               >
                 <Plus className="h-3 w-3 mr-1" />
                 Add Service
@@ -389,20 +423,22 @@ export function BreakdownService() {
                 <Label className="text-[12px] text-slate-600 mb-1.5 block">Title *</Label>
                 <Input
                   value={incidentForm.title}
-                  onChange={(e) => setIncidentForm({ ...incidentForm, title: e.target.value })}
+                  onChange={(e) => { setIncidentForm({ ...incidentForm, title: e.target.value }); clearIncidentError("title"); }}
                   placeholder="RCA report title"
-                  className="h-9 text-[13px] rounded-lg"
+                  className={`h-9 text-[13px] rounded-lg ${incidentErrors.title ? "border-red-400 ring-1 ring-red-200" : ""}`}
                 />
+                {incidentErrors.title && <p className="text-[10px] text-red-500 mt-0.5">{incidentErrors.title}</p>}
               </div>
 
               <div>
                 <Label className="text-[12px] text-slate-600 mb-1.5 block">Description *</Label>
                 <textarea
                   value={incidentForm.description}
-                  onChange={(e) => setIncidentForm({ ...incidentForm, description: e.target.value })}
-                  className="flex w-full rounded-lg border border-input bg-transparent px-3 py-2 text-[13px] min-h-[60px]"
+                  onChange={(e) => { setIncidentForm({ ...incidentForm, description: e.target.value }); clearIncidentError("description"); }}
+                  className={`flex w-full rounded-lg border border-input bg-transparent px-3 py-2 text-[13px] min-h-[60px] ${incidentErrors.description ? "border-red-400 ring-1 ring-red-200" : ""}`}
                   placeholder="Detailed description of the problem..."
                 />
+                {incidentErrors.description && <p className="text-[10px] text-red-500 mt-0.5">{incidentErrors.description}</p>}
               </div>
 
               {/* 5 Whys */}
@@ -538,23 +574,25 @@ export function BreakdownService() {
                 <Label className="text-[12px] text-slate-600 mb-1.5 block">Service Type *</Label>
                 <select
                   value={addForm.type}
-                  onChange={(e) => setAddForm({ ...addForm, type: e.target.value as BreakdownRecord["type"] })}
-                  className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 text-[13px]"
+                  onChange={(e) => { setAddForm({ ...addForm, type: e.target.value as BreakdownRecord["type"] }); clearAddError("type"); }}
+                  className={`flex h-9 w-full rounded-lg border border-input bg-transparent px-3 text-[13px] ${addErrors.type ? "border-red-400 ring-1 ring-red-200" : ""}`}
                 >
                   <option value="">Select type</option>
                   <option value="Inspection">Inspection</option>
                   <option value="Replacement">Replacement</option>
                   <option value="Maintenance">Maintenance</option>
                 </select>
+                {addErrors.type && <p className="text-[10px] text-red-500 mt-0.5">{addErrors.type}</p>}
               </div>
               <div>
                 <Label className="text-[12px] text-slate-600 mb-1.5 block">Asset *</Label>
                 <Input
                   value={addForm.asset}
-                  onChange={(e) => setAddForm({ ...addForm, asset: e.target.value })}
+                  onChange={(e) => { setAddForm({ ...addForm, asset: e.target.value }); clearAddError("asset"); }}
                   placeholder="Enter asset name"
-                  className="h-9 text-[13px] rounded-lg"
+                  className={`h-9 text-[13px] rounded-lg ${addErrors.asset ? "border-red-400 ring-1 ring-red-200" : ""}`}
                 />
+                {addErrors.asset && <p className="text-[10px] text-red-500 mt-0.5">{addErrors.asset}</p>}
               </div>
             </div>
             <div className="grid grid-cols-2 gap-2.5">
@@ -675,16 +713,17 @@ export function BreakdownService() {
           <div className="space-y-3 pt-2">
             <div className="grid grid-cols-2 gap-2.5">
               <div>
-                <Label className="text-[12px] text-slate-600 mb-1.5 block">Service Type</Label>
+                <Label className="text-[12px] text-slate-600 mb-1.5 block">Service Type *</Label>
                 <select
                   value={editForm.type}
-                  onChange={(e) => setEditForm({ ...editForm, type: e.target.value as BreakdownRecord["type"] })}
-                  className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 text-[13px]"
+                  onChange={(e) => { setEditForm({ ...editForm, type: e.target.value as BreakdownRecord["type"] }); clearEditError("type"); }}
+                  className={`flex h-9 w-full rounded-lg border border-input bg-transparent px-3 text-[13px] ${editErrors.type ? "border-red-400 ring-1 ring-red-200" : ""}`}
                 >
                   <option value="Inspection">Inspection</option>
                   <option value="Replacement">Replacement</option>
                   <option value="Maintenance">Maintenance</option>
                 </select>
+                {editErrors.type && <p className="text-[10px] text-red-500 mt-0.5">{editErrors.type}</p>}
               </div>
               <div>
                 <Label className="text-[12px] text-slate-600 mb-1.5 block">Status</Label>
@@ -700,12 +739,13 @@ export function BreakdownService() {
               </div>
             </div>
             <div>
-              <Label className="text-[12px] text-slate-600 mb-1.5 block">Asset</Label>
+              <Label className="text-[12px] text-slate-600 mb-1.5 block">Asset *</Label>
               <Input
                 value={editForm.asset}
-                onChange={(e) => setEditForm({ ...editForm, asset: e.target.value })}
-                className="h-9 text-[13px] rounded-lg"
+                onChange={(e) => { setEditForm({ ...editForm, asset: e.target.value }); clearEditError("asset"); }}
+                className={`h-9 text-[13px] rounded-lg ${editErrors.asset ? "border-red-400 ring-1 ring-red-200" : ""}`}
               />
+              {editErrors.asset && <p className="text-[10px] text-red-500 mt-0.5">{editErrors.asset}</p>}
             </div>
             <div className="grid grid-cols-2 gap-2.5">
               <div>

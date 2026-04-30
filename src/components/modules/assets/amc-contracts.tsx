@@ -24,6 +24,7 @@ import {
   Pencil,
   Trash2,
 } from "lucide-react";
+import { toast } from "sonner";
 
 export function AMCContracts() {
   const [contracts, setContracts] = useState<AMCContract[]>(mockAMCContracts);
@@ -34,6 +35,10 @@ export function AMCContracts() {
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [selectedContract, setSelectedContract] = useState<AMCContract | null>(null);
+
+  // Validation errors
+  const [addErrors, setAddErrors] = useState<Record<string, string>>({});
+  const [editErrors, setEditErrors] = useState<Record<string, string>>({});
 
   // Add form
   const [addForm, setAddForm] = useState({
@@ -62,9 +67,21 @@ export function AMCContracts() {
   const totalValue = contracts.reduce((sum, c) => sum + c.contractValue, 0);
   const dueForRenewal = contracts.filter((c) => c.status === "expiring").length;
 
+  // Validation helpers
+  const clearAddError = (field: string) => {
+    if (addErrors[field]) setAddErrors((prev) => { const n = { ...prev }; delete n[field]; return n; });
+  };
+  const clearEditError = (field: string) => {
+    if (editErrors[field]) setEditErrors((prev) => { const n = { ...prev }; delete n[field]; return n; });
+  };
+
   // Handlers
   const handleAdd = () => {
-    if (!addForm.vendorName || !addForm.contractType) return;
+    const errs: Record<string, string> = {};
+    if (!addForm.vendorName.trim()) errs.vendorName = "Vendor name is required";
+    if (!addForm.contractType) errs.contractType = "Contract type is required";
+    if (Object.keys(errs).length) { setAddErrors(errs); return; }
+
     const newContract: AMCContract = {
       id: `amc-${Date.now()}`,
       contractId: `AMC-2026-${String(contracts.length + 1).padStart(6, "0")}`,
@@ -80,7 +97,9 @@ export function AMCContracts() {
     };
     setContracts((prev) => [newContract, ...prev]);
     setAddForm({ vendorName: "", contractType: "", serviceProvider: "", contractValue: "", validUntil: "", description: "" });
+    setAddErrors({});
     setShowAddModal(false);
+    toast.success("AMC contract added successfully");
   };
 
   const openView = (c: AMCContract) => {
@@ -99,11 +118,17 @@ export function AMCContracts() {
       description: c.description,
       status: c.status,
     });
+    setEditErrors({});
     setEditOpen(true);
   };
 
   const handleEdit = () => {
     if (!selectedContract) return;
+    const errs: Record<string, string> = {};
+    if (!editForm.vendorName.trim()) errs.vendorName = "Vendor name is required";
+    if (!editForm.contractType) errs.contractType = "Contract type is required";
+    if (Object.keys(errs).length) { setEditErrors(errs); return; }
+
     setContracts((prev) =>
       prev.map((c) =>
         c.id === selectedContract.id
@@ -121,6 +146,7 @@ export function AMCContracts() {
       )
     );
     setEditOpen(false);
+    toast.success("Contract updated successfully");
   };
 
   const openDelete = (c: AMCContract) => {
@@ -132,6 +158,7 @@ export function AMCContracts() {
     if (!selectedContract) return;
     setContracts((prev) => prev.filter((c) => c.id !== selectedContract.id));
     setDeleteOpen(false);
+    toast.success("Contract deleted successfully");
   };
 
   return (
@@ -145,14 +172,14 @@ export function AMCContracts() {
           </p>
         </div>
         <div className="flex items-center gap-1.5">
-          <Button variant="outline" size="sm" className="h-7 text-[11px] px-2.5">
+          <Button variant="outline" size="sm" className="h-7 text-[11px] px-2.5" onClick={() => toast.success("Refreshed")}>
             <RefreshCw className="h-3 w-3 mr-1" />
             Refresh
           </Button>
           <Button
             size="sm"
             className="h-7 text-[11px] px-2.5 bg-blue-600 hover:bg-blue-700 text-white"
-            onClick={() => setShowAddModal(true)}
+            onClick={() => { setAddErrors({}); setShowAddModal(true); }}
           >
             <Plus className="h-3 w-3 mr-1" />
             Add AMC Contract
@@ -255,17 +282,18 @@ export function AMCContracts() {
                 <Label className="text-[12px] text-slate-600 mb-1.5 block">Vendor Name *</Label>
                 <Input
                   value={addForm.vendorName}
-                  onChange={(e) => setAddForm({ ...addForm, vendorName: e.target.value })}
+                  onChange={(e) => { setAddForm({ ...addForm, vendorName: e.target.value }); clearAddError("vendorName"); }}
                   placeholder="Enter vendor name"
-                  className="h-9 text-[13px] rounded-lg"
+                  className={`h-9 text-[13px] rounded-lg ${addErrors.vendorName ? "border-red-400 ring-1 ring-red-200" : ""}`}
                 />
+                {addErrors.vendorName && <p className="text-[10px] text-red-500 mt-0.5">{addErrors.vendorName}</p>}
               </div>
               <div>
                 <Label className="text-[12px] text-slate-600 mb-1.5 block">Contract Type *</Label>
                 <select
                   value={addForm.contractType}
-                  onChange={(e) => setAddForm({ ...addForm, contractType: e.target.value })}
-                  className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 text-[13px]"
+                  onChange={(e) => { setAddForm({ ...addForm, contractType: e.target.value }); clearAddError("contractType"); }}
+                  className={`flex h-9 w-full rounded-lg border border-input bg-transparent px-3 text-[13px] ${addErrors.contractType ? "border-red-400 ring-1 ring-red-200" : ""}`}
                 >
                   <option value="">Select type</option>
                   <option value="Comprehensive AMC">Comprehensive AMC</option>
@@ -273,6 +301,7 @@ export function AMCContracts() {
                   <option value="Breakdown Maintenance">Breakdown Maintenance</option>
                   <option value="Preventive Maintenance">Preventive Maintenance</option>
                 </select>
+                {addErrors.contractType && <p className="text-[10px] text-red-500 mt-0.5">{addErrors.contractType}</p>}
               </div>
             </div>
             <div className="grid grid-cols-2 gap-2.5">
@@ -384,26 +413,28 @@ export function AMCContracts() {
           </DialogHeader>
           <div className="space-y-3 pt-2">
             <div>
-              <Label className="text-[12px] text-slate-600 mb-1.5 block">Vendor Name</Label>
+              <Label className="text-[12px] text-slate-600 mb-1.5 block">Vendor Name *</Label>
               <Input
                 value={editForm.vendorName}
-                onChange={(e) => setEditForm({ ...editForm, vendorName: e.target.value })}
-                className="h-9 text-[13px] rounded-lg"
+                onChange={(e) => { setEditForm({ ...editForm, vendorName: e.target.value }); clearEditError("vendorName"); }}
+                className={`h-9 text-[13px] rounded-lg ${editErrors.vendorName ? "border-red-400 ring-1 ring-red-200" : ""}`}
               />
+              {editErrors.vendorName && <p className="text-[10px] text-red-500 mt-0.5">{editErrors.vendorName}</p>}
             </div>
             <div className="grid grid-cols-2 gap-2.5">
               <div>
-                <Label className="text-[12px] text-slate-600 mb-1.5 block">Contract Type</Label>
+                <Label className="text-[12px] text-slate-600 mb-1.5 block">Contract Type *</Label>
                 <select
                   value={editForm.contractType}
-                  onChange={(e) => setEditForm({ ...editForm, contractType: e.target.value })}
-                  className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 text-[13px]"
+                  onChange={(e) => { setEditForm({ ...editForm, contractType: e.target.value }); clearEditError("contractType"); }}
+                  className={`flex h-9 w-full rounded-lg border border-input bg-transparent px-3 text-[13px] ${editErrors.contractType ? "border-red-400 ring-1 ring-red-200" : ""}`}
                 >
                   <option value="Comprehensive AMC">Comprehensive AMC</option>
                   <option value="Annual Service Contract">Annual Service Contract</option>
                   <option value="Breakdown Maintenance">Breakdown Maintenance</option>
                   <option value="Preventive Maintenance">Preventive Maintenance</option>
                 </select>
+                {editErrors.contractType && <p className="text-[10px] text-red-500 mt-0.5">{editErrors.contractType}</p>}
               </div>
               <div>
                 <Label className="text-[12px] text-slate-600 mb-1.5 block">Status</Label>

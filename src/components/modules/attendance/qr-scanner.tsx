@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { QrCode, Camera, UserCheck, LogIn, LogOut, Search, AlertCircle } from "lucide-react";
+import { toast } from "sonner";
 import { MOCK_EMPLOYEES, MOCK_RECENT_SCANS, type RecentScan } from "./mock-data";
 
 export function QRScanner() {
@@ -20,6 +21,7 @@ export function QRScanner() {
   const [searchQuery, setSearchQuery] = useState("");
   const [lastScannedText, setLastScannedText] = useState("");
   const [scanError, setScanError] = useState("");
+  const [manualErrors, setManualErrors] = useState<Record<string, string>>({});
 
   const scannerRef = useRef<HTMLDivElement>(null);
   const html5QrCodeRef = useRef<any>(null);
@@ -129,11 +131,16 @@ export function QRScanner() {
     };
 
     setRecentScans((prev) => [newScan, ...prev]);
+    toast.success(`${newScan.employeeName} checked in`);
   }, []);
 
   // Manual check-in handler
   const handleManualCheckIn = useCallback(() => {
-    if (!selectedEmployeeId) return;
+    if (!selectedEmployeeId) {
+      setManualErrors({ employee: "Please select an employee" });
+      return;
+    }
+    setManualErrors({});
     const emp = MOCK_EMPLOYEES.find((e) => e.id === selectedEmployeeId);
     if (!emp) return;
 
@@ -156,6 +163,7 @@ export function QRScanner() {
     setShowManualDialog(false);
     setSelectedEmployeeId("");
     setCheckAction("in");
+    toast.success(checkAction === "in" ? "Checked in successfully" : "Checked out successfully");
   }, [selectedEmployeeId, checkAction]);
 
   const filteredScans = searchQuery
@@ -323,11 +331,14 @@ export function QRScanner() {
           </DialogHeader>
           <div className="space-y-4 pt-2">
             <div>
-              <label className="text-[12px] text-slate-600 mb-1.5 block">Employee</label>
+              <label className="text-[12px] text-slate-600 mb-1.5 block">Employee *</label>
               <select
                 value={selectedEmployeeId}
-                onChange={(e) => setSelectedEmployeeId(e.target.value)}
-                className="w-full h-9 rounded-lg border border-slate-200 bg-white px-3 text-[13px] focus:outline-none focus:border-emerald-300 focus:ring-1 focus:ring-emerald-100"
+                onChange={(e) => {
+                  setSelectedEmployeeId(e.target.value);
+                  if (manualErrors.employee) setManualErrors({});
+                }}
+                className={`w-full h-9 rounded-lg border bg-white px-3 text-[13px] focus:outline-none focus:border-emerald-300 focus:ring-1 focus:ring-emerald-100 ${manualErrors.employee ? "border-red-400 ring-1 ring-red-200" : "border-slate-200"}`}
               >
                 <option value="">Select employee...</option>
                 {MOCK_EMPLOYEES.map((emp) => (
@@ -336,6 +347,7 @@ export function QRScanner() {
                   </option>
                 ))}
               </select>
+              {manualErrors.employee && <p className="text-[10px] text-red-500 mt-0.5">{manualErrors.employee}</p>}
             </div>
 
             <div>
@@ -384,6 +396,7 @@ export function QRScanner() {
                 onClick={() => {
                   setShowManualDialog(false);
                   setSelectedEmployeeId("");
+                  setManualErrors({});
                 }}
               >
                 Cancel

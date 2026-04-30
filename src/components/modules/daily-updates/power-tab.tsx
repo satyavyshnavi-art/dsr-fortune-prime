@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { toast } from "sonner";
 import { KPICard } from "@/components/shared/kpi-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -75,8 +76,17 @@ export function PowerTab() {
     return ((curr - prev) * mf).toFixed(2);
   }, [editForm]);
 
+  const [editErrors, setEditErrors] = useState<Record<string, boolean>>({});
+  const [deleteConfirmIdx, setDeleteConfirmIdx] = useState<number | null>(null);
+
   const handleUpdate = () => {
     if (editIdx === null) return;
+    const errs: Record<string, boolean> = {};
+    if (!editForm.previousReading.trim()) errs.previousReading = true;
+    if (!editForm.currentReading.trim()) errs.currentReading = true;
+    setEditErrors(errs);
+    if (Object.keys(errs).length > 0) return;
+
     const prev = parseFloat(editForm.previousReading) || 0;
     const curr = parseFloat(editForm.currentReading) || 0;
     const mf = parseFloat(editForm.mf) || 1;
@@ -94,12 +104,20 @@ export function PowerTab() {
           : row
       )
     );
+    toast.success("Reading updated successfully");
     setEditOpen(false);
     setEditIdx(null);
   };
 
   const handleDelete = (idx: number) => {
-    setData((d) => d.filter((_, i) => i !== idx));
+    setDeleteConfirmIdx(idx);
+  };
+
+  const confirmDelete = () => {
+    if (deleteConfirmIdx === null) return;
+    setData((d) => d.filter((_, i) => i !== deleteConfirmIdx));
+    toast.success("Record deleted");
+    setDeleteConfirmIdx(null);
   };
 
   const totalConsumption = data.reduce((sum, r) => {
@@ -243,25 +261,27 @@ export function PowerTab() {
                   />
                 </div>
                 <div>
-                  <Label className="text-[12px] text-slate-600 mb-1.5 block">Previous Reading (kWh)</Label>
+                  <Label className="text-[12px] text-slate-600 mb-1.5 block">Previous Reading (kWh) *</Label>
                   <Input
                     type="number"
                     value={editForm.previousReading}
-                    onChange={(e) => setEditForm({ ...editForm, previousReading: e.target.value })}
-                    className="h-9 text-[13px] rounded-lg"
+                    onChange={(e) => { setEditForm({ ...editForm, previousReading: e.target.value }); setEditErrors((prev) => ({ ...prev, previousReading: false })); }}
+                    className={`h-9 text-[13px] rounded-lg ${editErrors.previousReading ? 'border-red-400 ring-1 ring-red-200' : 'border-slate-200'}`}
                   />
+                  {editErrors.previousReading && <p className="text-[10px] text-red-500 mt-0.5">Previous reading is required</p>}
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-[12px] text-slate-600 mb-1.5 block">Current Reading (kWh)</Label>
+                  <Label className="text-[12px] text-slate-600 mb-1.5 block">Current Reading (kWh) *</Label>
                   <Input
                     type="number"
                     value={editForm.currentReading}
-                    onChange={(e) => setEditForm({ ...editForm, currentReading: e.target.value })}
-                    className="h-9 text-[13px] rounded-lg"
+                    onChange={(e) => { setEditForm({ ...editForm, currentReading: e.target.value }); setEditErrors((prev) => ({ ...prev, currentReading: false })); }}
+                    className={`h-9 text-[13px] rounded-lg ${editErrors.currentReading ? 'border-red-400 ring-1 ring-red-200' : 'border-slate-200'}`}
                   />
+                  {editErrors.currentReading && <p className="text-[10px] text-red-500 mt-0.5">Current reading is required</p>}
                 </div>
                 <div>
                   <Label className="text-[12px] text-slate-600 mb-1.5 block">MF</Label>
@@ -285,7 +305,7 @@ export function PowerTab() {
               <div className="flex justify-end gap-2 pt-1">
                 <Button
                   variant="outline"
-                  onClick={() => setEditOpen(false)}
+                  onClick={() => { setEditOpen(false); setEditErrors({}); }}
                   className="h-9 text-[13px] px-4 rounded-lg"
                 >
                   Cancel
@@ -300,6 +320,24 @@ export function PowerTab() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* ===== DELETE CONFIRMATION DIALOG ===== */}
+      <Dialog open={deleteConfirmIdx !== null} onOpenChange={(open) => { if (!open) setDeleteConfirmIdx(null); }}>
+        <DialogContent className="sm:max-w-[380px]">
+          <DialogHeader>
+            <DialogTitle className="text-[15px]">Delete Record</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 pt-2">
+            <p className="text-[13px] text-slate-600">
+              Are you sure you want to delete this consumption record? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setDeleteConfirmIdx(null)} className="h-9 text-[13px] rounded-lg">Cancel</Button>
+              <Button onClick={confirmDelete} className="h-9 text-[13px] rounded-lg bg-red-600 hover:bg-red-700 text-white">Delete</Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

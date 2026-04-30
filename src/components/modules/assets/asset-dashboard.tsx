@@ -33,6 +33,7 @@ import {
   CalendarClock,
   FileText,
 } from "lucide-react";
+import { toast } from "sonner";
 
 export function AssetDashboard() {
   const data = dashboardSummary;
@@ -99,6 +100,7 @@ export function AssetDashboard() {
       })),
     ];
     exportPDF(rows, "Asset-Dashboard-Report", "Asset Dashboard Summary");
+    toast.success("Report downloaded successfully");
   }
 
   function getStatusVariant(status: string) {

@@ -30,6 +30,7 @@ import {
   RotateCcw,
   Search,
 } from "lucide-react";
+import { toast } from "sonner";
 import {
   MOCK_EMPLOYEES,
   MOCK_LEAVE_REQUESTS,
@@ -97,6 +98,7 @@ export function AttendanceTab() {
   const [shiftDialogOpen, setShiftDialogOpen] = useState(false);
   const [editingShift, setEditingShift] = useState<ShiftTemplate | null>(null);
   const [shiftForm, setShiftForm] = useState({ name: "", startTime: "09:00", endTime: "17:00" });
+  const [shiftErrors, setShiftErrors] = useState<Record<string, string>>({});
   const [manageDialogOpen, setManageDialogOpen] = useState(false);
   const [assignShiftEmp, setAssignShiftEmp] = useState("");
   const [assignShiftId, setAssignShiftId] = useState("");
@@ -119,6 +121,7 @@ export function AttendanceTab() {
   const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>(MOCK_LEAVE_REQUESTS);
   const [leaveSearch, setLeaveSearch] = useState("");
   const [leaveStatusFilter, setLeaveStatusFilter] = useState("all");
+  const [addLeaveErrors, setAddLeaveErrors] = useState<Record<string, string>>({});
   const [addLeaveOpen, setAddLeaveOpen] = useState(false);
   const [addLeaveForm, setAddLeaveForm] = useState({
     employeeName: "",
@@ -143,6 +146,7 @@ export function AttendanceTab() {
   const openCreateShift = () => {
     setEditingShift(null);
     setShiftForm({ name: "", startTime: "09:00", endTime: "17:00" });
+    setShiftErrors({});
     setShiftDialogOpen(true);
   };
 
@@ -153,7 +157,13 @@ export function AttendanceTab() {
   };
 
   const handleSaveShift = () => {
-    if (!shiftForm.name.trim()) return;
+    const newErrors: Record<string, string> = {};
+    if (!shiftForm.name.trim()) newErrors.name = "Shift name is required";
+    if (Object.keys(newErrors).length > 0) {
+      setShiftErrors(newErrors);
+      return;
+    }
+    setShiftErrors({});
     if (editingShift) {
       setShifts((prev) =>
         prev.map((s) =>
@@ -167,12 +177,14 @@ export function AttendanceTab() {
           a.shiftId === editingShift.id ? { ...a, shiftName: shiftForm.name } : a
         )
       );
+      toast.success("Shift updated successfully");
     } else {
       const newId = String(Date.now());
       setShifts((prev) => [
         ...prev,
         { id: newId, name: shiftForm.name, startTime: shiftForm.startTime, endTime: shiftForm.endTime },
       ]);
+      toast.success("Shift created successfully");
     }
     setShiftDialogOpen(false);
   };
@@ -180,6 +192,7 @@ export function AttendanceTab() {
   const handleDeleteShift = (shiftId: string) => {
     setShifts((prev) => prev.filter((s) => s.id !== shiftId));
     setAssignments((prev) => prev.filter((a) => a.shiftId !== shiftId));
+    toast.success("Shift deleted successfully");
   };
 
   const handleAssignShift = () => {
@@ -201,10 +214,12 @@ export function AttendanceTab() {
     });
     setAssignShiftEmp("");
     setAssignShiftId("");
+    toast.success("Shift assigned successfully");
   };
 
   const handleRemoveAssignment = (employeeId: string) => {
     setAssignments((prev) => prev.filter((a) => a.employeeId !== employeeId));
+    toast.success("Assignment removed");
   };
 
   // --- Week Off handlers ---
@@ -238,6 +253,7 @@ export function AttendanceTab() {
     setWeekOffDays(new Set());
     setWeekOffSaved(true);
     setTimeout(() => setWeekOffSaved(false), 2000);
+    toast.success("Week off saved successfully");
   };
 
   const openEditWeekOff = (entry: WeekOffEntry) => {
@@ -265,6 +281,7 @@ export function AttendanceTab() {
       )
     );
     setEditWeekOffOpen(false);
+    toast.success("Week off updated successfully");
   };
 
   const openDeleteWeekOff = (entry: WeekOffEntry) => {
@@ -278,6 +295,7 @@ export function AttendanceTab() {
       prev.filter((w) => w.employeeId !== deleteWeekOffTarget.employeeId)
     );
     setDeleteWeekOffOpen(false);
+    toast.success("Deleted successfully");
   };
 
   // --- Leave handlers ---
@@ -298,16 +316,26 @@ export function AttendanceTab() {
     setLeaveRequests((prev) =>
       prev.map((lr) => (lr.id === id ? { ...lr, status: "Approved" as const } : lr))
     );
+    toast.success("Leave approved");
   };
 
   const handleRejectLeave = (id: string) => {
     setLeaveRequests((prev) =>
       prev.map((lr) => (lr.id === id ? { ...lr, status: "Rejected" as const } : lr))
     );
+    toast.success("Leave rejected");
   };
 
   const handleAddLeave = () => {
-    if (!addLeaveForm.employeeName || !addLeaveForm.dateFrom || !addLeaveForm.dateTo) return;
+    const newErrors: Record<string, string> = {};
+    if (!addLeaveForm.employeeName) newErrors.employeeName = "Employee is required";
+    if (!addLeaveForm.dateFrom) newErrors.dateFrom = "Start date is required";
+    if (!addLeaveForm.dateTo) newErrors.dateTo = "End date is required";
+    if (Object.keys(newErrors).length > 0) {
+      setAddLeaveErrors(newErrors);
+      return;
+    }
+    setAddLeaveErrors({});
     const from = new Date(addLeaveForm.dateFrom);
     const to = new Date(addLeaveForm.dateTo);
     const diffDays = Math.max(1, Math.ceil((to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24)) + 1);
@@ -327,6 +355,7 @@ export function AttendanceTab() {
     ]);
     setAddLeaveForm({ employeeName: "", type: "Sick Leave", dateFrom: "", dateTo: "", reason: "" });
     setAddLeaveOpen(false);
+    toast.success("Leave request added successfully");
   };
 
   const openEditLeave = (lr: LeaveRequest) => {
@@ -362,6 +391,7 @@ export function AttendanceTab() {
       )
     );
     setEditLeaveOpen(false);
+    toast.success("Leave updated successfully");
   };
 
   const openDeleteLeave = (lr: LeaveRequest) => {
@@ -373,6 +403,7 @@ export function AttendanceTab() {
     if (!deleteLeaveTarget) return;
     setLeaveRequests((prev) => prev.filter((lr) => lr.id !== deleteLeaveTarget.id));
     setDeleteLeaveOpen(false);
+    toast.success("Deleted successfully");
   };
 
   // When an employee is selected in week off planner, load their existing days
@@ -696,10 +727,14 @@ export function AttendanceTab() {
               <Label className="text-[12px] text-slate-600 mb-1.5 block">Shift Name *</Label>
               <Input
                 value={shiftForm.name}
-                onChange={(e) => setShiftForm({ ...shiftForm, name: e.target.value })}
+                onChange={(e) => {
+                  setShiftForm({ ...shiftForm, name: e.target.value });
+                  if (shiftErrors.name) setShiftErrors((prev) => { const n = { ...prev }; delete n.name; return n; });
+                }}
                 placeholder="e.g. Morning, Evening, Night"
-                className="h-9 text-[13px] rounded-lg"
+                className={`h-9 text-[13px] rounded-lg ${shiftErrors.name ? "border-red-400 ring-1 ring-red-200" : ""}`}
               />
+              {shiftErrors.name && <p className="text-[10px] text-red-500 mt-0.5">{shiftErrors.name}</p>}
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -1018,9 +1053,12 @@ export function AttendanceTab() {
               <Label className="text-[12px] text-slate-600 mb-1.5 block">Employee *</Label>
               <Select
                 value={addLeaveForm.employeeName}
-                onValueChange={(v) => setAddLeaveForm({ ...addLeaveForm, employeeName: v ?? "" })}
+                onValueChange={(v) => {
+                  setAddLeaveForm({ ...addLeaveForm, employeeName: v ?? "" });
+                  if (addLeaveErrors.employeeName) setAddLeaveErrors((prev) => { const n = { ...prev }; delete n.employeeName; return n; });
+                }}
               >
-                <SelectTrigger className="h-9 text-[13px] rounded-lg">
+                <SelectTrigger className={`h-9 text-[13px] rounded-lg ${addLeaveErrors.employeeName ? "border-red-400 ring-1 ring-red-200" : ""}`}>
                   <SelectValue placeholder="Select Employee" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1035,6 +1073,7 @@ export function AttendanceTab() {
                   ))}
                 </SelectContent>
               </Select>
+              {addLeaveErrors.employeeName && <p className="text-[10px] text-red-500 mt-0.5">{addLeaveErrors.employeeName}</p>}
             </div>
             <div>
               <Label className="text-[12px] text-slate-600 mb-1.5 block">Leave Type *</Label>
@@ -1059,18 +1098,26 @@ export function AttendanceTab() {
                 <Input
                   type="date"
                   value={addLeaveForm.dateFrom}
-                  onChange={(e) => setAddLeaveForm({ ...addLeaveForm, dateFrom: e.target.value })}
-                  className="h-9 text-[13px] rounded-lg"
+                  onChange={(e) => {
+                    setAddLeaveForm({ ...addLeaveForm, dateFrom: e.target.value });
+                    if (addLeaveErrors.dateFrom) setAddLeaveErrors((prev) => { const n = { ...prev }; delete n.dateFrom; return n; });
+                  }}
+                  className={`h-9 text-[13px] rounded-lg ${addLeaveErrors.dateFrom ? "border-red-400 ring-1 ring-red-200" : ""}`}
                 />
+                {addLeaveErrors.dateFrom && <p className="text-[10px] text-red-500 mt-0.5">{addLeaveErrors.dateFrom}</p>}
               </div>
               <div>
                 <Label className="text-[12px] text-slate-600 mb-1.5 block">To *</Label>
                 <Input
                   type="date"
                   value={addLeaveForm.dateTo}
-                  onChange={(e) => setAddLeaveForm({ ...addLeaveForm, dateTo: e.target.value })}
-                  className="h-9 text-[13px] rounded-lg"
+                  onChange={(e) => {
+                    setAddLeaveForm({ ...addLeaveForm, dateTo: e.target.value });
+                    if (addLeaveErrors.dateTo) setAddLeaveErrors((prev) => { const n = { ...prev }; delete n.dateTo; return n; });
+                  }}
+                  className={`h-9 text-[13px] rounded-lg ${addLeaveErrors.dateTo ? "border-red-400 ring-1 ring-red-200" : ""}`}
                 />
+                {addLeaveErrors.dateTo && <p className="text-[10px] text-red-500 mt-0.5">{addLeaveErrors.dateTo}</p>}
               </div>
             </div>
             <div>
@@ -1086,7 +1133,7 @@ export function AttendanceTab() {
             <div className="flex justify-end gap-2 pt-1">
               <Button
                 variant="outline"
-                onClick={() => setAddLeaveOpen(false)}
+                onClick={() => { setAddLeaveOpen(false); setAddLeaveErrors({}); }}
                 className="h-9 text-[13px] rounded-lg"
               >
                 Cancel

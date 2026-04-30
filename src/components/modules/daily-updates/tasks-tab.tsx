@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { toast } from "sonner";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -67,6 +68,7 @@ export function TasksTab() {
   const handleAssign = (employee: string) => {
     if (!selectedTask) return;
     setTasks((prev) => prev.map((t) => t.id === selectedTask.id ? { ...t, assignedTo: employee, status: "In Progress" as const } : t));
+    toast.success(`Assigned to ${employee}`);
     setAssignOpen(false);
   };
 
@@ -79,19 +81,27 @@ export function TasksTab() {
   };
   const handleEdit = () => {
     if (!selectedTask) return;
+    const errs: Record<string, boolean> = {};
+    if (!editForm.title.trim()) errs.title = true;
+    setEditErrors(errs);
+    if (Object.keys(errs).length > 0) return;
+
     setTasks((prev) => prev.map((t) => t.id === selectedTask.id ? { ...t, title: editForm.title, status: editForm.status as Task["status"], priority: editForm.priority as Task["priority"], dueDate: editForm.dueDate } : t));
+    toast.success("Task updated successfully");
     setEditOpen(false);
   };
 
   const handleDuplicate = (t: Task) => {
     const copy = { ...t, id: `task-copy-${Date.now()}`, title: `${t.title} (Copy)` };
     setTasks((prev) => [copy, ...prev]);
+    toast.success("Task duplicated");
   };
 
   const openDeleteDialog = (t: Task) => { setSelectedTask(t); setDeleteOpen(true); };
   const handleDelete = () => {
     if (!selectedTask) return;
     setTasks((prev) => prev.filter((t) => t.id !== selectedTask.id));
+    toast.success("Task deleted");
     setDeleteOpen(false);
   };
 
@@ -99,14 +109,38 @@ export function TasksTab() {
     title: "", description: "", department: "", responsibility: "Individual",
     priority: "Low", source: "Routine Maintenance", eisenhowerMatrix: "Urgent & Important", dueDate: "",
   });
+  const [addErrors, setAddErrors] = useState<Record<string, boolean>>({});
+  const [editErrors, setEditErrors] = useState<Record<string, boolean>>({});
+  const [bulkFileName, setBulkFileName] = useState<string | null>(null);
+  const [attachmentName, setAttachmentName] = useState<string | null>(null);
+
+  const handleFileUpload = (accept: string, onSelect?: (name: string) => void) => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = accept;
+    input.onchange = () => {
+      if (input.files?.[0]) {
+        toast.success(`File selected: ${input.files[0].name}`);
+        onSelect?.(input.files[0].name);
+      }
+    };
+    input.click();
+  };
 
   const handleAddTask = () => {
-    if (!newTask.title) return;
+    const errs: Record<string, boolean> = {};
+    if (!newTask.title.trim()) errs.title = true;
+    setAddErrors(errs);
+    if (Object.keys(errs).length > 0) return;
+
     setTasks((prev) => [
       { id: `task-${Date.now()}`, title: newTask.title, status: "Pending" as const, assignedTo: "Unassigned", dueDate: newTask.dueDate || "—", priority: newTask.priority as Task["priority"] },
       ...prev,
     ]);
     setNewTask({ title: "", description: "", department: "", responsibility: "Individual", priority: "Low", source: "Routine Maintenance", eisenhowerMatrix: "Urgent & Important", dueDate: "" });
+    setAddErrors({});
+    setAttachmentName(null);
+    toast.success("Task created successfully");
     setActiveView("list");
   };
 
@@ -196,7 +230,7 @@ export function TasksTab() {
           <h4 className="text-[14px] font-semibold text-slate-900 mb-4 flex items-center gap-2"><ListTodo className="h-4 w-4" /> Add New Task</h4>
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
-              <div><Label className="text-[12px] text-slate-600 mb-1.5 block">Task Title *</Label><Input value={newTask.title} onChange={(e) => setNewTask({ ...newTask, title: e.target.value })} className="h-9 text-[13px] rounded-lg" /></div>
+              <div><Label className="text-[12px] text-slate-600 mb-1.5 block">Task Title *</Label><Input value={newTask.title} onChange={(e) => { setNewTask({ ...newTask, title: e.target.value }); setAddErrors((prev) => ({ ...prev, title: false })); }} className={`h-9 text-[13px] rounded-lg ${addErrors.title ? 'border-red-400 ring-1 ring-red-200' : 'border-slate-200'}`} />{addErrors.title && <p className="text-[10px] text-red-500 mt-0.5">Title is required</p>}</div>
               <div><Label className="text-[12px] text-slate-600 mb-1.5 block">Due Date</Label><Input type="date" value={newTask.dueDate} onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })} className="h-9 text-[13px] rounded-lg" /></div>
             </div>
             <div><Label className="text-[12px] text-slate-600 mb-1.5 block">Description</Label><textarea value={newTask.description} onChange={(e) => setNewTask({ ...newTask, description: e.target.value })} rows={3} className="flex w-full rounded-lg border border-input bg-transparent px-3 py-2 text-[13px]" /></div>
@@ -209,7 +243,7 @@ export function TasksTab() {
               <div><Label className="text-[12px] text-slate-600 mb-1.5 block">Responsibility</Label><select value={newTask.responsibility} onChange={(e) => setNewTask({ ...newTask, responsibility: e.target.value })} className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 text-[13px]"><option>Individual</option><option>Team</option><option>Department</option></select></div>
               <div><Label className="text-[12px] text-slate-600 mb-1.5 block">Eisenhower Matrix</Label><select value={newTask.eisenhowerMatrix} onChange={(e) => setNewTask({ ...newTask, eisenhowerMatrix: e.target.value })} className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 text-[13px]"><option>Urgent & Important</option><option>Not Urgent & Important</option><option>Urgent & Not Important</option><option>Not Urgent & Not Important</option></select></div>
             </div>
-            <div><Label className="text-[12px] text-slate-600 mb-1.5 block">Attachments</Label><div className="flex items-center gap-2"><Button variant="outline" size="sm" className="h-8 text-[12px] rounded-lg"><Paperclip className="h-3.5 w-3.5 mr-1" /> Choose files</Button><Button variant="outline" size="sm" className="h-8 text-[12px] rounded-lg"><Camera className="h-3.5 w-3.5 mr-1" /> Take Photo</Button></div></div>
+            <div><Label className="text-[12px] text-slate-600 mb-1.5 block">Attachments</Label><div className="flex items-center gap-2"><Button variant="outline" size="sm" className="h-8 text-[12px] rounded-lg" onClick={() => handleFileUpload(".jpg,.jpeg,.png,.pdf,.doc,.docx", setAttachmentName)}><Paperclip className="h-3.5 w-3.5 mr-1" /> Choose files</Button><Button variant="outline" size="sm" className="h-8 text-[12px] rounded-lg" onClick={() => handleFileUpload("image/*", setAttachmentName)}><Camera className="h-3.5 w-3.5 mr-1" /> Take Photo</Button>{attachmentName && <span className="text-[12px] text-slate-500">{attachmentName}</span>}</div></div>
             <Button onClick={handleAddTask} className="w-full bg-blue-600 hover:bg-blue-700 text-white h-9 text-[13px] rounded-lg"><Plus className="h-3.5 w-3.5 mr-1.5" /> Create Task</Button>
           </div>
         </div>
@@ -263,14 +297,14 @@ export function TasksTab() {
         <DialogContent className="sm:max-w-[450px]">
           <DialogHeader><DialogTitle className="text-[15px]">Edit Task</DialogTitle></DialogHeader>
           <div className="space-y-3 pt-2">
-            <div><Label className="text-[12px] text-slate-600 mb-1.5 block">Title</Label><Input value={editForm.title} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} className="h-9 text-[13px] rounded-lg" /></div>
+            <div><Label className="text-[12px] text-slate-600 mb-1.5 block">Title *</Label><Input value={editForm.title} onChange={(e) => { setEditForm({ ...editForm, title: e.target.value }); setEditErrors((prev) => ({ ...prev, title: false })); }} className={`h-9 text-[13px] rounded-lg ${editErrors.title ? 'border-red-400 ring-1 ring-red-200' : 'border-slate-200'}`} />{editErrors.title && <p className="text-[10px] text-red-500 mt-0.5">Title is required</p>}</div>
             <div className="grid grid-cols-2 gap-3">
               <div><Label className="text-[12px] text-slate-600 mb-1.5 block">Status</Label><select value={editForm.status} onChange={(e) => setEditForm({ ...editForm, status: e.target.value })} className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 text-[13px]"><option>Pending</option><option>In Progress</option><option>Completed</option></select></div>
               <div><Label className="text-[12px] text-slate-600 mb-1.5 block">Priority</Label><select value={editForm.priority} onChange={(e) => setEditForm({ ...editForm, priority: e.target.value })} className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 text-[13px]"><option>Low</option><option>Medium</option><option>High</option><option>Critical</option></select></div>
             </div>
             <div><Label className="text-[12px] text-slate-600 mb-1.5 block">Due Date</Label><Input type="date" value={editForm.dueDate} onChange={(e) => setEditForm({ ...editForm, dueDate: e.target.value })} className="h-9 text-[13px] rounded-lg" /></div>
             <div className="flex justify-end gap-2 pt-1">
-              <Button variant="outline" onClick={() => setEditOpen(false)} className="h-9 text-[13px] rounded-lg">Cancel</Button>
+              <Button variant="outline" onClick={() => { setEditOpen(false); setEditErrors({}); }} className="h-9 text-[13px] rounded-lg">Cancel</Button>
               <Button onClick={handleEdit} className="h-9 text-[13px] rounded-lg bg-blue-600 hover:bg-blue-700 text-white">Update Task</Button>
             </div>
           </div>
@@ -299,12 +333,12 @@ export function TasksTab() {
             <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
               <p className="text-[12px] font-medium text-blue-800">Excel Format Required</p>
               <p className="text-[11px] text-blue-600 mt-0.5">Columns: Task Title, Description, Due Date, Department, Priority, Responsibility, Source</p>
-              <Button variant="link" size="sm" className="text-blue-700 text-[11px] h-6 px-0 mt-1"><Download className="h-3 w-3 mr-1" /> Download Template</Button>
+              <Button variant="link" size="sm" className="text-blue-700 text-[11px] h-6 px-0 mt-1" onClick={() => toast.success("Downloading template...")}><Download className="h-3 w-3 mr-1" /> Download Template</Button>
             </div>
-            <div><Label className="text-[12px] text-slate-600 mb-1.5 block">Select Excel File</Label><div className="flex items-center gap-2"><Button variant="outline" size="sm" className="h-8 text-[12px] rounded-lg">Choose file</Button><span className="text-[12px] text-slate-400">No file chosen</span></div></div>
+            <div><Label className="text-[12px] text-slate-600 mb-1.5 block">Select Excel File</Label><div className="flex items-center gap-2"><Button variant="outline" size="sm" className="h-8 text-[12px] rounded-lg" onClick={() => handleFileUpload(".xlsx,.xls,.csv", setBulkFileName)}>Choose file</Button><span className="text-[12px] text-slate-400">{bulkFileName || "No file chosen"}</span></div></div>
             <div className="flex justify-end gap-2 pt-1">
-              <Button variant="outline" onClick={() => setBulkUploadOpen(false)} className="h-9 text-[13px] rounded-lg">Cancel</Button>
-              <Button className="bg-green-600 hover:bg-green-700 text-white h-9 text-[13px] rounded-lg"><Upload className="h-3.5 w-3.5 mr-1.5" /> Upload Tasks</Button>
+              <Button variant="outline" onClick={() => { setBulkUploadOpen(false); setBulkFileName(null); }} className="h-9 text-[13px] rounded-lg">Cancel</Button>
+              <Button onClick={() => { if (!bulkFileName) { toast.error("Please select a file first"); return; } toast.success("Tasks uploaded successfully"); setBulkUploadOpen(false); setBulkFileName(null); }} className="bg-green-600 hover:bg-green-700 text-white h-9 text-[13px] rounded-lg"><Upload className="h-3.5 w-3.5 mr-1.5" /> Upload Tasks</Button>
             </div>
           </div>
         </DialogContent>

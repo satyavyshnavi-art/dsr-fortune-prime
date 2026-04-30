@@ -15,6 +15,7 @@ import {
   Gauge,
   Activity,
 } from "lucide-react";
+import { toast } from "sonner";
 
 interface WaterTank {
   id: string;
@@ -269,7 +270,7 @@ export function WaterInfraConfig() {
       </div>
 
       {/* Water Tanks */}
-      <CollapsibleSection title="Water Tanks">
+      <CollapsibleSection title="Water Tanks" onAdd={() => toast.info("Add water tank form coming soon")}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {mockTanks.map((tank) => (
             <InfraCard
@@ -288,7 +289,7 @@ export function WaterInfraConfig() {
       </CollapsibleSection>
 
       {/* Borewells */}
-      <CollapsibleSection title="Borewells">
+      <CollapsibleSection title="Borewells" onAdd={() => toast.info("Add borewell form coming soon")}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {mockBorewells.map((bw) => (
             <InfraCard
@@ -307,7 +308,7 @@ export function WaterInfraConfig() {
       </CollapsibleSection>
 
       {/* Cavern / Municipal Supply */}
-      <CollapsibleSection title="Cavern / Municipal Supply">
+      <CollapsibleSection title="Cavern / Municipal Supply" onAdd={() => toast.info("Add supply source form coming soon")}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {mockCavern.map((c) => (
             <InfraCard
@@ -324,7 +325,7 @@ export function WaterInfraConfig() {
       </CollapsibleSection>
 
       {/* Tanker Supply */}
-      <CollapsibleSection title="Tanker Supply">
+      <CollapsibleSection title="Tanker Supply" onAdd={() => toast.info("Add tanker supply form coming soon")}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {mockTanker.map((t) => (
             <InfraCard

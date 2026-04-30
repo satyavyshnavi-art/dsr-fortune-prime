@@ -12,6 +12,7 @@ import {
   SprayCan,
   Bug,
 } from "lucide-react";
+import { toast } from "sonner";
 
 interface TemplateFile {
   id: string;
@@ -161,11 +162,30 @@ function ChecklistSectionCard({ section }: { section: ChecklistSection }) {
         ))}
       </div>
       <div className="flex items-center gap-3 pt-0.5 px-1">
-        <button className="flex items-center gap-1 text-[10px] text-blue-600 hover:text-blue-700 font-medium">
+        <button
+          className="flex items-center gap-1 text-[10px] text-blue-600 hover:text-blue-700 font-medium"
+          onClick={() => {
+            const input = document.createElement("input");
+            input.type = "file";
+            input.accept = ".xlsx,.xls,.csv";
+            input.onchange = () => toast.success("Template uploaded");
+            input.click();
+          }}
+        >
           <Plus className="h-3 w-3" />
           Add Template
         </button>
-        <button className="flex items-center gap-1 text-[10px] text-slate-400 hover:text-slate-600 font-medium">
+        <button
+          className="flex items-center gap-1 text-[10px] text-slate-400 hover:text-slate-600 font-medium"
+          onClick={() => {
+            const input = document.createElement("input");
+            input.type = "file";
+            input.accept = ".xlsx,.xls,.csv";
+            input.multiple = true;
+            input.onchange = () => toast.success("Templates replaced");
+            input.click();
+          }}
+        >
           <RefreshCw className="h-3 w-3" />
           Replace All
         </button>
@@ -181,6 +201,7 @@ export function HygieneConfig() {
         <Button
           variant="outline"
           className="h-7 text-[11px] gap-1.5 text-blue-600 border-blue-200 hover:bg-blue-50 px-2.5"
+          onClick={() => toast.info("Downloading template...")}
         >
           <Download className="h-3.5 w-3.5" />
           Template Download

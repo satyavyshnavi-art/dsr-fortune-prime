@@ -58,6 +58,7 @@ import {
   Check,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
+import { toast } from "sonner";
 
 const iconMap: Record<string, React.ElementType> = {
   Zap,
@@ -85,6 +86,10 @@ export function AssetCategories() {
   const [showQRModal, setShowQRModal] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
   const [addCategoryId, setAddCategoryId] = useState<string>("");
+
+  // File picker refs
+  const bulkUploadRef = useRef<HTMLInputElement>(null);
+  const categoryUploadRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   // Form state for add/edit
   const [formData, setFormData] = useState({
@@ -141,6 +146,7 @@ export function AssetCategories() {
     };
     setAssets([...assets, newAsset]);
     setShowAddModal(false);
+    toast.success("Asset added successfully");
   };
 
   const handleUpdateAsset = () => {
@@ -151,6 +157,27 @@ export function AssetCategories() {
       )
     );
     setShowEditModal(false);
+    toast.success("Asset updated successfully");
+  };
+
+  const handleDeleteAsset = (assetId: string) => {
+    setAssets(assets.filter((a) => a.id !== assetId));
+    toast.success("Asset deleted successfully");
+  };
+
+  const handleBulkUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    toast.success(`File "${file.name}" uploaded successfully`);
+    if (bulkUploadRef.current) bulkUploadRef.current.value = "";
+  };
+
+  const handleCategoryUpload = (e: React.ChangeEvent<HTMLInputElement>, catId: string) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    toast.success(`File "${file.name}" uploaded for category`);
+    const ref = categoryUploadRefs.current[catId];
+    if (ref) ref.value = "";
   };
 
   const getCategoryAssets = (categoryId: string) =>
@@ -158,6 +185,15 @@ export function AssetCategories() {
 
   return (
     <div className="space-y-4">
+      {/* Hidden file inputs */}
+      <input
+        ref={bulkUploadRef}
+        type="file"
+        accept=".xlsx,.csv"
+        className="hidden"
+        onChange={handleBulkUpload}
+      />
+
       {/* Header actions */}
       <div className="flex items-center justify-between">
         <p className="text-[11px] text-slate-400">
@@ -168,7 +204,12 @@ export function AssetCategories() {
             <Download className="h-3 w-3 mr-1" />
             Download QRs
           </Button>
-          <Button variant="outline" size="sm" className="h-7 text-[11px] px-2.5 bg-yellow-50 border-yellow-300 text-yellow-700 hover:bg-yellow-100">
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 text-[11px] px-2.5 bg-yellow-50 border-yellow-300 text-yellow-700 hover:bg-yellow-100"
+            onClick={() => bulkUploadRef.current?.click()}
+          >
             <Upload className="h-3 w-3 mr-1" />
             Bulk Upload
           </Button>
@@ -189,6 +230,13 @@ export function AssetCategories() {
           return (
             <Card key={cat.id} className="shadow-none border-slate-200 hover:shadow-sm transition-shadow">
               <CardContent className="p-3">
+                {/* Hidden file input per category */}
+                <input
+                  ref={(el) => { categoryUploadRefs.current[cat.id] = el; }}
+                  type="file"
+                  className="hidden"
+                  onChange={(e) => handleCategoryUpload(e, cat.id)}
+                />
                 {/* Header */}
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-1.5">
@@ -246,7 +294,12 @@ export function AssetCategories() {
                     <Plus className="h-3 w-3 mr-0.5" />
                     Add
                   </Button>
-                  <Button variant="outline" size="sm" className="text-[10px] h-6 px-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-[10px] h-6 px-2"
+                    onClick={() => categoryUploadRefs.current[cat.id]?.click()}
+                  >
                     <Upload className="h-3 w-3 mr-0.5" />
                     Upload
                   </Button>
@@ -319,11 +372,13 @@ export function AssetCategories() {
                           >
                             <Pencil className="h-3.5 w-3.5 text-slate-500" />
                           </Button>
-                          <Button variant="ghost" size="icon" className="h-7 w-7">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7"
+                            onClick={() => handleDeleteAsset(asset.id)}
+                          >
                             <Trash2 className="h-3.5 w-3.5 text-red-500" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-7 w-7">
-                            <Upload className="h-3.5 w-3.5 text-slate-500" />
                           </Button>
                         </div>
                       </TableCell>
@@ -420,6 +475,7 @@ function QRCodeModal({
     try {
       await navigator.clipboard.writeText(assetQRValue);
       setCopied(true);
+      toast.success("Copied to clipboard");
       setTimeout(() => setCopied(false), 2000);
     } catch {
       // Fallback for non-secure contexts
@@ -430,6 +486,7 @@ function QRCodeModal({
       document.execCommand("copy");
       document.body.removeChild(textarea);
       setCopied(true);
+      toast.success("Copied to clipboard");
       setTimeout(() => setCopied(false), 2000);
     }
   }, [assetQRValue]);
@@ -457,6 +514,7 @@ function QRCodeModal({
       link.download = `QR-${asset.name.replace(/\s+/g, "-")}.png`;
       link.href = pngUrl;
       link.click();
+      toast.success("QR code downloaded");
     };
 
     img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
@@ -539,6 +597,32 @@ function AssetForm({
   submitLabel: string;
   onCancel?: () => void;
 }) {
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const validate = () => {
+    const newErrors: Record<string, string> = {};
+    if (!formData.name.trim()) newErrors.name = "Asset name is required";
+    if (!formData.assetTag.trim()) newErrors.assetTag = "Asset tag is required";
+    if (!formData.location.trim()) newErrors.location = "Location is required";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = () => {
+    if (!validate()) return;
+    onSubmit();
+  };
+
+  const clearError = (field: string) => {
+    if (errors[field]) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
+  };
+
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-3 gap-2.5">
@@ -546,28 +630,31 @@ function AssetForm({
           <Label className="text-[11px] text-slate-500">Asset Name *</Label>
           <Input
             value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            onChange={(e) => { setFormData({ ...formData, name: e.target.value }); clearError("name"); }}
             placeholder="Enter name"
-            className="mt-0.5 h-8 text-[12px]"
+            className={`mt-0.5 h-8 text-[12px] ${errors.name ? "border-red-400 ring-1 ring-red-200" : ""}`}
           />
+          {errors.name && <p className="text-[10px] text-red-500 mt-0.5">{errors.name}</p>}
         </div>
         <div>
           <Label className="text-[11px] text-slate-500">Asset Tag *</Label>
           <Input
             value={formData.assetTag}
-            onChange={(e) => setFormData({ ...formData, assetTag: e.target.value })}
+            onChange={(e) => { setFormData({ ...formData, assetTag: e.target.value }); clearError("assetTag"); }}
             placeholder="Enter asset tag"
-            className="mt-0.5 h-8 text-[12px]"
+            className={`mt-0.5 h-8 text-[12px] ${errors.assetTag ? "border-red-400 ring-1 ring-red-200" : ""}`}
           />
+          {errors.assetTag && <p className="text-[10px] text-red-500 mt-0.5">{errors.assetTag}</p>}
         </div>
         <div>
           <Label className="text-[11px] text-slate-500">Location *</Label>
           <Input
             value={formData.location}
-            onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+            onChange={(e) => { setFormData({ ...formData, location: e.target.value }); clearError("location"); }}
             placeholder="Enter location"
-            className="mt-0.5 h-8 text-[12px]"
+            className={`mt-0.5 h-8 text-[12px] ${errors.location ? "border-red-400 ring-1 ring-red-200" : ""}`}
           />
+          {errors.location && <p className="text-[10px] text-red-500 mt-0.5">{errors.location}</p>}
         </div>
       </div>
 
@@ -647,7 +734,7 @@ function AssetForm({
         )}
         <Button
           size="sm"
-          onClick={onSubmit}
+          onClick={handleSubmit}
           className="h-7 text-[11px] bg-blue-600 hover:bg-blue-700 text-white"
         >
           {submitLabel}

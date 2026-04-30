@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Zap, Droplets, Save } from "lucide-react";
@@ -94,7 +95,7 @@ function PowerReadingsSection() {
             <p className="text-[12px] text-slate-400">{ebMeters.length + dgMeters.length} meters configured</p>
           </div>
         </div>
-        <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white h-9 text-[13px] px-5 rounded-lg shadow-sm">
+        <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white h-9 text-[13px] px-5 rounded-lg shadow-sm" onClick={() => toast.success("Power readings saved successfully")}>
           <Save className="h-3.5 w-3.5 mr-2" />
           Save Power
         </Button>
@@ -338,7 +339,7 @@ function WaterReadingsSection() {
             </p>
           </div>
         </div>
-        <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white h-9 text-[13px] px-5 rounded-lg shadow-sm">
+        <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white h-9 text-[13px] px-5 rounded-lg shadow-sm" onClick={() => toast.success("Water readings saved successfully")}>
           <Save className="h-3.5 w-3.5 mr-2" />
           Save Water
         </Button>
@@ -383,7 +384,7 @@ function WaterQualitySection() {
               <span className="h-2.5 w-2.5 rounded-full bg-purple-500" />
               <span className="text-[13px] font-semibold text-slate-900">STP Daily</span>
             </div>
-            <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white h-7 text-[11px] px-3 rounded-lg">
+            <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white h-7 text-[11px] px-3 rounded-lg" onClick={() => toast.success("STP data saved")}>
               <Save className="h-3 w-3 mr-1" /> Save
             </Button>
           </div>
@@ -414,7 +415,7 @@ function WaterQualitySection() {
               <span className="h-2.5 w-2.5 rounded-full bg-blue-500" />
               <span className="text-[13px] font-semibold text-slate-900">Swimming Pool</span>
             </div>
-            <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white h-7 text-[11px] px-3 rounded-lg">
+            <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white h-7 text-[11px] px-3 rounded-lg" onClick={() => toast.success("Pool data saved")}>
               <Save className="h-3 w-3 mr-1" /> Save
             </Button>
           </div>
@@ -451,7 +452,7 @@ function WaterQualitySection() {
               <span className="h-2.5 w-2.5 rounded-full bg-green-500" />
               <span className="text-[13px] font-semibold text-slate-900">RO Plant</span>
             </div>
-            <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white h-7 text-[11px] px-3 rounded-lg">
+            <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white h-7 text-[11px] px-3 rounded-lg" onClick={() => toast.success("RO data saved")}>
               <Save className="h-3 w-3 mr-1" /> Save
             </Button>
           </div>
@@ -492,7 +493,7 @@ function WaterQualitySection() {
               <span className="h-2.5 w-2.5 rounded-full bg-orange-500" />
               <span className="text-[13px] font-semibold text-slate-900">WTP Daily</span>
             </div>
-            <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white h-7 text-[11px] px-3 rounded-lg">
+            <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white h-7 text-[11px] px-3 rounded-lg" onClick={() => toast.success("WTP data saved")}>
               <Save className="h-3 w-3 mr-1" /> Save
             </Button>
           </div>

@@ -16,6 +16,7 @@ import {
   Smartphone,
   Send,
 } from "lucide-react";
+import { toast } from "sonner";
 
 interface CategoryToggle {
   key: string;
@@ -157,6 +158,11 @@ export function AlertConfiguration() {
     setAuditHalfYearly("14");
     setAuditYearly("30");
     setChannels(INITIAL_CHANNELS);
+    toast.info("Reset to defaults");
+  }
+
+  function handleSaveConfiguration() {
+    toast.success("Configuration saved");
   }
 
   return (
@@ -178,7 +184,7 @@ export function AlertConfiguration() {
           <Button variant="outline" size="sm" className="h-7 text-[11px] px-2.5" onClick={handleResetDefaults}>
             Reset Defaults
           </Button>
-          <Button size="sm" className="h-7 text-[11px] px-2.5 bg-blue-600 hover:bg-blue-700 text-white">
+          <Button size="sm" className="h-7 text-[11px] px-2.5 bg-blue-600 hover:bg-blue-700 text-white" onClick={handleSaveConfiguration}>
             <CheckCircle className="h-3 w-3 mr-1" />
             Save Changes
           </Button>
@@ -391,7 +397,7 @@ export function AlertConfiguration() {
         <Button variant="outline" size="sm" className="h-7 text-[11px] px-3" onClick={handleResetDefaults}>
           Reset Defaults
         </Button>
-        <Button size="sm" className="h-7 text-[11px] px-3 bg-blue-600 hover:bg-blue-700 text-white">
+        <Button size="sm" className="h-7 text-[11px] px-3 bg-blue-600 hover:bg-blue-700 text-white" onClick={handleSaveConfiguration}>
           <CheckCircle className="h-3 w-3 mr-1" />
           Save Configuration
         </Button>

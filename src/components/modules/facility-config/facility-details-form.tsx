@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Building2, CheckCircle } from "lucide-react";
+import { toast } from "sonner";
 
 interface FacilityDetails {
   type: string;
@@ -38,9 +39,24 @@ const initialDetails: FacilityDetails = {
 
 export function FacilityDetailsForm() {
   const [details, setDetails] = useState<FacilityDetails>(initialDetails);
+  const [errors, setErrors] = useState<Record<string, boolean>>({});
 
   const handleChange = (field: keyof FacilityDetails, value: string) => {
     setDetails((prev) => ({ ...prev, [field]: value }));
+    setErrors((prev) => ({ ...prev, [field]: false }));
+  };
+
+  const handleSubmit = () => {
+    const errs: Record<string, boolean> = {};
+    if (!details.siteName.trim()) errs.siteName = true;
+    if (!details.city.trim()) errs.city = true;
+    if (!details.email.trim()) errs.email = true;
+    setErrors(errs);
+    if (Object.keys(errs).length > 0) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+    toast.success("Facility details updated");
   };
 
   return (
@@ -107,8 +123,9 @@ export function FacilityDetailsForm() {
               <Input
                 value={details.siteName}
                 onChange={(e) => handleChange("siteName", e.target.value)}
-                className="h-8 text-[12px]"
+                className={`h-8 text-[12px] ${errors.siteName ? 'border-red-400 ring-1 ring-red-200' : ''}`}
               />
+              {errors.siteName && <p className="text-[10px] text-red-500 mt-0.5">Site name is required</p>}
             </div>
             <div className="space-y-1">
               <Label className="text-[11px] text-slate-500">
@@ -117,8 +134,9 @@ export function FacilityDetailsForm() {
               <Input
                 value={details.city}
                 onChange={(e) => handleChange("city", e.target.value)}
-                className="h-8 text-[12px]"
+                className={`h-8 text-[12px] ${errors.city ? 'border-red-400 ring-1 ring-red-200' : ''}`}
               />
+              {errors.city && <p className="text-[10px] text-red-500 mt-0.5">City is required</p>}
             </div>
           </div>
 
@@ -169,17 +187,18 @@ export function FacilityDetailsForm() {
             </div>
             <div className="space-y-1">
               <Label className="text-[11px] text-slate-500">
-                Email Address
+                Email Address <span className="text-red-500">*</span>
               </Label>
               <Input
                 value={details.email}
                 onChange={(e) => handleChange("email", e.target.value)}
-                className="h-8 text-[12px]"
+                className={`h-8 text-[12px] ${errors.email ? 'border-red-400 ring-1 ring-red-200' : ''}`}
               />
+              {errors.email && <p className="text-[10px] text-red-500 mt-0.5">Email is required</p>}
             </div>
           </div>
 
-          <Button className="h-7 text-[11px] bg-blue-600 hover:bg-blue-700 text-white gap-1.5 px-3">
+          <Button className="h-7 text-[11px] bg-blue-600 hover:bg-blue-700 text-white gap-1.5 px-3" onClick={handleSubmit}>
             <CheckCircle className="h-3.5 w-3.5" />
             Update Facility Details
           </Button>

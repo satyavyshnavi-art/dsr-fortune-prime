@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { Check, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 // ---- Types ----
 interface RolePermission {
@@ -190,6 +192,23 @@ const rolesData: RolePermission[] = [
 
 // ---- Component ----
 export function RolesPermissions() {
+  const [roles, setRoles] = useState(rolesData);
+
+  function togglePermission(roleIdx: number, perm: string) {
+    if (roles[roleIdx].isLocked) {
+      toast.error("Admin permissions cannot be modified");
+      return;
+    }
+    setRoles((prev) =>
+      prev.map((r, i) =>
+        i === roleIdx
+          ? { ...r, permissions: { ...r.permissions, [perm]: !r.permissions[perm] } }
+          : r
+      )
+    );
+    toast.success("Permissions updated");
+  }
+
   return (
     <div className="space-y-3">
       <div>
@@ -218,7 +237,7 @@ export function RolesPermissions() {
             </tr>
           </thead>
           <tbody>
-            {rolesData.map((roleRow) => (
+            {roles.map((roleRow, roleIdx) => (
               <tr
                 key={roleRow.role}
                 className="border-b last:border-b-0 hover:bg-slate-50/50"
@@ -236,7 +255,11 @@ export function RolesPermissions() {
                   </div>
                 </td>
                 {PERMISSIONS.map((perm) => (
-                  <td key={perm} className="text-center px-2 py-1.5">
+                  <td
+                    key={perm}
+                    className="text-center px-2 py-1.5 cursor-pointer"
+                    onClick={() => togglePermission(roleIdx, perm)}
+                  >
                     {roleRow.permissions[perm] ? (
                       <div className="flex justify-center">
                         <div className="h-5 w-5 rounded-full bg-green-100 flex items-center justify-center">

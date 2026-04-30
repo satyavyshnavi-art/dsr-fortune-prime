@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Download, Search } from "lucide-react";
+import { toast } from "sonner";
 import { MOCK_EMPLOYEES, MOCK_ATTENDANCE } from "./mock-data";
 import { exportCSV, exportPDF, exportExcel } from "@/lib/export";
 
@@ -168,8 +169,10 @@ export function TimesheetView() {
     const filename = `Timesheet_${startDate}_to_${endDate}`;
     if (type === "csv") {
       exportCSV(rows, filename);
+      toast.success("CSV downloaded");
     } else {
       exportPDF(rows, filename, "Timesheet Report");
+      toast.success("PDF downloaded");
     }
     setTimeout(() => setDownloading(null), 500);
   }, [buildExportData, startDate, endDate]);

@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Pencil, Trash2, Settings2, Save } from "lucide-react";
+import { toast } from "sonner";
 
 interface ExistingConfig {
   id: string;
@@ -163,7 +164,7 @@ function STPConfigForm() {
           </FormField>
         </div>
         <div className="flex justify-end">
-          <Button className="h-7 text-[11px] bg-blue-600 hover:bg-blue-700 text-white gap-1.5 px-2.5">
+          <Button className="h-7 text-[11px] bg-blue-600 hover:bg-blue-700 text-white gap-1.5 px-2.5" onClick={() => toast.success("Parameters saved")}>
             <Save className="h-3.5 w-3.5" />
             Save
           </Button>
@@ -240,7 +241,7 @@ function WTPConfigForm() {
           </FormField>
         </div>
         <div className="flex justify-end">
-          <Button className="h-7 text-[11px] bg-blue-600 hover:bg-blue-700 text-white gap-1.5 px-2.5">
+          <Button className="h-7 text-[11px] bg-blue-600 hover:bg-blue-700 text-white gap-1.5 px-2.5" onClick={() => toast.success("Parameters saved")}>
             <Save className="h-3.5 w-3.5" />
             Save
           </Button>
@@ -343,7 +344,7 @@ function PoolConfigForm() {
           </FormField>
         </div>
         <div className="flex justify-end">
-          <Button className="h-7 text-[11px] bg-blue-600 hover:bg-blue-700 text-white gap-1.5 px-2.5">
+          <Button className="h-7 text-[11px] bg-blue-600 hover:bg-blue-700 text-white gap-1.5 px-2.5" onClick={() => toast.success("Parameters saved")}>
             <Save className="h-3.5 w-3.5" />
             Save
           </Button>
@@ -420,7 +421,7 @@ function ROConfigForm() {
           </FormField>
         </div>
         <div className="flex justify-end">
-          <Button className="h-7 text-[11px] bg-blue-600 hover:bg-blue-700 text-white gap-1.5 px-2.5">
+          <Button className="h-7 text-[11px] bg-blue-600 hover:bg-blue-700 text-white gap-1.5 px-2.5" onClick={() => toast.success("Parameters saved")}>
             <Save className="h-3.5 w-3.5" />
             Save
           </Button>

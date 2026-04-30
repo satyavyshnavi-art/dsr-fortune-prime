@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Download, Search } from "lucide-react";
+import { toast } from "sonner";
 import { MOCK_EMPLOYEES, MOCK_ATTENDANCE } from "./mock-data";
 import type { AttendanceRecord } from "./mock-data";
 import { exportCSV, exportPDF } from "@/lib/export";
@@ -99,8 +100,10 @@ export function CalendarView() {
     const filename = `Attendance_Calendar_${startDate}_to_${endDate}`;
     if (type === "csv") {
       exportCSV(rows, filename);
+      toast.success("CSV downloaded");
     } else {
       exportPDF(rows, filename, "Attendance Calendar Report");
+      toast.success("PDF downloaded");
     }
     setTimeout(() => setDownloading(null), 500);
   }, [filteredEmployees, days, getStatus, startDate, endDate]);

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { toast } from "sonner";
 import { KPICard } from "@/components/shared/kpi-card";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
@@ -68,6 +69,8 @@ export function ComplaintsTab() {
   const [newComplaint, setNewComplaint] = useState({
     title: "", description: "", department: "", priority: "medium",
   });
+  const [addErrors, setAddErrors] = useState<Record<string, boolean>>({});
+  const [editErrors, setEditErrors] = useState<Record<string, boolean>>({});
 
   const totalComplaints = complaints.length;
   const openCount = complaints.filter((c) => c.status === "Open").length;
@@ -97,13 +100,15 @@ export function ComplaintsTab() {
 
   const handleAssign = (employee: string) => {
     if (!selectedComplaint) return;
+    const name = employee.replace(/ ①$/, "");
     setComplaints((prev) =>
       prev.map((c) =>
         c.ticketId === selectedComplaint.ticketId
-          ? { ...c, assignedTo: employee.replace(/ ①$/, ""), status: "In Progress" as const }
+          ? { ...c, assignedTo: name, status: "In Progress" as const }
           : c
       )
     );
+    toast.success(`Assigned to ${name}`);
     setAssignOpen(false);
   };
 
@@ -120,6 +125,11 @@ export function ComplaintsTab() {
 
   const handleEdit = () => {
     if (!selectedComplaint) return;
+    const errs: Record<string, boolean> = {};
+    if (!editForm.title.trim()) errs.title = true;
+    setEditErrors(errs);
+    if (Object.keys(errs).length > 0) return;
+
     setComplaints((prev) =>
       prev.map((c) =>
         c.ticketId === selectedComplaint.ticketId
@@ -127,6 +137,7 @@ export function ComplaintsTab() {
           : c
       )
     );
+    toast.success("Complaint updated successfully");
     setEditOpen(false);
   };
 
@@ -138,11 +149,18 @@ export function ComplaintsTab() {
   const handleDelete = () => {
     if (!selectedComplaint) return;
     setComplaints((prev) => prev.filter((c) => c.ticketId !== selectedComplaint.ticketId));
+    toast.success("Complaint deleted");
     setDeleteOpen(false);
   };
 
   const handleAddComplaint = () => {
-    if (!newComplaint.title) return;
+    const errs: Record<string, boolean> = {};
+    if (!newComplaint.title.trim()) errs.title = true;
+    if (!newComplaint.description.trim()) errs.description = true;
+    if (!newComplaint.department) errs.department = true;
+    setAddErrors(errs);
+    if (Object.keys(errs).length > 0) return;
+
     const id = `GV-${String(complaints.length + 1).padStart(5, "0")}`;
     setComplaints((prev) => [
       {
@@ -155,6 +173,8 @@ export function ComplaintsTab() {
       ...prev,
     ]);
     setNewComplaint({ title: "", description: "", department: "", priority: "medium" });
+    setAddErrors({});
+    toast.success("Complaint created successfully");
     setActiveView("list");
   };
 
@@ -300,19 +320,22 @@ export function ComplaintsTab() {
           <div className="space-y-3">
             <div>
               <Label className="text-[12px] text-slate-600 mb-1.5 block">Complaint Title *</Label>
-              <Input value={newComplaint.title} onChange={(e) => setNewComplaint({ ...newComplaint, title: e.target.value })} placeholder="Enter complaint title" className="h-9 text-[13px] rounded-lg" />
+              <Input value={newComplaint.title} onChange={(e) => { setNewComplaint({ ...newComplaint, title: e.target.value }); setAddErrors((prev) => ({ ...prev, title: false })); }} placeholder="Enter complaint title" className={`h-9 text-[13px] rounded-lg ${addErrors.title ? 'border-red-400 ring-1 ring-red-200' : 'border-slate-200'}`} />
+              {addErrors.title && <p className="text-[10px] text-red-500 mt-0.5">Title is required</p>}
             </div>
             <div>
               <Label className="text-[12px] text-slate-600 mb-1.5 block">Description *</Label>
-              <textarea value={newComplaint.description} onChange={(e) => setNewComplaint({ ...newComplaint, description: e.target.value })} placeholder="Describe the complaint in detail..." rows={3} className="flex w-full rounded-lg border border-input bg-transparent px-3 py-2 text-[13px]" />
+              <textarea value={newComplaint.description} onChange={(e) => { setNewComplaint({ ...newComplaint, description: e.target.value }); setAddErrors((prev) => ({ ...prev, description: false })); }} placeholder="Describe the complaint in detail..." rows={3} className={`flex w-full rounded-lg border bg-transparent px-3 py-2 text-[13px] ${addErrors.description ? 'border-red-400 ring-1 ring-red-200' : 'border-input'}`} />
+              {addErrors.description && <p className="text-[10px] text-red-500 mt-0.5">Description is required</p>}
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label className="text-[12px] text-slate-600 mb-1.5 block">Department *</Label>
-                <select value={newComplaint.department} onChange={(e) => setNewComplaint({ ...newComplaint, department: e.target.value })} className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 text-[13px]">
+                <select value={newComplaint.department} onChange={(e) => { setNewComplaint({ ...newComplaint, department: e.target.value }); setAddErrors((prev) => ({ ...prev, department: false })); }} className={`flex h-9 w-full rounded-lg border bg-transparent px-3 text-[13px] ${addErrors.department ? 'border-red-400 ring-1 ring-red-200' : 'border-input'}`}>
                   <option value="">Select Department</option>
                   <option>Operations</option><option>Maintenance</option><option>Housekeeping</option><option>Security</option><option>Electrical</option><option>Plumbing</option>
                 </select>
+                {addErrors.department && <p className="text-[10px] text-red-500 mt-0.5">Department is required</p>}
               </div>
               <div>
                 <Label className="text-[12px] text-slate-600 mb-1.5 block">Priority *</Label>
@@ -416,8 +439,9 @@ export function ComplaintsTab() {
           </DialogHeader>
           <div className="space-y-3 pt-2">
             <div>
-              <Label className="text-[12px] text-slate-600 mb-1.5 block">Title</Label>
-              <Input value={editForm.title} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} className="h-9 text-[13px] rounded-lg" />
+              <Label className="text-[12px] text-slate-600 mb-1.5 block">Title *</Label>
+              <Input value={editForm.title} onChange={(e) => { setEditForm({ ...editForm, title: e.target.value }); setEditErrors((prev) => ({ ...prev, title: false })); }} className={`h-9 text-[13px] rounded-lg ${editErrors.title ? 'border-red-400 ring-1 ring-red-200' : 'border-slate-200'}`} />
+              {editErrors.title && <p className="text-[10px] text-red-500 mt-0.5">Title is required</p>}
             </div>
             <div>
               <Label className="text-[12px] text-slate-600 mb-1.5 block">Status</Label>
@@ -428,7 +452,7 @@ export function ComplaintsTab() {
               </select>
             </div>
             <div className="flex justify-end gap-2 pt-1">
-              <Button variant="outline" onClick={() => setEditOpen(false)} className="h-9 text-[13px] rounded-lg">Cancel</Button>
+              <Button variant="outline" onClick={() => { setEditOpen(false); setEditErrors({}); }} className="h-9 text-[13px] rounded-lg">Cancel</Button>
               <Button onClick={handleEdit} className="h-9 text-[13px] rounded-lg bg-blue-600 hover:bg-blue-700 text-white">Update Complaint</Button>
             </div>
           </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useMemo } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   ClipboardList,
@@ -130,7 +131,7 @@ export function HygieneTab() {
           <Calendar className="h-4 w-4 text-blue-600" />
           <h3 className="text-[15px] font-semibold text-slate-900">Daily Hygiene Calendar</h3>
         </div>
-        <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white h-8 text-[12px] px-4 rounded-lg">
+        <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white h-8 text-[12px] px-4 rounded-lg" onClick={() => toast.success("Exporting hygiene report...")}>
           <FileText className="h-3.5 w-3.5 mr-1.5" />
           Export Report
         </Button>

@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/select";
 import { Fingerprint, Plus, RefreshCw, Trash2 } from "lucide-react";
 import { ColumnDef } from "@tanstack/react-table";
+import { toast } from "sonner";
 
 interface BiometricDevice {
   id: string;
@@ -90,9 +91,17 @@ export function DevicesTab() {
   const [serialNumber, setSerialNumber] = useState("");
   const [deviceType, setDeviceType] = useState("fingerprint");
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [errors, setErrors] = useState<Record<string, boolean>>({});
 
   function handleAddDevice() {
-    if (!deviceName.trim() || !serialNumber.trim()) return;
+    const errs: Record<string, boolean> = {};
+    if (!deviceName.trim()) errs.deviceName = true;
+    if (!serialNumber.trim()) errs.serialNumber = true;
+    setErrors(errs);
+    if (Object.keys(errs).length > 0) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
 
     const newDevice: BiometricDevice = {
       id: crypto.randomUUID(),
@@ -107,11 +116,14 @@ export function DevicesTab() {
     setDeviceName("");
     setSerialNumber("");
     setDeviceType("fingerprint");
+    setErrors({});
     setDialogOpen(false);
+    toast.success("Device registered successfully");
   }
 
   function handleRefresh() {
     setIsRefreshing(true);
+    toast.info("Refreshing...");
     setTimeout(() => setIsRefreshing(false), 1000);
   }
 
@@ -147,25 +159,27 @@ export function DevicesTab() {
 
               <div className="space-y-3 py-1">
                 <div className="space-y-1">
-                  <Label htmlFor="device-name" className="text-[11px]">Device Name</Label>
+                  <Label htmlFor="device-name" className="text-[11px]">Device Name <span className="text-red-500">*</span></Label>
                   <Input
                     id="device-name"
                     placeholder="e.g. Main Gate Reader"
                     value={deviceName}
-                    onChange={(e) => setDeviceName(e.target.value)}
-                    className="h-8 text-[12px]"
+                    onChange={(e) => { setDeviceName(e.target.value); setErrors((prev) => ({ ...prev, deviceName: false })); }}
+                    className={`h-8 text-[12px] ${errors.deviceName ? 'border-red-400 ring-1 ring-red-200' : ''}`}
                   />
+                  {errors.deviceName && <p className="text-[10px] text-red-500 mt-0.5">Device name is required</p>}
                 </div>
 
                 <div className="space-y-1">
-                  <Label htmlFor="serial-number" className="text-[11px]">Serial Number</Label>
+                  <Label htmlFor="serial-number" className="text-[11px]">Serial Number <span className="text-red-500">*</span></Label>
                   <Input
                     id="serial-number"
                     placeholder="e.g. ZK-2024-0001"
                     value={serialNumber}
-                    onChange={(e) => setSerialNumber(e.target.value)}
-                    className="h-8 text-[12px]"
+                    onChange={(e) => { setSerialNumber(e.target.value); setErrors((prev) => ({ ...prev, serialNumber: false })); }}
+                    className={`h-8 text-[12px] ${errors.serialNumber ? 'border-red-400 ring-1 ring-red-200' : ''}`}
                   />
+                  {errors.serialNumber && <p className="text-[10px] text-red-500 mt-0.5">Serial number is required</p>}
                 </div>
 
                 <div className="space-y-1">

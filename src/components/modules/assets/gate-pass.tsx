@@ -30,6 +30,7 @@ import {
   Trash2,
   RotateCcw,
 } from "lucide-react";
+import { toast } from "sonner";
 
 export function GatePassManagement() {
   const [gatePasses, setGatePasses] = useState<GatePass[]>(mockGatePasses);
@@ -39,6 +40,9 @@ export function GatePassManagement() {
   const [viewOpen, setViewOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [selectedPass, setSelectedPass] = useState<GatePass | null>(null);
+
+  // Validation errors
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Create form
   const [createForm, setCreateForm] = useState({
@@ -54,9 +58,17 @@ export function GatePassManagement() {
   const returnedCount = gatePasses.filter((gp) => gp.status === "Returned").length;
   const totalPasses = gatePasses.length;
 
+  const clearError = (field: string) => {
+    if (errors[field]) setErrors((prev) => { const n = { ...prev }; delete n[field]; return n; });
+  };
+
   // Handlers
   const handleCreate = () => {
-    if (!createForm.assetName || !createForm.gatePassType) return;
+    const errs: Record<string, string> = {};
+    if (!createForm.assetName.trim()) errs.assetName = "Asset name is required";
+    if (!createForm.gatePassType) errs.gatePassType = "Gate pass type is required";
+    if (Object.keys(errs).length) { setErrors(errs); return; }
+
     const newPass: GatePass = {
       id: `gp-${Date.now()}`,
       assetName: createForm.assetName,
@@ -84,7 +96,9 @@ export function GatePassManagement() {
     };
     setGatePasses((prev) => [newPass, ...prev]);
     setCreateForm({ assetName: "", assetTag: "", gatePassType: "", serviceProvider: "", dateTimeOut: "" });
+    setErrors({});
     setShowCreateModal(false);
+    toast.success("Gate pass created successfully");
   };
 
   const openView = (gp: GatePass) => {
@@ -98,6 +112,7 @@ export function GatePassManagement() {
         p.id === gp.id ? { ...p, status: "Returned" as const } : p
       )
     );
+    toast.success(`${gp.assetName} marked as returned`);
   };
 
   const openDelete = (gp: GatePass) => {
@@ -109,6 +124,7 @@ export function GatePassManagement() {
     if (!selectedPass) return;
     setGatePasses((prev) => prev.filter((p) => p.id !== selectedPass.id));
     setDeleteOpen(false);
+    toast.success("Gate pass deleted successfully");
   };
 
   return (
@@ -137,7 +153,7 @@ export function GatePassManagement() {
             <Button
               size="sm"
               className="h-7 text-[11px] px-2.5 bg-blue-600 hover:bg-blue-700 text-white"
-              onClick={() => setShowCreateModal(true)}
+              onClick={() => { setErrors({}); setShowCreateModal(true); }}
             >
               <Plus className="h-3 w-3 mr-1" />
               Create Pass
@@ -260,10 +276,11 @@ export function GatePassManagement() {
                 <Label className="text-[12px] text-slate-600 mb-1.5 block">Asset Name *</Label>
                 <Input
                   value={createForm.assetName}
-                  onChange={(e) => setCreateForm({ ...createForm, assetName: e.target.value })}
+                  onChange={(e) => { setCreateForm({ ...createForm, assetName: e.target.value }); clearError("assetName"); }}
                   placeholder="Enter asset name"
-                  className="h-9 text-[13px] rounded-lg"
+                  className={`h-9 text-[13px] rounded-lg ${errors.assetName ? "border-red-400 ring-1 ring-red-200" : ""}`}
                 />
+                {errors.assetName && <p className="text-[10px] text-red-500 mt-0.5">{errors.assetName}</p>}
               </div>
               <div>
                 <Label className="text-[12px] text-slate-600 mb-1.5 block">Asset Tag</Label>
@@ -280,8 +297,8 @@ export function GatePassManagement() {
                 <Label className="text-[12px] text-slate-600 mb-1.5 block">Gate Pass Type *</Label>
                 <select
                   value={createForm.gatePassType}
-                  onChange={(e) => setCreateForm({ ...createForm, gatePassType: e.target.value })}
-                  className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 text-[13px]"
+                  onChange={(e) => { setCreateForm({ ...createForm, gatePassType: e.target.value }); clearError("gatePassType"); }}
+                  className={`flex h-9 w-full rounded-lg border border-input bg-transparent px-3 text-[13px] ${errors.gatePassType ? "border-red-400 ring-1 ring-red-200" : ""}`}
                 >
                   <option value="">Select type</option>
                   <option value="Demonstration">Demonstration</option>
@@ -292,6 +309,7 @@ export function GatePassManagement() {
                   <option value="Permanent transfer">Permanent transfer</option>
                   <option value="Temporary transfer">Temporary transfer</option>
                 </select>
+                {errors.gatePassType && <p className="text-[10px] text-red-500 mt-0.5">{errors.gatePassType}</p>}
               </div>
               <div>
                 <Label className="text-[12px] text-slate-600 mb-1.5 block">Service Provider</Label>

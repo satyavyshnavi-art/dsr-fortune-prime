@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { AlertCard, type AlertItem, type AlertCategory, type AlertSeverity, type AlertStatus } from "./alert-card";
 import { Search, RefreshCw, Filter } from "lucide-react";
+import { toast } from "sonner";
 
 // ---- Mock data matching the screenshots ----
 const now = new Date();
@@ -215,18 +216,21 @@ export function AlertsList() {
     setAlerts((prev) =>
       prev.map((a) => (a.id === id ? { ...a, status: "acknowledged" as AlertStatus } : a))
     );
+    toast.success("Alert acknowledged");
   }
 
   function handleDismiss(id: string) {
     setAlerts((prev) =>
       prev.map((a) => (a.id === id ? { ...a, status: "dismissed" as AlertStatus } : a))
     );
+    toast.success("Alert dismissed");
   }
 
   function handleResolve(id: string) {
     setAlerts((prev) =>
       prev.map((a) => (a.id === id ? { ...a, status: "resolved" as AlertStatus } : a))
     );
+    toast.success("Alert resolved");
   }
 
   function clearFilters() {
@@ -244,7 +248,7 @@ export function AlertsList() {
           <span className="font-semibold text-slate-800">{unacknowledgedCount} unacknowledged alerts</span>
           {" "}out of {filtered.length} filtered / {totalCount} total
         </p>
-        <Button variant="outline" size="sm" className="h-7 text-[11px] px-2.5">
+        <Button variant="outline" size="sm" className="h-7 text-[11px] px-2.5" onClick={() => toast.info("Refreshing alerts...")}>
           <RefreshCw className="h-3 w-3 mr-1" />
           Refresh & Generate
         </Button>
