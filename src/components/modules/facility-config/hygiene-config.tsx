@@ -301,16 +301,37 @@ export function HygieneConfig() {
   const [categories, setCategories] = useState<HygieneCategory[]>(mockHygieneData);
   const [loading, setLoading] = useState(true);
 
+  // Edit template dialog state
+  const [editTemplate, setEditTemplate] = useState<TemplateFile | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editTasks, setEditTasks] = useState("");
+
   const handleEditTemplate = (template: TemplateFile) => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = ".xlsx,.xls,.csv";
-    input.onchange = () => {
-      if (input.files?.[0]) {
-        toast.success(`Template "${template.name}" replaced with "${input.files[0].name}"`);
-      }
-    };
-    input.click();
+    setEditTemplate(template);
+    setEditName(template.name);
+    setEditTasks(String(template.tasks));
+  };
+
+  const handleSaveEdit = () => {
+    if (!editTemplate || !editName.trim()) {
+      toast.error("Template name is required");
+      return;
+    }
+    setCategories(prev =>
+      prev.map(cat => ({
+        ...cat,
+        sections: cat.sections.map(sec => ({
+          ...sec,
+          templates: sec.templates.map(t =>
+            t.id === editTemplate.id
+              ? { ...t, name: editName.trim(), tasks: parseInt(editTasks) || t.tasks, version: t.version + 1 }
+              : t
+          ),
+        })),
+      }))
+    );
+    toast.success(`Template "${editName}" updated (v${editTemplate.version + 1})`);
+    setEditTemplate(null);
   };
 
   const handleDeleteTemplate = (template: TemplateFile) => {
@@ -480,6 +501,59 @@ export function HygieneConfig() {
           </div>
         ))}
       </div>
+
+      {/* ===== EDIT TEMPLATE DIALOG ===== */}
+      <Dialog open={!!editTemplate} onOpenChange={(open) => { if (!open) setEditTemplate(null); }}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle className="text-[15px]">Edit Template</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 pt-2">
+            <div>
+              <label className="text-[12px] text-slate-600 mb-1.5 block">Template Name *</label>
+              <input
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                className="w-full h-9 rounded-lg border border-slate-200 bg-white px-3 text-[13px] focus:outline-none focus:border-blue-300 focus:ring-1 focus:ring-blue-100"
+              />
+            </div>
+            <div>
+              <label className="text-[12px] text-slate-600 mb-1.5 block">Number of Tasks</label>
+              <input
+                type="number"
+                value={editTasks}
+                onChange={(e) => setEditTasks(e.target.value)}
+                className="w-full h-9 rounded-lg border border-slate-200 bg-white px-3 text-[13px] focus:outline-none focus:border-blue-300 focus:ring-1 focus:ring-blue-100"
+              />
+            </div>
+            <div>
+              <label className="text-[12px] text-slate-600 mb-1.5 block">Replace File (optional)</label>
+              <Button
+                variant="outline"
+                className="h-8 text-[12px] rounded-lg"
+                onClick={() => {
+                  const input = document.createElement("input");
+                  input.type = "file";
+                  input.accept = ".xlsx,.xls,.csv";
+                  input.onchange = () => {
+                    if (input.files?.[0]) toast.info(`File selected: ${input.files[0].name}`);
+                  };
+                  input.click();
+                }}
+              >
+                <Download className="h-3.5 w-3.5 mr-1.5" />
+                Choose File
+              </Button>
+            </div>
+            <div className="flex justify-end gap-2 pt-1">
+              <Button variant="outline" onClick={() => setEditTemplate(null)} className="h-9 text-[13px] rounded-lg">Cancel</Button>
+              <Button onClick={handleSaveEdit} className="h-9 text-[13px] rounded-lg bg-blue-600 hover:bg-blue-700 text-white">
+                Save Changes
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* ===== QR TEMPLATE DETAIL MODAL ===== */}
       <Dialog
