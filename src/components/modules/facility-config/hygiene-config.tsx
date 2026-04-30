@@ -139,7 +139,7 @@ const mockHygieneData: HygieneCategory[] = [
   },
 ];
 
-function TemplateRow({ template }: { template: TemplateFile }) {
+function TemplateRow({ template, onEdit, onDelete }: { template: TemplateFile; onEdit: (t: TemplateFile) => void; onDelete: (t: TemplateFile) => void }) {
   return (
     <div className="flex items-center justify-between py-1.5 px-2 rounded hover:bg-slate-50 transition-colors">
       <div className="flex items-center gap-2">
@@ -151,13 +151,25 @@ function TemplateRow({ template }: { template: TemplateFile }) {
       </div>
       <div className="flex items-center gap-1">
         <span className="text-[10px] text-slate-400 mr-0.5">v{template.version}</span>
-        <button className="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-blue-600 transition-colors">
+        <button
+          className="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-blue-600 transition-colors"
+          title="Edit template"
+          onClick={() => onEdit(template)}
+        >
           <Pencil className="h-3 w-3" />
         </button>
-        <button className="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-blue-600 transition-colors">
+        <button
+          className="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-blue-600 transition-colors"
+          title="Download template"
+          onClick={() => toast.success(`Downloading ${template.name}...`)}
+        >
           <Download className="h-3 w-3" />
         </button>
-        <button className="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-red-500 transition-colors">
+        <button
+          className="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-red-500 transition-colors"
+          title="Delete template"
+          onClick={() => onDelete(template)}
+        >
           <Trash2 className="h-3 w-3" />
         </button>
       </div>
@@ -165,7 +177,7 @@ function TemplateRow({ template }: { template: TemplateFile }) {
   );
 }
 
-function ChecklistSectionCard({ section }: { section: ChecklistSection }) {
+function ChecklistSectionCard({ section, onEdit, onDelete }: { section: ChecklistSection; onEdit: (t: TemplateFile) => void; onDelete: (t: TemplateFile) => void }) {
   return (
     <div className="space-y-0.5">
       <div className="flex items-center justify-between px-1">
@@ -178,7 +190,7 @@ function ChecklistSectionCard({ section }: { section: ChecklistSection }) {
       </div>
       <div>
         {section.templates.map((template) => (
-          <TemplateRow key={template.id} template={template} />
+          <TemplateRow key={template.id} template={template} onEdit={onEdit} onDelete={onDelete} />
         ))}
       </div>
       <div className="flex items-center gap-3 pt-0.5 px-1">
@@ -217,6 +229,32 @@ function ChecklistSectionCard({ section }: { section: ChecklistSection }) {
 export function HygieneConfig() {
   const [categories, setCategories] = useState<HygieneCategory[]>(mockHygieneData);
   const [loading, setLoading] = useState(true);
+
+  const handleEditTemplate = (template: TemplateFile) => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".xlsx,.xls,.csv";
+    input.onchange = () => {
+      if (input.files?.[0]) {
+        toast.success(`Template "${template.name}" replaced with "${input.files[0].name}"`);
+      }
+    };
+    input.click();
+  };
+
+  const handleDeleteTemplate = (template: TemplateFile) => {
+    setCategories(prev =>
+      prev.map(cat => ({
+        ...cat,
+        sections: cat.sections.map(sec => ({
+          ...sec,
+          templates: sec.templates.filter(t => t.id !== template.id),
+          templateCount: sec.templates.filter(t => t.id !== template.id).length,
+        })),
+      }))
+    );
+    toast.success(`Template "${template.name}" deleted`);
+  };
 
   const fetchTemplates = useCallback(async () => {
     try {
@@ -270,7 +308,10 @@ export function HygieneConfig() {
                   {category.name}
                 </h3>
               </div>
-              <button className="flex items-center gap-1 text-[10px] text-blue-600 hover:text-blue-700 font-medium">
+              <button
+                className="flex items-center gap-1 text-[10px] text-blue-600 hover:text-blue-700 font-medium"
+                onClick={() => toast.success(`Downloading QR codes for ${category.name}...`)}
+              >
                 <Download className="h-3 w-3" />
                 Download QRs
               </button>
@@ -279,7 +320,7 @@ export function HygieneConfig() {
             <Card className="shadow-none border-slate-200">
               <CardContent className="p-3 space-y-3">
                 {category.sections.map((section) => (
-                  <ChecklistSectionCard key={section.title} section={section} />
+                  <ChecklistSectionCard key={section.title} section={section} onEdit={handleEditTemplate} onDelete={handleDeleteTemplate} />
                 ))}
               </CardContent>
             </Card>
