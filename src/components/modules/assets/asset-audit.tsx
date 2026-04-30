@@ -435,9 +435,15 @@ export function AssetAudit() {
                     className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 text-[13px]"
                   >
                     <option value="">Select category</option>
-                    {mockCategories.map((cat) => (
-                      <option key={cat.id} value={cat.name}>{cat.name}</option>
-                    ))}
+                    {(realCategories.length > 0 ? realCategories : mockCategories).map((cat) => {
+                      const catAssets = getAssetsForCategory(cat.name);
+                      const unscanned = catAssets.filter(a => !scannedAssetIds.has(a.id)).length;
+                      return (
+                        <option key={cat.id} value={cat.name} disabled={unscanned === 0 && catAssets.length > 0}>
+                          {cat.name} ({unscanned}/{catAssets.length} remaining)
+                        </option>
+                      );
+                    })}
                   </select>
                 </div>
                 <div className="flex justify-end gap-2 pt-1">
