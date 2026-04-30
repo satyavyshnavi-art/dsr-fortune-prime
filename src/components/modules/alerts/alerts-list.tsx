@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -178,12 +178,48 @@ const CATEGORY_LABELS: Record<string, string> = {
   general: "General",
 };
 
+// Map DB alert row to AlertItem shape
+function mapAlertFromDb(row: Record<string, unknown>): AlertItem {
+  return {
+    id: row.id as string,
+    category: (row.category as AlertCategory) || "general",
+    severity: (row.severity as AlertSeverity) || "medium",
+    title: (row.title as string) || "",
+    message: (row.message as string) || "",
+    status: (row.status as AlertStatus) || "unacknowledged",
+    createdAt: (row.createdAt as string) || (row.created_at as string) || new Date().toISOString(),
+    source: (row.source as string) || undefined,
+  };
+}
+
 export function AlertsList() {
   const [alerts, setAlerts] = useState<AlertItem[]>(MOCK_ALERTS);
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [loading, setLoading] = useState(true);
+
+  // Fetch alerts from API on mount
+  const fetchAlerts = useCallback(() => {
+    setLoading(true);
+    fetch("/api/v1/alerts")
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setAlerts(data.map(mapAlertFromDb));
+        }
+        // If empty array or not array, keep mock data
+      })
+      .catch(() => {
+        // API unavailable — keep mock data
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    fetchAlerts();
+  }, [fetchAlerts]);
 
   const filtered = useMemo(() => {
     return alerts.filter((a) => {
@@ -212,25 +248,38 @@ export function AlertsList() {
 
   const groupEntries = Object.entries(grouped);
 
-  function handleAcknowledge(id: string) {
+  async function updateAlertStatus(id: string, newStatus: AlertStatus, label: string) {
+    // Optimistic update
     setAlerts((prev) =>
-      prev.map((a) => (a.id === id ? { ...a, status: "acknowledged" as AlertStatus } : a))
+      prev.map((a) => (a.id === id ? { ...a, status: newStatus } : a))
     );
-    toast.success("Alert acknowledged");
+    try {
+      const res = await fetch(`/api/v1/alerts/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (!res.ok) throw new Error();
+      toast.success(`Alert ${label}`);
+    } catch {
+      // Revert on failure
+      setAlerts((prev) =>
+        prev.map((a) => (a.id === id ? { ...a, status: "unacknowledged" as AlertStatus } : a))
+      );
+      toast.error(`Failed to ${label.toLowerCase()} alert`);
+    }
+  }
+
+  function handleAcknowledge(id: string) {
+    updateAlertStatus(id, "acknowledged", "acknowledged");
   }
 
   function handleDismiss(id: string) {
-    setAlerts((prev) =>
-      prev.map((a) => (a.id === id ? { ...a, status: "dismissed" as AlertStatus } : a))
-    );
-    toast.success("Alert dismissed");
+    updateAlertStatus(id, "dismissed", "dismissed");
   }
 
   function handleResolve(id: string) {
-    setAlerts((prev) =>
-      prev.map((a) => (a.id === id ? { ...a, status: "resolved" as AlertStatus } : a))
-    );
-    toast.success("Alert resolved");
+    updateAlertStatus(id, "resolved", "resolved");
   }
 
   function clearFilters() {
@@ -248,9 +297,9 @@ export function AlertsList() {
           <span className="font-semibold text-slate-800">{unacknowledgedCount} unacknowledged alerts</span>
           {" "}out of {filtered.length} filtered / {totalCount} total
         </p>
-        <Button variant="outline" size="sm" className="h-7 text-[11px] px-2.5" onClick={() => toast.info("Refreshing alerts...")}>
-          <RefreshCw className="h-3 w-3 mr-1" />
-          Refresh & Generate
+        <Button variant="outline" size="sm" className="h-7 text-[11px] px-2.5" onClick={() => { toast.info("Refreshing alerts..."); fetchAlerts(); }}>
+          <RefreshCw className={`h-3 w-3 mr-1 ${loading ? "animate-spin" : ""}`} />
+          {loading ? "Loading..." : "Refresh & Generate"}
         </Button>
       </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { KPICard, StatusBadge } from "@/components/shared";
@@ -32,8 +32,49 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+// Map DB row to GatePass shape
+function mapDbGatePass(row: Record<string, unknown>): GatePass {
+  const statusMap: Record<string, GatePass["status"]> = {
+    out: "Out",
+    returned: "Returned",
+    approved: "Approved",
+    pending: "Pending",
+  };
+  return {
+    id: row.id as string,
+    _dbId: row.id as string,
+    assetName: (row.assetName as string) || "",
+    assetTag: (row.assetTag as string) || "",
+    gatePassType: (row.passType as string) || "",
+    status: statusMap[(row.status as string) || "pending"] || "Pending",
+    dateTimeOut: row.dateOut
+      ? new Date(row.dateOut as string).toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "2-digit",
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        })
+      : "",
+    serviceProvider: (row.serviceProvider as string) || "",
+  };
+}
+
 export function GatePassManagement() {
   const [gatePasses, setGatePasses] = useState<GatePass[]>(mockGatePasses);
+
+  // Fetch from API on mount
+  useEffect(() => {
+    fetch("/api/v1/gate-passes")
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setGatePasses(data.map(mapDbGatePass));
+        }
+      })
+      .catch(() => {}); // keep mock data
+  }, []);
 
   // Dialog states
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -63,12 +104,41 @@ export function GatePassManagement() {
   };
 
   // Handlers
-  const handleCreate = () => {
+  const handleCreate = async () => {
     const errs: Record<string, string> = {};
     if (!createForm.assetName.trim()) errs.assetName = "Asset name is required";
     if (!createForm.gatePassType) errs.gatePassType = "Gate pass type is required";
     if (Object.keys(errs).length) { setErrors(errs); return; }
 
+    const body = {
+      assetName: createForm.assetName,
+      assetTag: createForm.assetTag || `GV-${Date.now().toString().slice(-6)}`,
+      passType: createForm.gatePassType,
+      status: "out",
+      dateOut: createForm.dateTimeOut ? new Date(createForm.dateTimeOut).toISOString() : new Date().toISOString(),
+      serviceProvider: createForm.serviceProvider,
+    };
+
+    try {
+      const res = await fetch("/api/v1/gate-passes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (res.ok) {
+        const created = await res.json();
+        setGatePasses((prev) => [mapDbGatePass(created), ...prev]);
+        setCreateForm({ assetName: "", assetTag: "", gatePassType: "", serviceProvider: "", dateTimeOut: "" });
+        setErrors({});
+        setShowCreateModal(false);
+        toast.success("Gate pass created successfully");
+        return;
+      }
+    } catch {
+      // fallback to local
+    }
+
+    // Fallback: local state mutation
     const newPass: GatePass = {
       id: `gp-${Date.now()}`,
       assetName: createForm.assetName,
@@ -98,7 +168,7 @@ export function GatePassManagement() {
     setCreateForm({ assetName: "", assetTag: "", gatePassType: "", serviceProvider: "", dateTimeOut: "" });
     setErrors({});
     setShowCreateModal(false);
-    toast.success("Gate pass created successfully");
+    toast.success("Gate pass created (offline)");
   };
 
   const openView = (gp: GatePass) => {
@@ -106,7 +176,19 @@ export function GatePassManagement() {
     setViewOpen(true);
   };
 
-  const handleMarkReturned = (gp: GatePass) => {
+  const handleMarkReturned = async (gp: GatePass) => {
+    const apiId = gp._dbId || gp.id;
+
+    try {
+      await fetch(`/api/v1/gate-passes/${apiId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "returned", dateIn: new Date().toISOString() }),
+      });
+    } catch {
+      // proceed with local update regardless
+    }
+
     setGatePasses((prev) =>
       prev.map((p) =>
         p.id === gp.id ? { ...p, status: "Returned" as const } : p
@@ -120,8 +202,16 @@ export function GatePassManagement() {
     setDeleteOpen(true);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!selectedPass) return;
+    const apiId = selectedPass._dbId || selectedPass.id;
+
+    try {
+      await fetch(`/api/v1/gate-passes/${apiId}`, { method: "DELETE" });
+    } catch {
+      // proceed with local removal regardless
+    }
+
     setGatePasses((prev) => prev.filter((p) => p.id !== selectedPass.id));
     setDeleteOpen(false);
     toast.success("Gate pass deleted successfully");

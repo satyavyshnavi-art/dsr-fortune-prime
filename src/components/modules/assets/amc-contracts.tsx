@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { KPICard, StatusBadge } from "@/components/shared";
@@ -26,8 +26,36 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+// Map DB row to AMCContract shape
+function mapDbContract(row: Record<string, unknown>): AMCContract {
+  return {
+    id: row.id as string,
+    _dbId: row.id as string,
+    contractId: (row.contractId as string) || (row.id as string)?.slice(0, 8) || "",
+    vendorName: (row.vendorName as string) || "",
+    description: (row.description as string) || (row.category as string) || "",
+    contractType: (row.contractType as string) || "",
+    serviceProvider: (row.serviceProvider as string) || (row.vendorName as string) || "",
+    contractValue: Number(row.annualCost) || 0,
+    validUntil: (row.endDate as string) || "",
+    status: ((row.status as string) === "active" ? "active" : (row.status as string) === "expiring" ? "expiring" : "expired") as AMCContract["status"],
+  };
+}
+
 export function AMCContracts() {
   const [contracts, setContracts] = useState<AMCContract[]>(mockAMCContracts);
+
+  // Fetch from API on mount
+  useEffect(() => {
+    fetch("/api/v1/amc-contracts")
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setContracts(data.map(mapDbContract));
+        }
+      })
+      .catch(() => {}); // keep mock data
+  }, []);
 
   // Dialog states
   const [showAddModal, setShowAddModal] = useState(false);
@@ -76,12 +104,45 @@ export function AMCContracts() {
   };
 
   // Handlers
-  const handleAdd = () => {
+  const handleAdd = async () => {
     const errs: Record<string, string> = {};
     if (!addForm.vendorName.trim()) errs.vendorName = "Vendor name is required";
     if (!addForm.contractType) errs.contractType = "Contract type is required";
     if (Object.keys(errs).length) { setAddErrors(errs); return; }
 
+    const facilityId = contracts[0]?._dbId ? "" : "";
+    const body = {
+      vendorName: addForm.vendorName,
+      contractType: addForm.contractType,
+      category: addForm.contractType,
+      serviceProvider: addForm.serviceProvider || addForm.vendorName,
+      annualCost: String(Number(addForm.contractValue) || 0),
+      startDate: new Date().toISOString().slice(0, 10),
+      endDate: addForm.validUntil || new Date().toISOString().slice(0, 10),
+      status: "active",
+      description: addForm.description || `Annual maintenance contract for ${addForm.contractType}`,
+    };
+
+    try {
+      const res = await fetch("/api/v1/amc-contracts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (res.ok) {
+        const created = await res.json();
+        setContracts((prev) => [mapDbContract(created), ...prev]);
+        setAddForm({ vendorName: "", contractType: "", serviceProvider: "", contractValue: "", validUntil: "", description: "" });
+        setAddErrors({});
+        setShowAddModal(false);
+        toast.success("AMC contract added successfully");
+        return;
+      }
+    } catch {
+      // fallback to local
+    }
+
+    // Fallback: local state mutation
     const newContract: AMCContract = {
       id: `amc-${Date.now()}`,
       contractId: `AMC-2026-${String(contracts.length + 1).padStart(6, "0")}`,
@@ -99,7 +160,7 @@ export function AMCContracts() {
     setAddForm({ vendorName: "", contractType: "", serviceProvider: "", contractValue: "", validUntil: "", description: "" });
     setAddErrors({});
     setShowAddModal(false);
-    toast.success("AMC contract added successfully");
+    toast.success("AMC contract added (offline)");
   };
 
   const openView = (c: AMCContract) => {
@@ -122,13 +183,46 @@ export function AMCContracts() {
     setEditOpen(true);
   };
 
-  const handleEdit = () => {
+  const handleEdit = async () => {
     if (!selectedContract) return;
     const errs: Record<string, string> = {};
     if (!editForm.vendorName.trim()) errs.vendorName = "Vendor name is required";
     if (!editForm.contractType) errs.contractType = "Contract type is required";
     if (Object.keys(errs).length) { setEditErrors(errs); return; }
 
+    const updateFields = {
+      vendorName: editForm.vendorName,
+      contractType: editForm.contractType,
+      category: editForm.contractType,
+      annualCost: String(Number(editForm.contractValue) || 0),
+      endDate: editForm.validUntil || undefined,
+      status: editForm.status,
+    };
+
+    const apiId = selectedContract._dbId || selectedContract.id;
+
+    try {
+      const res = await fetch(`/api/v1/amc-contracts/${apiId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updateFields),
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setContracts((prev) =>
+          prev.map((c) =>
+            c.id === selectedContract.id ? mapDbContract(updated) : c
+          )
+        );
+        setEditOpen(false);
+        toast.success("Contract updated successfully");
+        return;
+      }
+    } catch {
+      // fallback to local
+    }
+
+    // Fallback: local state mutation
     setContracts((prev) =>
       prev.map((c) =>
         c.id === selectedContract.id
@@ -146,7 +240,7 @@ export function AMCContracts() {
       )
     );
     setEditOpen(false);
-    toast.success("Contract updated successfully");
+    toast.success("Contract updated (offline)");
   };
 
   const openDelete = (c: AMCContract) => {
@@ -154,8 +248,16 @@ export function AMCContracts() {
     setDeleteOpen(true);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!selectedContract) return;
+    const apiId = selectedContract._dbId || selectedContract.id;
+
+    try {
+      await fetch(`/api/v1/amc-contracts/${apiId}`, { method: "DELETE" });
+    } catch {
+      // proceed with local removal regardless
+    }
+
     setContracts((prev) => prev.filter((c) => c.id !== selectedContract.id));
     setDeleteOpen(false);
     toast.success("Contract deleted successfully");

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { KPICard, StatusBadge } from "@/components/shared";
@@ -36,7 +36,27 @@ import {
 import { toast } from "sonner";
 
 export function AssetDashboard() {
-  const data = dashboardSummary;
+  const [data, setData] = useState(dashboardSummary);
+
+  // Fetch real dashboard summary from API
+  useEffect(() => {
+    fetch("/api/v1/dashboard/summary")
+      .then((r) => r.json())
+      .then((summary) => {
+        if (summary && summary.assets) {
+          const totalAssets = summary.assets.total || 0;
+          const activeAssets = (summary.assets.byStatus?.active || 0);
+          const inactiveAssets = (summary.assets.byStatus?.inactive || 0);
+          setData((prev) => ({
+            ...prev,
+            totalAssets,
+            activeAssets,
+            inactiveAssets: inactiveAssets || totalAssets - activeAssets,
+          }));
+        }
+      })
+      .catch(() => {}); // keep mock data
+  }, []);
 
   // Dialog states
   const [criticalDialogOpen, setCriticalDialogOpen] = useState(false);

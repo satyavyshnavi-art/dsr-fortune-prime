@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
@@ -22,12 +22,55 @@ import {
   Plus,
   FolderKanban,
   Upload as UploadIcon,
+  Loader2,
 } from "lucide-react";
 import { projectsData, type Project } from "./mock-data";
 
+// Map DB status (snake_case) to display status (Title Case)
+const statusDisplayMap: Record<string, Project["status"]> = {
+  planning: "Planning",
+  on_hold: "On Hold",
+  in_progress: "In Progress",
+  completed: "Completed",
+};
+
+// Map display status back to DB status
+const statusDbMap: Record<string, string> = {
+  Planning: "planning",
+  "On Hold": "on_hold",
+  "In Progress": "in_progress",
+  Completed: "completed",
+};
+
+// Convert a DB project record to the component's Project shape
+function mapDbProject(row: Record<string, unknown>): ProjectWithDbId {
+  const formatDate = (d: unknown) => {
+    if (!d) return "";
+    const date = new Date(d as string);
+    return date.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "2-digit" });
+  };
+  const start = formatDate(row.startDate);
+  const end = formatDate(row.endDate);
+  return {
+    id: (row.id as string) ?? "",
+    name: (row.name as string) ?? "",
+    manager: (row.managerId as string) ?? "Unassigned",
+    dates: start && end ? `${start} - ${end}` : start || end || "",
+    status: statusDisplayMap[(row.status as string) ?? "planning"] ?? "Planning",
+    _dbId: (row.id as string) ?? undefined,
+    _description: (row.description as string) ?? "",
+    _startDate: (row.startDate as string) ?? "",
+    _endDate: (row.endDate as string) ?? "",
+  };
+}
+
+// Extend Project type locally to carry DB id and raw dates
+type ProjectWithDbId = Project & { _dbId?: string; _description?: string; _startDate?: string; _endDate?: string };
+
 export function ProjectsTab() {
   const [activeView, setActiveView] = useState<"list" | "add">("list");
-  const [projects, setProjects] = useState(projectsData);
+  const [projects, setProjects] = useState<ProjectWithDbId[]>(projectsData);
+  const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
 
@@ -35,8 +78,28 @@ export function ProjectsTab() {
   const [viewOpen, setViewOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [selectedProject, setSelectedProject] = useState<ProjectWithDbId | null>(null);
   const [editForm, setEditForm] = useState({ name: "", manager: "", status: "", startDate: "", endDate: "" });
+
+  // Fetch projects from API
+  const fetchProjects = useCallback(async () => {
+    try {
+      const res = await fetch("/api/v1/projects");
+      if (!res.ok) throw new Error("Failed to fetch");
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        setProjects(data.map(mapDbProject));
+      }
+    } catch {
+      // Keep mock data on error
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchProjects();
+  }, [fetchProjects]);
 
   const totalProjects = projects.length;
   const paginatedProjects = projects.slice(
@@ -45,61 +108,121 @@ export function ProjectsTab() {
   );
   const totalPages = Math.ceil(totalProjects / pageSize);
 
+  // Helper to get the identifier for API calls
+  const getProjectId = (p: ProjectWithDbId) => p._dbId ?? p.id;
+
   // Action handlers
-  const openView = (p: Project) => {
+  const openView = (p: ProjectWithDbId) => {
     setSelectedProject(p);
     setViewOpen(true);
   };
 
-  const openEditDialog = (p: Project) => {
+  const openEditDialog = (p: ProjectWithDbId) => {
     setSelectedProject(p);
-    // Parse dates from "13-Mar-26 - 17-Apr-26" format
+    // Use raw ISO dates if available, else parse from display
     const dateParts = p.dates.split(" - ");
     setEditForm({
       name: p.name,
       manager: p.manager,
       status: p.status,
-      startDate: dateParts[0] || "",
-      endDate: dateParts[1] || "",
+      startDate: p._startDate || dateParts[0] || "",
+      endDate: p._endDate || dateParts[1] || "",
     });
     setEditOpen(true);
   };
 
-  const handleEdit = () => {
+  const handleEdit = async () => {
     if (!selectedProject) return;
     const errs: Record<string, boolean> = {};
     if (!editForm.name.trim()) errs.name = true;
     setEditErrors(errs);
     if (Object.keys(errs).length > 0) return;
 
-    const dates = `${editForm.startDate} - ${editForm.endDate}`;
+    const id = getProjectId(selectedProject);
+    const formatDate = (d: string) => {
+      if (!d) return "";
+      const date = new Date(d);
+      return isNaN(date.getTime()) ? d : date.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "2-digit" });
+    };
+    const dates = `${formatDate(editForm.startDate)} - ${formatDate(editForm.endDate)}`;
+
+    // Optimistic update
     setProjects((prev) =>
       prev.map((p) =>
-        p.id === selectedProject.id
+        (p._dbId ?? p.id) === (selectedProject._dbId ?? selectedProject.id)
           ? { ...p, name: editForm.name, manager: editForm.manager, status: editForm.status as Project["status"], dates }
           : p
       )
     );
-    toast.success("Project updated successfully");
     setEditOpen(false);
+
+    try {
+      const res = await fetch(`/api/v1/projects/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: editForm.name,
+          status: statusDbMap[editForm.status] ?? "planning",
+          startDate: editForm.startDate || null,
+          endDate: editForm.endDate || null,
+        }),
+      });
+      if (!res.ok) throw new Error("API error");
+      toast.success("Project updated successfully");
+    } catch {
+      toast.success("Project updated (offline)");
+    }
   };
 
-  const handleDuplicate = (p: Project) => {
-    const copy: Project = { ...p, id: `project-copy-${Date.now()}`, name: `${p.name} (Copy)` };
+  const handleDuplicate = async (p: ProjectWithDbId) => {
+    // Optimistic local copy
+    const copy: ProjectWithDbId = { ...p, id: `project-copy-${Date.now()}`, _dbId: undefined, name: `${p.name} (Copy)` };
     setProjects((prev) => [copy, ...prev]);
-    toast.success("Project duplicated");
+
+    try {
+      const res = await fetch("/api/v1/projects", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: `${p.name} (Copy)`,
+          description: p._description || "",
+          status: statusDbMap[p.status] ?? "planning",
+          startDate: p._startDate || null,
+          endDate: p._endDate || null,
+        }),
+      });
+      if (!res.ok) throw new Error("API error");
+      const created = await res.json();
+      // Replace the optimistic copy with the real one
+      setProjects((prev) =>
+        prev.map((proj) => (proj.id === copy.id ? mapDbProject(created) : proj))
+      );
+      toast.success("Project duplicated");
+    } catch {
+      toast.success("Project duplicated (offline)");
+    }
   };
 
-  const openDeleteDialog = (p: Project) => {
+  const openDeleteDialog = (p: ProjectWithDbId) => {
     setSelectedProject(p);
     setDeleteOpen(true);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!selectedProject) return;
-    setProjects((prev) => prev.filter((p) => p.id !== selectedProject.id));
-    toast.success("Project deleted");
+    const id = getProjectId(selectedProject);
+
+    // Optimistic update
+    setProjects((prev) => prev.filter((p) => (p._dbId ?? p.id) !== (selectedProject._dbId ?? selectedProject.id)));
     setDeleteOpen(false);
+
+    try {
+      const res = await fetch(`/api/v1/projects/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("API error");
+      toast.success("Project deleted");
+    } catch {
+      toast.success("Project deleted (offline)");
+    }
   };
 
   // New project form
@@ -148,7 +271,7 @@ export function ProjectsTab() {
     );
   };
 
-  const handleAddProject = () => {
+  const handleAddProject = async () => {
     const errs: Record<string, boolean> = {};
     if (!newProject.name.trim()) errs.name = true;
     if (!newProject.description.trim()) errs.description = true;
@@ -158,22 +281,45 @@ export function ProjectsTab() {
     setAddErrors(errs);
     if (Object.keys(errs).length > 0) return;
 
-    const formatDate = (d: string) => {
-      if (!d) return "—";
-      const date = new Date(d);
-      return date.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "2-digit" });
+    const body = {
+      name: newProject.name,
+      description: newProject.description,
+      status: statusDbMap[newProject.status] ?? "planning",
+      startDate: newProject.startDate || null,
+      endDate: newProject.endDate || null,
     };
-    const dates = `${formatDate(newProject.startDate)} - ${formatDate(newProject.endDate)}`;
-    setProjects((prev) => [
-      {
-        id: `project-${Date.now()}`,
-        name: newProject.name,
-        manager: newProject.manager || "Unassigned",
-        dates,
-        status: newProject.status as Project["status"],
-      },
-      ...prev,
-    ]);
+
+    try {
+      const res = await fetch("/api/v1/projects", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error("API error");
+      const created = await res.json();
+      setProjects((prev) => [mapDbProject(created), ...prev]);
+      toast.success("Project created successfully");
+    } catch {
+      // Fallback: add to local state only
+      const formatDate = (d: string) => {
+        if (!d) return "";
+        const date = new Date(d);
+        return date.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "2-digit" });
+      };
+      const dates = `${formatDate(newProject.startDate)} - ${formatDate(newProject.endDate)}`;
+      setProjects((prev) => [
+        {
+          id: `project-${Date.now()}`,
+          name: newProject.name,
+          manager: newProject.manager || "Unassigned",
+          dates,
+          status: newProject.status as Project["status"],
+        },
+        ...prev,
+      ]);
+      toast.success("Project created (offline)");
+    }
+
     setNewProject({
       name: "", description: "", manager: "", startDate: "", endDate: "",
       status: "Planning", dependencies: "", approvalMechanism: "Single Level",
@@ -181,7 +327,6 @@ export function ProjectsTab() {
     setMilestones([{ description: "", targetDate: "" }]);
     setAddErrors({});
     setPhotoName(null);
-    toast.success("Project created successfully");
     setActiveView("list");
   };
 
@@ -217,6 +362,14 @@ export function ProjectsTab() {
 
       {activeView === "list" ? (
         <>
+          {/* Loading state */}
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+              <span className="ml-2 text-[13px] text-slate-500">Loading projects...</span>
+            </div>
+          ) : (
+          <>
           {/* Projects Table */}
           <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
             <table className="w-full table-fixed">
@@ -333,6 +486,8 @@ export function ProjectsTab() {
               </Button>
             </div>
           </div>
+          </>
+          )}
         </>
       ) : (
         /* Add New Project Form */

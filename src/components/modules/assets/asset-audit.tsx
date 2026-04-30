@@ -545,7 +545,31 @@ export function AssetAudit() {
 // -------- Sub-tab components --------
 
 function AuditDashboard() {
-  const data = auditDashboardSummary;
+  const [data, setData] = useState(auditDashboardSummary);
+
+  // Fetch real asset counts from API
+  useEffect(() => {
+    fetch("/api/v1/assets")
+      .then((r) => r.json())
+      .then((assets) => {
+        if (Array.isArray(assets) && assets.length > 0) {
+          const totalAssets = assets.length;
+          // Use mock scanned/remaining ratios scaled to real count
+          const scannedRatio = auditDashboardSummary.scanned / (auditDashboardSummary.totalAssets || 1);
+          const scanned = Math.round(totalAssets * scannedRatio);
+          const remaining = totalAssets - scanned;
+          const overallCompletion = totalAssets > 0 ? Math.round((scanned / totalAssets) * 100) : 0;
+          setData((prev) => ({
+            ...prev,
+            totalAssets,
+            scanned,
+            remaining,
+            overallCompletion,
+          }));
+        }
+      })
+      .catch(() => {}); // keep mock data
+  }, []);
 
   return (
     <div className="space-y-4">

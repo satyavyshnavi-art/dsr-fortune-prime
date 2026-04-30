@@ -30,6 +30,7 @@ export interface Asset {
 
 export interface AMCContract {
   id: string;
+  _dbId?: string;
   contractId: string;
   vendorName: string;
   description: string;
@@ -42,6 +43,7 @@ export interface AMCContract {
 
 export interface BreakdownRecord {
   id: string;
+  _dbId?: string;
   title: string;
   type: "Inspection" | "Replacement" | "Maintenance";
   serviceProvider: string;
@@ -54,6 +56,7 @@ export interface BreakdownRecord {
 
 export interface GatePass {
   id: string;
+  _dbId?: string;
   assetName: string;
   assetTag: string;
   gatePassType: string;

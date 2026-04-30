@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { KPICard } from "@/components/shared/kpi-card";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Zap, Pencil, Trash2, ClipboardList, Save } from "lucide-react";
+import { Zap, Pencil, Trash2, ClipboardList, Save, Loader2 } from "lucide-react";
 import { powerConsumptionData } from "./mock-data";
 
 type ConsumptionRow = {
@@ -24,6 +24,7 @@ type ConsumptionRow = {
   unitsConsumed: string;
   mf: number;
   recordedAt: string;
+  _dbId?: string;
 };
 
 // Add TEST 2 row to match screenshot
@@ -41,11 +42,57 @@ const initialData: ConsumptionRow[] = [
   ...powerConsumptionData,
 ];
 
+// Convert a DB power reading to the component's ConsumptionRow shape
+function mapDbPowerReading(row: Record<string, unknown>): ConsumptionRow {
+  const date = row.date
+    ? new Date(row.date as string).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "2-digit" })
+    : "";
+  const prev = parseFloat((row.previousKwh as string) ?? "0") || 0;
+  const curr = parseFloat((row.currentKwh as string) ?? "0") || 0;
+  const mf = parseFloat((row.multiplicationFactor as string) ?? "1") || 1;
+  const units = parseFloat((row.unitsConsumed as string) ?? "0") || (curr - prev) * mf;
+  const recordedAt = row.createdAt
+    ? new Date(row.createdAt as string).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })
+    : "";
+  return {
+    date,
+    meterId: (row.meterId as string) ?? "",
+    location: (row.location as string) ?? "",
+    previousReading: String(prev),
+    currentReading: String(curr),
+    unitsConsumed: `${units.toFixed(2)} kWh`,
+    mf,
+    recordedAt,
+    _dbId: (row.id as string) ?? undefined,
+  };
+}
+
 export function PowerTab() {
   const [data, setData] = useState(initialData);
+  const [loading, setLoading] = useState(true);
   const [meterFilter, setMeterFilter] = useState("all");
   const [dateFrom, setDateFrom] = useState("2026-03-30");
   const [dateTo, setDateTo] = useState("2026-04-29");
+
+  // Fetch power readings from API
+  const fetchPowerReadings = useCallback(async () => {
+    try {
+      const res = await fetch("/api/v1/power-readings");
+      if (!res.ok) throw new Error("Failed to fetch");
+      const result = await res.json();
+      if (Array.isArray(result) && result.length > 0) {
+        setData(result.map(mapDbPowerReading));
+      }
+    } catch {
+      // Keep initial data on error
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchPowerReadings();
+  }, [fetchPowerReadings]);
 
   // Edit dialog state
   const [editOpen, setEditOpen] = useState(false);
@@ -79,7 +126,7 @@ export function PowerTab() {
   const [editErrors, setEditErrors] = useState<Record<string, boolean>>({});
   const [deleteConfirmIdx, setDeleteConfirmIdx] = useState<number | null>(null);
 
-  const handleUpdate = () => {
+  const handleUpdate = async () => {
     if (editIdx === null) return;
     const errs: Record<string, boolean> = {};
     if (!editForm.previousReading.trim()) errs.previousReading = true;
@@ -87,37 +134,74 @@ export function PowerTab() {
     setEditErrors(errs);
     if (Object.keys(errs).length > 0) return;
 
+    const row = data[editIdx];
     const prev = parseFloat(editForm.previousReading) || 0;
     const curr = parseFloat(editForm.currentReading) || 0;
     const mf = parseFloat(editForm.mf) || 1;
     const units = ((curr - prev) * mf).toFixed(2);
+
+    // Optimistic update
     setData((d) =>
-      d.map((row, i) =>
+      d.map((r, i) =>
         i === editIdx
           ? {
-              ...row,
+              ...r,
               previousReading: `${prev.toFixed(0)}`,
               currentReading: `${curr.toFixed(0)}`,
               mf: mf,
               unitsConsumed: `${units} kWh`,
             }
-          : row
+          : r
       )
     );
-    toast.success("Reading updated successfully");
     setEditOpen(false);
     setEditIdx(null);
+
+    if (row._dbId) {
+      try {
+        const res = await fetch(`/api/v1/power-readings/${row._dbId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            previousKwh: String(prev),
+            currentKwh: String(curr),
+            multiplicationFactor: String(mf),
+            unitsConsumed: units,
+          }),
+        });
+        if (!res.ok) throw new Error("API error");
+        toast.success("Reading updated successfully");
+      } catch {
+        toast.success("Reading updated (offline)");
+      }
+    } else {
+      toast.success("Reading updated successfully");
+    }
   };
 
   const handleDelete = (idx: number) => {
     setDeleteConfirmIdx(idx);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (deleteConfirmIdx === null) return;
+    const row = data[deleteConfirmIdx];
+
+    // Optimistic update
     setData((d) => d.filter((_, i) => i !== deleteConfirmIdx));
-    toast.success("Record deleted");
     setDeleteConfirmIdx(null);
+
+    if (row._dbId) {
+      try {
+        const res = await fetch(`/api/v1/power-readings/${row._dbId}`, { method: "DELETE" });
+        if (!res.ok) throw new Error("API error");
+        toast.success("Record deleted");
+      } catch {
+        toast.success("Record deleted (offline)");
+      }
+    } else {
+      toast.success("Record deleted");
+    }
   };
 
   const totalConsumption = data.reduce((sum, r) => {
@@ -168,6 +252,14 @@ export function PowerTab() {
         <KPICard title="Active Meters" value={7} color="green" />
       </div>
 
+      {/* Loading state */}
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+          <span className="ml-2 text-[13px] text-slate-500">Loading power readings...</span>
+        </div>
+      ) : (
+      <>
       {/* Consumption Table */}
       <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
         <table className="w-full table-fixed">
@@ -229,6 +321,9 @@ export function PowerTab() {
           </tbody>
         </table>
       </div>
+
+      </>
+      )}
 
       {/* Edit Consumption Dialog */}
       <Dialog open={editOpen} onOpenChange={setEditOpen}>

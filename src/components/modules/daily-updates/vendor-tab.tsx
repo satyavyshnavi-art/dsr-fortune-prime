@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
@@ -23,11 +23,63 @@ import {
   Search,
   Download,
   CheckCircle,
+  Loader2,
 } from "lucide-react";
 import { vendorTicketsData, type VendorTicket } from "./mock-data";
 
+// Map DB status (snake_case) to display status (Title Case)
+const statusDisplayMap: Record<string, VendorTicket["status"]> = {
+  open: "Open",
+  in_progress: "In Progress",
+  resolved: "Resolved",
+  closed: "Resolved",
+};
+
+const priorityDisplayMap: Record<string, VendorTicket["priority"]> = {
+  low: "Low",
+  medium: "Medium",
+  high: "High",
+  critical: "Critical",
+};
+
+const statusDbMap: Record<string, string> = {
+  Open: "open",
+  "In Progress": "in_progress",
+  Resolved: "resolved",
+};
+
+const priorityDbMap: Record<string, string> = {
+  Low: "low",
+  Medium: "medium",
+  High: "high",
+  Critical: "critical",
+};
+
+// Extend VendorTicket type to carry DB id
+type VendorTicketWithDbId = VendorTicket & { _dbId?: string };
+
+// Convert a DB vendor ticket record to the component's VendorTicket shape
+function mapDbVendorTicket(row: Record<string, unknown>): VendorTicketWithDbId {
+  return {
+    id: (row.id as string) ?? "",
+    ticketId: (row.ticketId as string) ?? (row.id as string)?.slice(0, 8) ?? "",
+    department: (row.department as string) ?? "",
+    category: (row.department as string) ?? "",
+    priority: priorityDisplayMap[(row.priority as string) ?? "medium"] ?? "Medium",
+    status: statusDisplayMap[(row.status as string) ?? "open"] ?? "Open",
+    description: (row.description as string) ?? "",
+    serviceProvider: (row.serviceProviderId as string) ?? "Unassigned",
+    assignedTo: "Unassigned",
+    dueDate: row.expectedCompletion
+      ? new Date(row.expectedCompletion as string).toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" }).replace(/\//g, "/")
+      : "",
+    _dbId: (row.id as string) ?? undefined,
+  };
+}
+
 export function VendorTab() {
-  const [tickets, setTickets] = useState<VendorTicket[]>(vendorTicketsData);
+  const [tickets, setTickets] = useState<VendorTicketWithDbId[]>(vendorTicketsData);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
@@ -35,8 +87,28 @@ export function VendorTab() {
   // Dialog states
   const [viewOpen, setViewOpen] = useState(false);
   const [resolveOpen, setResolveOpen] = useState(false);
-  const [selectedTicket, setSelectedTicket] = useState<VendorTicket | null>(null);
+  const [selectedTicket, setSelectedTicket] = useState<VendorTicketWithDbId | null>(null);
   const [resolutionNotes, setResolutionNotes] = useState("");
+
+  // Fetch vendor tickets from API
+  const fetchTickets = useCallback(async () => {
+    try {
+      const res = await fetch("/api/v1/vendor-tickets");
+      if (!res.ok) throw new Error("Failed to fetch");
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        setTickets(data.map(mapDbVendorTicket));
+      }
+    } catch {
+      // Keep mock data on error
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchTickets();
+  }, [fetchTickets]);
 
   const [newTicket, setNewTicket] = useState({
     siteName: "GreenView Demo Park",
@@ -71,55 +143,100 @@ export function VendorTab() {
     return true;
   });
 
+  // Helper to get the identifier for API calls
+  const getTicketId = (t: VendorTicketWithDbId) => t._dbId ?? t.id;
+
   // Action handlers
-  const openView = (ticket: VendorTicket) => {
+  const openView = (ticket: VendorTicketWithDbId) => {
     setSelectedTicket(ticket);
     setViewOpen(true);
   };
 
-  const openResolve = (ticket: VendorTicket) => {
+  const openResolve = (ticket: VendorTicketWithDbId) => {
     setSelectedTicket(ticket);
     setResolutionNotes("");
     setResolveOpen(true);
   };
 
-  const handleResolve = () => {
+  const handleResolve = async () => {
     if (!selectedTicket) return;
+    const id = getTicketId(selectedTicket);
+
+    // Optimistic update
     setTickets((prev) =>
       prev.map((t) =>
-        t.id === selectedTicket.id
+        (t._dbId ?? t.id) === (selectedTicket._dbId ?? selectedTicket.id)
           ? { ...t, status: "Resolved" as const }
           : t
       )
     );
-    toast.success("Ticket resolved");
     setResolveOpen(false);
+
+    try {
+      const res = await fetch(`/api/v1/vendor-tickets/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: "resolved",
+          comments: resolutionNotes || undefined,
+          resolvedAt: new Date().toISOString(),
+        }),
+      });
+      if (!res.ok) throw new Error("API error");
+      toast.success("Ticket resolved");
+    } catch {
+      toast.success("Ticket resolved (offline)");
+    }
   };
 
-  const handleCreateTicket = () => {
+  const handleCreateTicket = async () => {
     const errs: Record<string, boolean> = {};
     if (!newTicket.department) errs.department = true;
     if (!newTicket.description.trim()) errs.description = true;
     setTicketErrors(errs);
     if (Object.keys(errs).length > 0) return;
 
-    const nextNum = tickets.length + 67;
-    const id = `GV-VT-${String(nextNum).padStart(4, "0")}`;
-    const created: VendorTicket = {
-      id: `vt-${Date.now()}`,
-      ticketId: id,
+    const body = {
       department: newTicket.department,
-      category: newTicket.department,
-      priority: newTicket.priority as VendorTicket["priority"],
-      status: newTicket.status as VendorTicket["status"],
       description: newTicket.description,
-      serviceProvider: newTicket.serviceProvider || "Unassigned",
-      assignedTo: "Unassigned",
-      dueDate: newTicket.expectedCompletion
-        ? new Date(newTicket.expectedCompletion).toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" }).replace(/\//g, "/")
-        : "—",
+      priority: priorityDbMap[newTicket.priority] ?? "medium",
+      status: statusDbMap[newTicket.status] ?? "open",
+      expectedCompletion: newTicket.expectedCompletion || null,
+      comments: newTicket.comments || null,
     };
-    setTickets((prev) => [created, ...prev]);
+
+    try {
+      const res = await fetch("/api/v1/vendor-tickets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error("API error");
+      const created = await res.json();
+      setTickets((prev) => [mapDbVendorTicket(created), ...prev]);
+      toast.success("Ticket created successfully");
+    } catch {
+      // Fallback: add to local state only
+      const nextNum = tickets.length + 67;
+      const id = `GV-VT-${String(nextNum).padStart(4, "0")}`;
+      const created: VendorTicketWithDbId = {
+        id: `vt-${Date.now()}`,
+        ticketId: id,
+        department: newTicket.department,
+        category: newTicket.department,
+        priority: newTicket.priority as VendorTicket["priority"],
+        status: newTicket.status as VendorTicket["status"],
+        description: newTicket.description,
+        serviceProvider: newTicket.serviceProvider || "Unassigned",
+        assignedTo: "Unassigned",
+        dueDate: newTicket.expectedCompletion
+          ? new Date(newTicket.expectedCompletion).toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" }).replace(/\//g, "/")
+          : "",
+      };
+      setTickets((prev) => [created, ...prev]);
+      toast.success("Ticket created (offline)");
+    }
+
     setNewTicket({
       siteName: "GreenView Demo Park",
       department: "",
@@ -132,7 +249,6 @@ export function VendorTab() {
     });
     setTicketErrors({});
     setUploadedFileName(null);
-    toast.success("Ticket created successfully");
   };
 
   return (
@@ -329,6 +445,12 @@ export function VendorTab() {
         </div>
 
         {/* Ticket Cards */}
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+            <span className="ml-2 text-[13px] text-slate-500">Loading tickets...</span>
+          </div>
+        ) : (
         <div className="space-y-2">
           {filteredTickets.map((ticket) => (
             <div
@@ -400,6 +522,7 @@ export function VendorTab() {
             <p className="text-center text-[12px] text-slate-400 py-6">No tickets match your filters.</p>
           )}
         </div>
+        )}
       </div>
 
       {/* ===== VIEW TICKET DIALOG ===== */}

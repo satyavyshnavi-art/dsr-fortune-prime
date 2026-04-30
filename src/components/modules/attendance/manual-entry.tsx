@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -42,6 +42,23 @@ const STATUS_RING: Record<string, string> = {
   WO: "ring-slate-200",
 };
 
+// Map UI short codes to DB enum values
+const STATUS_TO_DB: Record<string, string> = {
+  P: "present",
+  A: "absent",
+  HD: "half_day",
+  L: "leave",
+  WO: "week_off",
+};
+
+const DB_TO_STATUS: Record<string, AttendanceStatus> = {
+  present: "P",
+  absent: "A",
+  half_day: "HD",
+  leave: "L",
+  week_off: "WO",
+};
+
 function formatDateShort(dateStr: string): string {
   const d = new Date(dateStr + "T00:00:00");
   const day = d.getDate();
@@ -76,9 +93,32 @@ export function ManualEntry() {
     new Set()
   );
   const [notes, setNotes] = useState<Record<string, string>>({});
+  const [saving, setSaving] = useState(false);
 
   // attendance grid keyed by "empId::date" -> status
   const [grid, setGrid] = useState<Record<string, AttendanceStatus>>({});
+
+  // Load existing attendance records from API for the selected date range
+  useEffect(() => {
+    if (!startDate || !endDate) return;
+    fetch(`/api/v1/attendance?dateFrom=${startDate}&dateTo=${endDate}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          const loaded: Record<string, AttendanceStatus> = {};
+          data.forEach((rec: { employeeId: string; date: string; status: string }) => {
+            const uiStatus = DB_TO_STATUS[rec.status];
+            if (uiStatus) {
+              loaded[cellKey(rec.employeeId, rec.date)] = uiStatus;
+            }
+          });
+          setGrid((prev) => ({ ...loaded, ...prev }));
+        }
+      })
+      .catch(() => {
+        // API unavailable — keep local grid as-is
+      });
+  }, [startDate, endDate]);
 
   const dateColumns = useMemo(
     () => getDatesInRange(startDate, endDate),
@@ -138,10 +178,34 @@ export function ManualEntry() {
     [selectedCount, selectedEmployees, filteredEmployees, dateColumns]
   );
 
-  // Save handler
-  const handleSave = useCallback(() => {
-    toast.success("Attendance saved successfully");
-  }, []);
+  // Save handler — POST each marked cell to the API
+  const handleSave = useCallback(async () => {
+    const entries = Object.entries(grid).filter(([, status]) => status !== "" && status !== undefined);
+    if (entries.length === 0) return;
+
+    setSaving(true);
+    try {
+      const promises = entries.map(([key, status]) => {
+        const [empId, date] = key.split("::");
+        return fetch("/api/v1/attendance", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            employeeId: empId,
+            date,
+            status: STATUS_TO_DB[status] || status.toLowerCase(),
+            source: "manual",
+          }),
+        });
+      });
+      await Promise.all(promises);
+      toast.success(`Saved ${entries.length} attendance record${entries.length !== 1 ? "s" : ""}`);
+    } catch {
+      toast.error("Failed to save some attendance records");
+    } finally {
+      setSaving(false);
+    }
+  }, [grid]);
 
   // Select all toggle
   const allSelected =
@@ -416,9 +480,9 @@ export function ManualEntry() {
           <Button
             className="h-7 text-[11px] px-3 bg-blue-600 hover:bg-blue-700 text-white"
             onClick={handleSave}
-            disabled={editedCount === 0}
+            disabled={editedCount === 0 || saving}
           >
-            Save Attendance ({editedCount})
+            {saving ? "Saving..." : `Save Attendance (${editedCount})`}
           </Button>
         </div>
       </div>

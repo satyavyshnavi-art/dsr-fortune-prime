@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -9,6 +9,15 @@ import { toast } from "sonner";
 import { MOCK_EMPLOYEES, MOCK_ATTENDANCE } from "./mock-data";
 import type { AttendanceRecord } from "./mock-data";
 import { exportCSV, exportPDF } from "@/lib/export";
+
+// Map DB enum values to UI short codes
+const DB_TO_STATUS: Record<string, AttendanceRecord["status"]> = {
+  present: "P",
+  absent: "A",
+  half_day: "HD",
+  leave: "L",
+  week_off: "WO",
+};
 
 const STATUS_CYCLE: Array<AttendanceRecord["status"]> = ["P", "A", "L", "WO", ""];
 const STATUS_COLORS: Record<string, string> = {
@@ -54,14 +63,34 @@ export function CalendarView() {
     });
   }, [searchQuery]);
 
-  const attendanceLookup = useMemo(() => {
+  // Fetch real attendance data from API; fall back to mock data
+  const [attendanceLookup, setAttendanceLookup] = useState<Record<string, Record<string, string>>>(() => {
     const lookup: Record<string, Record<string, string>> = {};
     MOCK_ATTENDANCE.forEach((rec) => {
       if (!lookup[rec.employeeId]) lookup[rec.employeeId] = {};
       lookup[rec.employeeId][rec.date] = rec.status;
     });
     return lookup;
-  }, []);
+  });
+
+  useEffect(() => {
+    if (!startDate || !endDate) return;
+    fetch(`/api/v1/attendance?dateFrom=${startDate}&dateTo=${endDate}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          const lookup: Record<string, Record<string, string>> = {};
+          data.forEach((rec: { employeeId: string; date: string; status: string }) => {
+            if (!lookup[rec.employeeId]) lookup[rec.employeeId] = {};
+            lookup[rec.employeeId][rec.date] = DB_TO_STATUS[rec.status] || rec.status;
+          });
+          setAttendanceLookup(lookup);
+        }
+      })
+      .catch(() => {
+        // API unavailable — keep mock data
+      });
+  }, [startDate, endDate]);
 
   const getStatus = useCallback(
     (empId: string, day: string): string => {

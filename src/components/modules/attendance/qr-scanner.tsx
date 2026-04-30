@@ -103,7 +103,7 @@ export function QRScanner() {
   }, []);
 
   // Process scanned QR code
-  const handleQRResult = useCallback((text: string) => {
+  const handleQRResult = useCallback(async (text: string) => {
     setLastScannedText(text);
     const now = new Date();
     const timeStr = now.toLocaleTimeString("en-US", {
@@ -111,6 +111,7 @@ export function QRScanner() {
       minute: "2-digit",
       hour12: true,
     });
+    const today = now.toISOString().split("T")[0];
 
     // Try to match to an employee by empId or name in the QR text
     const matchedEmp = MOCK_EMPLOYEES.find(
@@ -131,11 +132,31 @@ export function QRScanner() {
     };
 
     setRecentScans((prev) => [newScan, ...prev]);
+
+    // POST to API if employee matched
+    if (matchedEmp) {
+      try {
+        await fetch("/api/v1/attendance", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            employeeId: matchedEmp.id,
+            date: today,
+            status: "present",
+            checkIn: now.toISOString(),
+            source: "qr",
+          }),
+        });
+      } catch {
+        // API unavailable — scan still recorded locally
+      }
+    }
+
     toast.success(`${newScan.employeeName} checked in`);
   }, []);
 
   // Manual check-in handler
-  const handleManualCheckIn = useCallback(() => {
+  const handleManualCheckIn = useCallback(async () => {
     if (!selectedEmployeeId) {
       setManualErrors({ employee: "Please select an employee" });
       return;
@@ -150,6 +171,7 @@ export function QRScanner() {
       minute: "2-digit",
       hour12: true,
     });
+    const today = now.toISOString().split("T")[0];
 
     const newScan: RecentScan = {
       employeeName: `${emp.firstName} ${emp.lastName}`,
@@ -160,6 +182,29 @@ export function QRScanner() {
     };
 
     setRecentScans((prev) => [newScan, ...prev]);
+
+    // POST to attendance API
+    try {
+      const body: Record<string, string> = {
+        employeeId: emp.id,
+        date: today,
+        status: "present",
+        source: "manual",
+      };
+      if (checkAction === "in") {
+        body.checkIn = now.toISOString();
+      } else {
+        body.checkOut = now.toISOString();
+      }
+      await fetch("/api/v1/attendance", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+    } catch {
+      // API unavailable — entry still recorded locally
+    }
+
     setShowManualDialog(false);
     setSelectedEmployeeId("");
     setCheckAction("in");

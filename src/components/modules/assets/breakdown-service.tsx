@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,10 +27,44 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+// Map DB row to BreakdownRecord shape
+function mapDbBreakdown(row: Record<string, unknown>): BreakdownRecord {
+  const statusMap: Record<string, BreakdownRecord["status"]> = {
+    open: "Pending",
+    in_progress: "In Progress",
+    resolved: "Completed",
+    closed: "Completed",
+  };
+  return {
+    id: row.id as string,
+    _dbId: row.id as string,
+    title: (row.description as string) || "Service Record",
+    type: "Maintenance" as BreakdownRecord["type"],
+    serviceProvider: (row.serviceProvider as string) || "",
+    asset: (row.assetId as string) || "",
+    serviceId: (row.id as string)?.slice(0, 8) || "",
+    date: (row.reportedDate as string) || "",
+    cost: Number(row.cost) || 0,
+    status: statusMap[(row.status as string) || "open"] || "Pending",
+  };
+}
+
 export function BreakdownService() {
   const [breakdowns, setBreakdowns] = useState<BreakdownRecord[]>(mockBreakdowns);
   const [incidentReports, setIncidentReports] = useState<IncidentReport[]>([]);
   const [activeSubTab, setActiveSubTab] = useState<"report" | "view">("report");
+
+  // Fetch from API on mount
+  useEffect(() => {
+    fetch("/api/v1/breakdown")
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setBreakdowns(data.map(mapDbBreakdown));
+        }
+      })
+      .catch(() => {}); // keep mock data
+  }, []);
 
   // Dialog states
   const [showAddModal, setShowAddModal] = useState(false);
@@ -93,11 +127,51 @@ export function BreakdownService() {
   };
 
   // Add handler
-  const handleAdd = () => {
+  const handleAdd = async () => {
     const errs: Record<string, string> = {};
     if (!addForm.type) errs.type = "Service type is required";
     if (!addForm.asset.trim()) errs.asset = "Asset is required";
     if (Object.keys(errs).length) { setAddErrors(errs); return; }
+
+    const statusMap: Record<string, string> = {
+      Pending: "open",
+      "In Progress": "in_progress",
+      Completed: "resolved",
+    };
+
+    const body = {
+      assetId: addForm.asset, // will use asset name as placeholder
+      reportedDate: addForm.date || new Date().toISOString().slice(0, 10),
+      description: `${addForm.type} - ${addForm.asset}`,
+      serviceProvider: addForm.serviceProvider,
+      cost: String(Number(addForm.cost) || 0),
+      status: statusMap[addForm.status] || "open",
+    };
+
+    try {
+      const res = await fetch("/api/v1/breakdown", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (res.ok) {
+        const created = await res.json();
+        const mapped = mapDbBreakdown(created);
+        mapped.type = addForm.type as BreakdownRecord["type"];
+        mapped.asset = addForm.asset;
+        mapped.title = `${addForm.type} - ${addForm.asset}`;
+        setBreakdowns((prev) => [mapped, ...prev]);
+        setAddForm({ type: "", asset: "", serviceProvider: "", cost: "", date: "", status: "Pending" });
+        setAddErrors({});
+        setShowAddModal(false);
+        toast.success("Service record added successfully");
+        return;
+      }
+    } catch {
+      // fallback to local
+    }
+
+    // Fallback: local state mutation
     const newRecord: BreakdownRecord = {
       id: `bd-${Date.now()}`,
       title: `${addForm.type} - ${addForm.asset}`,
@@ -115,7 +189,7 @@ export function BreakdownService() {
     setAddForm({ type: "", asset: "", serviceProvider: "", cost: "", date: "", status: "Pending" });
     setAddErrors({});
     setShowAddModal(false);
-    toast.success("Service record added successfully");
+    toast.success("Service record added (offline)");
   };
 
   // View handler
@@ -139,12 +213,59 @@ export function BreakdownService() {
     setEditOpen(true);
   };
 
-  const handleEdit = () => {
+  const handleEdit = async () => {
     if (!selectedBreakdown) return;
     const errs: Record<string, string> = {};
     if (!editForm.type) errs.type = "Service type is required";
     if (!editForm.asset.trim()) errs.asset = "Asset is required";
     if (Object.keys(errs).length) { setEditErrors(errs); return; }
+
+    const statusMap: Record<string, string> = {
+      Pending: "open",
+      "In Progress": "in_progress",
+      Completed: "resolved",
+    };
+
+    const apiId = selectedBreakdown._dbId || selectedBreakdown.id;
+    const updateFields = {
+      description: `${editForm.type} - ${editForm.asset}`,
+      serviceProvider: editForm.serviceProvider,
+      cost: String(Number(editForm.cost) || 0),
+      status: statusMap[editForm.status] || "open",
+    };
+
+    try {
+      const res = await fetch(`/api/v1/breakdown/${apiId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updateFields),
+      });
+      if (res.ok) {
+        setBreakdowns((prev) =>
+          prev.map((b) =>
+            b.id === selectedBreakdown.id
+              ? {
+                  ...b,
+                  title: `${editForm.type} - ${editForm.asset}`,
+                  type: editForm.type,
+                  asset: editForm.asset,
+                  serviceProvider: editForm.serviceProvider,
+                  cost: Number(editForm.cost) || 0,
+                  date: editForm.date,
+                  status: editForm.status,
+                }
+              : b
+          )
+        );
+        setEditOpen(false);
+        toast.success("Service record updated successfully");
+        return;
+      }
+    } catch {
+      // fallback to local
+    }
+
+    // Fallback: local state mutation
     setBreakdowns((prev) =>
       prev.map((b) =>
         b.id === selectedBreakdown.id
@@ -162,7 +283,7 @@ export function BreakdownService() {
       )
     );
     setEditOpen(false);
-    toast.success("Service record updated successfully");
+    toast.success("Service record updated (offline)");
   };
 
   // Delete handlers
@@ -171,8 +292,16 @@ export function BreakdownService() {
     setDeleteOpen(true);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!selectedBreakdown) return;
+    const apiId = selectedBreakdown._dbId || selectedBreakdown.id;
+
+    try {
+      await fetch(`/api/v1/breakdown/${apiId}`, { method: "DELETE" });
+    } catch {
+      // proceed with local removal regardless
+    }
+
     setBreakdowns((prev) => prev.filter((b) => b.id !== selectedBreakdown.id));
     setDeleteOpen(false);
     toast.success("Service record deleted successfully");
