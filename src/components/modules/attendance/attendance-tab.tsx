@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -92,6 +92,33 @@ function buildWeekOffEntries(weekOffs: WeekOff[]): WeekOffEntry[] {
 }
 
 export function AttendanceTab() {
+  // Employees: API with mock fallback (for dropdowns)
+  const [employeeList, setEmployeeList] = useState(MOCK_EMPLOYEES);
+
+  useEffect(() => {
+    fetch("/api/v1/employees")
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setEmployeeList(
+            data.map((e: Record<string, string>) => ({
+              id: e.id,
+              empId: e.empId || e.emp_id || "",
+              firstName: e.firstName || e.first_name || "",
+              lastName: e.lastName || e.last_name || "",
+              designation: e.designation || "",
+              department: e.department || "",
+              phone: e.phone || "",
+              email: e.email || "",
+              dateOfBirth: e.dateOfBirth || e.date_of_birth || "",
+              qrConfigured: false,
+            }))
+          );
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   // --- Shift state ---
   const [shifts, setShifts] = useState<ShiftTemplate[]>(DEFAULT_SHIFTS);
   const [assignments, setAssignments] = useState<ShiftAssignment[]>(DEFAULT_ASSIGNMENTS);
@@ -197,7 +224,7 @@ export function AttendanceTab() {
 
   const handleAssignShift = () => {
     if (!assignShiftEmp || !assignShiftId) return;
-    const emp = MOCK_EMPLOYEES.find((e) => e.id === assignShiftEmp);
+    const emp = employeeList.find((e) => e.id === assignShiftEmp);
     const shift = shifts.find((s) => s.id === assignShiftId);
     if (!emp || !shift) return;
     setAssignments((prev) => {
@@ -225,7 +252,7 @@ export function AttendanceTab() {
   // --- Week Off handlers ---
   const handleAssignWeekOff = () => {
     if (!selectedEmployee || weekOffDays.size === 0) return;
-    const emp = MOCK_EMPLOYEES.find((e) => e.id === selectedEmployee);
+    const emp = employeeList.find((e) => e.id === selectedEmployee);
     if (!emp) return;
     const empName = `${emp.firstName} ${emp.lastName}`;
     const daysStr = DAYS_OF_WEEK.filter((d) => weekOffDays.has(d))
@@ -496,7 +523,7 @@ export function AttendanceTab() {
               <SelectValue placeholder="Select Employee" />
             </SelectTrigger>
             <SelectContent>
-              {MOCK_EMPLOYEES.map((emp) => (
+              {employeeList.map((emp) => (
                 <SelectItem key={emp.id} value={emp.id} className="text-[13px]">
                   {emp.firstName} {emp.lastName}
                 </SelectItem>
@@ -829,7 +856,7 @@ export function AttendanceTab() {
                     <SelectValue placeholder="Select Employee" />
                   </SelectTrigger>
                   <SelectContent>
-                    {MOCK_EMPLOYEES.map((emp) => (
+                    {employeeList.map((emp) => (
                       <SelectItem key={emp.id} value={emp.id} className="text-[13px]">
                         {emp.firstName} {emp.lastName}
                       </SelectItem>
@@ -1062,7 +1089,7 @@ export function AttendanceTab() {
                   <SelectValue placeholder="Select Employee" />
                 </SelectTrigger>
                 <SelectContent>
-                  {MOCK_EMPLOYEES.map((emp) => (
+                  {employeeList.map((emp) => (
                     <SelectItem
                       key={emp.id}
                       value={`${emp.firstName} ${emp.lastName}`}

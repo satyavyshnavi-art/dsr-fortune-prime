@@ -25,6 +25,7 @@ import {
   TaskStatusWidget,
   VendorTicketsWidget,
 } from "@/components/modules/dashboard";
+import { DashboardProvider, useDashboard } from "@/hooks/use-dashboard";
 
 function formatDateLabel(dateStr: string): string {
   if (!dateStr) return "";
@@ -42,76 +43,13 @@ function getDaysBetween(start: string, end: string): number {
   return Math.max(0, Math.round((e.getTime() - s.getTime()) / (1000 * 60 * 60 * 24)));
 }
 
-// Simulate different KPI data for different date ranges
-function getKpiData(start: string, end: string) {
-  const days = getDaysBetween(start, end);
-  const seed = new Date(start).getDate() + new Date(end).getDate();
-  return [
-    {
-      title: "Attendance",
-      value: `${Math.min(100, 85 + (seed % 16))}%`,
-      icon: Users,
-      color: "green" as const,
-    },
-    {
-      title: "Water Consumption",
-      value: `${(seed * 3 + days * 2) % 50} KL`,
-      icon: Droplets,
-      color: "blue" as const,
-    },
-    {
-      title: "Hygiene & Satisfaction",
-      value: `${60 + (seed % 40)}%`,
-      icon: SprayCan,
-      color: "yellow" as const,
-    },
-    {
-      title: "Power Consumption",
-      value: `${(days * 12.5 + seed).toFixed(1)} kWh`,
-      icon: Zap,
-      color: "slate" as const,
-    },
-    {
-      title: "Complaints Closed",
-      value: `${seed % 80}%`,
-      subtitle: `${seed % 5} / ${(seed % 5) + (seed % 3) + 1}`,
-      icon: MessageSquare,
-      color: "red" as const,
-    },
-    {
-      title: "Task Completion",
-      value: `${seed % 65}%`,
-      icon: ListChecks,
-      color: "blue" as const,
-    },
-  ];
-}
-
-interface DashboardSummary {
-  employees: { total: number };
-  assets: { total: number; byStatus: Record<string, number> };
-  complaints: { total: number; byStatus: Record<string, number> };
-  tasks: { total: number; byStatus: Record<string, number> };
-  alerts: { unacknowledged: number };
-}
-
-export default function DashboardPage() {
+function DashboardContent() {
   const [startDate, setStartDate] = useState("2026-03-31");
   const [endDate, setEndDate] = useState("2026-04-29");
   const [appliedRange, setAppliedRange] = useState({ start: "2026-03-31", end: "2026-04-29" });
   const [showApplied, setShowApplied] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [dashboardData, setDashboardData] = useState<DashboardSummary | null>(null);
-
-  // Fetch dashboard summary from API
-  useEffect(() => {
-    fetch("/api/v1/dashboard/summary")
-      .then((r) => r.json())
-      .then((data) => {
-        if (data && !data.error) setDashboardData(data);
-      })
-      .catch(() => {});
-  }, [appliedRange]);
+  const { data: dashboardData } = useDashboard();
 
   const hasUnappliedChanges =
     startDate !== appliedRange.start || endDate !== appliedRange.end;
@@ -122,7 +60,6 @@ export default function DashboardPage() {
       return;
     }
     setIsLoading(true);
-    // Simulate loading
     setTimeout(() => {
       setAppliedRange({ start: startDate, end: endDate });
       setIsLoading(false);
@@ -131,38 +68,61 @@ export default function DashboardPage() {
     }, 400);
   }, [startDate, endDate]);
 
-  const mockKpiCards = getKpiData(appliedRange.start, appliedRange.end);
-
-  // If real data is available, override mock KPI values
+  // Build KPI cards from real data
   const kpiCards = dashboardData
     ? [
         {
-          ...mockKpiCards[0],
           title: "Employees",
           value: `${dashboardData.employees.total}`,
-          subtitle: "Total employees",
+          subtitle: `${dashboardData.employees.present} present / ${dashboardData.employees.absent} absent`,
+          icon: Users,
+          color: "green" as const,
         },
-        mockKpiCards[1],
-        mockKpiCards[2],
-        mockKpiCards[3],
         {
-          ...mockKpiCards[4],
+          title: "Water Consumption",
+          value: `${Math.round(dashboardData.waterReadings.totalLiters / 1000)} KL`,
+          subtitle: `${dashboardData.waterReadings.activeSources} sources`,
+          icon: Droplets,
+          color: "blue" as const,
+        },
+        {
+          title: "Hygiene & Satisfaction",
+          value: "--",
+          subtitle: "No data yet",
+          icon: SprayCan,
+          color: "yellow" as const,
+        },
+        {
+          title: "Power Consumption",
+          value: `${dashboardData.powerReadings.totalKwh.toFixed(1)} kWh`,
+          subtitle: `${dashboardData.powerReadings.activeMeters} meters`,
+          icon: Zap,
+          color: "slate" as const,
+        },
+        {
           title: "Complaints",
           value: `${dashboardData.complaints.total}`,
-          subtitle: Object.entries(dashboardData.complaints.byStatus)
-            .map(([s, c]) => `${c} ${s}`)
-            .join(" / "),
+          subtitle: `${dashboardData.complaints.open} open / ${dashboardData.complaints.resolved + dashboardData.complaints.closed} resolved`,
+          icon: MessageSquare,
+          color: "red" as const,
         },
         {
-          ...mockKpiCards[5],
           title: "Tasks",
           value: `${dashboardData.tasks.total}`,
-          subtitle: Object.entries(dashboardData.tasks.byStatus)
-            .map(([s, c]) => `${c} ${s}`)
-            .join(" / "),
+          subtitle: `${dashboardData.tasks.completed} done / ${dashboardData.tasks.overdue} overdue`,
+          icon: ListChecks,
+          color: "blue" as const,
         },
       ]
-    : mockKpiCards;
+    : [
+        { title: "Employees", value: "--", subtitle: "Loading...", icon: Users, color: "green" as const },
+        { title: "Water Consumption", value: "--", subtitle: "Loading...", icon: Droplets, color: "blue" as const },
+        { title: "Hygiene & Satisfaction", value: "--", subtitle: "Loading...", icon: SprayCan, color: "yellow" as const },
+        { title: "Power Consumption", value: "--", subtitle: "Loading...", icon: Zap, color: "slate" as const },
+        { title: "Complaints", value: "--", subtitle: "Loading...", icon: MessageSquare, color: "red" as const },
+        { title: "Tasks", value: "--", subtitle: "Loading...", icon: ListChecks, color: "blue" as const },
+      ];
+
   const days = getDaysBetween(appliedRange.start, appliedRange.end);
 
   return (
@@ -173,7 +133,6 @@ export default function DashboardPage() {
         <div className="p-5 space-y-3">
           {/* Date Range Picker */}
           <div className="flex items-center justify-end gap-3">
-            {/* Applied confirmation toast */}
             {showApplied && (
               <div className="flex items-center gap-1.5 text-[12px] text-green-600 font-medium animate-in fade-in slide-in-from-right-2 duration-200">
                 <CheckCircle2 className="h-3.5 w-3.5" />
@@ -269,5 +228,13 @@ export default function DashboardPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <DashboardProvider>
+      <DashboardContent />
+    </DashboardProvider>
   );
 }

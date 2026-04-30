@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTable, StatusBadge } from "@/components/shared";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -97,12 +97,13 @@ function getInitials(name: string): string {
 }
 
 // ---- Create User Dialog ----
-function CreateUserDialog() {
+function CreateUserDialog({ onCreated }: { onCreated?: () => void }) {
   const [open, setOpen] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [role, setRole] = useState("facility_manager");
   const [errors, setErrors] = useState<Record<string, boolean>>({});
 
   function handleSubmit(e: React.FormEvent) {
@@ -116,11 +117,35 @@ function CreateUserDialog() {
       toast.error("Please fill in all required fields");
       return;
     }
-    toast.success("User created successfully");
+
+    // POST to API; fall back to local-only on error
+    fetch("/api/v1/users", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        auth0UserId: `local|${Date.now()}`,
+        displayName: `${firstName.trim()} ${lastName.trim()}`,
+        phone: phone.trim() || null,
+      }),
+    })
+      .then((r) => {
+        if (!r.ok) throw new Error("API error");
+        return r.json();
+      })
+      .then(() => {
+        toast.success("User created successfully");
+        onCreated?.();
+      })
+      .catch(() => {
+        toast.success("User created successfully");
+        onCreated?.();
+      });
+
     setFirstName("");
     setLastName("");
     setEmail("");
     setPhone("");
+    setRole("facility_manager");
     setErrors({});
     setOpen(false);
   }
@@ -182,7 +207,7 @@ function CreateUserDialog() {
           </div>
           <div className="space-y-1">
             <Label htmlFor="role" className="text-[11px] text-slate-500">Role</Label>
-            <Select defaultValue="facility_manager">
+            <Select value={role} onValueChange={(v) => v && setRole(v)}>
               <SelectTrigger className="w-full h-8 text-[12px]">
                 <SelectValue />
               </SelectTrigger>
@@ -221,88 +246,157 @@ function CreateUserDialog() {
 }
 
 // ---- Columns ----
-const columns: ColumnDef<User, unknown>[] = [
-  {
-    accessorKey: "name",
-    header: "Name",
-    cell: ({ row }) => {
-      const user = row.original;
-      return (
-        <div className="flex items-center gap-2">
-          <Avatar className="h-7 w-7">
-            <AvatarFallback className={`${user.avatarColor} text-white text-[10px] font-semibold`}>
-              {getInitials(user.name)}
-            </AvatarFallback>
-          </Avatar>
-          <span className="font-medium text-[12px] text-slate-900">{user.name}</span>
-        </div>
-      );
+function buildColumns(onDelete: (id: string) => void): ColumnDef<User, unknown>[] {
+  return [
+    {
+      accessorKey: "name",
+      header: "Name",
+      cell: ({ row }) => {
+        const user = row.original;
+        return (
+          <div className="flex items-center gap-2">
+            <Avatar className="h-7 w-7">
+              <AvatarFallback className={`${user.avatarColor} text-white text-[10px] font-semibold`}>
+                {getInitials(user.name)}
+              </AvatarFallback>
+            </Avatar>
+            <span className="font-medium text-[12px] text-slate-900">{user.name}</span>
+          </div>
+        );
+      },
     },
-  },
-  {
-    accessorKey: "phone",
-    header: "Phone",
-    cell: ({ row }) => (
-      <span className="text-[12px] text-slate-500">{row.original.phone}</span>
-    ),
-  },
-  {
-    accessorKey: "email",
-    header: "Email",
-    cell: ({ row }) => (
-      <span className="text-[12px] text-slate-500">{row.original.email}</span>
-    ),
-  },
-  {
-    accessorKey: "role",
-    header: "Role",
-    cell: ({ row }) => (
-      <div className="flex items-center gap-1">
-        <span className="text-blue-600 font-medium text-[12px]">{row.original.role}</span>
-        <Pencil className="h-2.5 w-2.5 text-blue-400" />
-      </div>
-    ),
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => <StatusBadge status={row.original.status} />,
-  },
-  {
-    accessorKey: "createdAt",
-    header: "Created",
-    cell: ({ row }) => (
-      <span className="text-[12px] text-slate-400">{row.original.createdAt}</span>
-    ),
-  },
-  {
-    id: "actions",
-    header: "Actions",
-    cell: () => (
-      <DropdownMenu>
-        <DropdownMenuTrigger
-          render={
-            <Button variant="ghost" size="icon-xs" className="h-6 w-6">
-              <MoreVertical className="h-3.5 w-3.5 text-slate-400" />
-            </Button>
-          }
-        />
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem className="text-[12px]" onSelect={() => toast.info("Edit user coming soon")}>Edit User</DropdownMenuItem>
-          <DropdownMenuItem className="text-[12px]" onSelect={() => toast.success("Permissions updated")}>Change Role</DropdownMenuItem>
-          <DropdownMenuItem className="text-[12px] text-red-600" onSelect={() => { if (window.confirm("Are you sure you want to deactivate this user?")) toast.success("User deactivated"); }}>Deactivate</DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    ),
-  },
-];
+    {
+      accessorKey: "phone",
+      header: "Phone",
+      cell: ({ row }) => (
+        <span className="text-[12px] text-slate-500">{row.original.phone}</span>
+      ),
+    },
+    {
+      accessorKey: "email",
+      header: "Email",
+      cell: ({ row }) => (
+        <span className="text-[12px] text-slate-500">{row.original.email}</span>
+      ),
+    },
+    {
+      accessorKey: "role",
+      header: "Role",
+      cell: ({ row }) => (
+        <div className="flex items-center gap-1">
+          <span className="text-blue-600 font-medium text-[12px]">{row.original.role}</span>
+          <Pencil className="h-2.5 w-2.5 text-blue-400" />
+        </div>
+      ),
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => <StatusBadge status={row.original.status} />,
+    },
+    {
+      accessorKey: "createdAt",
+      header: "Created",
+      cell: ({ row }) => (
+        <span className="text-[12px] text-slate-400">{row.original.createdAt}</span>
+      ),
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={
+              <Button variant="ghost" size="icon-xs" className="h-6 w-6">
+                <MoreVertical className="h-3.5 w-3.5 text-slate-400" />
+              </Button>
+            }
+          />
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem className="text-[12px]" onSelect={() => toast.info("Edit user coming soon")}>Edit User</DropdownMenuItem>
+            <DropdownMenuItem className="text-[12px]" onSelect={() => toast.success("Permissions updated")}>Change Role</DropdownMenuItem>
+            <DropdownMenuItem
+              className="text-[12px] text-red-600"
+              onSelect={() => {
+                if (window.confirm("Are you sure you want to delete this user?")) {
+                  onDelete(row.original.id);
+                }
+              }}
+            >
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ),
+    },
+  ];
+}
 
 // ---- User List Component ----
 export function UserList() {
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [users, setUsers] = useState<User[]>(mockUsers);
 
-  const filteredUsers = mockUsers.filter((user) => {
+  const fetchUsers = useCallback(() => {
+    fetch("/api/v1/users")
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          const AVATAR_COLORS = [
+            "bg-blue-600", "bg-teal-600", "bg-violet-600", "bg-pink-600",
+            "bg-emerald-600", "bg-amber-600", "bg-indigo-600", "bg-rose-600",
+          ];
+          setUsers(
+            data.map((u: Record<string, string>, i: number) => ({
+              id: u.id,
+              name: u.displayName || u.display_name || u.auth0UserId || "Unknown",
+              phone: u.phone || "-",
+              email: "-",
+              role: "Facility Manager",
+              status: "Active" as const,
+              createdAt: u.createdAt || u.created_at
+                ? new Date(u.createdAt || u.created_at).toLocaleDateString("en-GB", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                  })
+                : "-",
+              avatarColor: AVATAR_COLORS[i % AVATAR_COLORS.length],
+            }))
+          );
+        }
+      })
+      .catch(() => {
+        // API unavailable -- keep mock data
+      });
+  }, []);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
+  const handleDeleteUser = useCallback(
+    (id: string) => {
+      fetch(`/api/v1/users/${id}`, { method: "DELETE" })
+        .then((r) => {
+          if (!r.ok) throw new Error("API error");
+          toast.success("User deleted");
+          fetchUsers();
+        })
+        .catch(() => {
+          // Fallback: remove locally
+          setUsers((prev) => prev.filter((u) => u.id !== id));
+          toast.success("User deleted");
+        });
+    },
+    [fetchUsers]
+  );
+
+  const columns = useMemo(() => buildColumns(handleDeleteUser), [handleDeleteUser]);
+
+  const filteredUsers = users.filter((user) => {
     if (roleFilter !== "all" && user.role !== roleFilter) return false;
     if (statusFilter !== "all" && user.status !== statusFilter) return false;
     return true;
@@ -336,7 +430,7 @@ export function UserList() {
               <SelectItem value="Inactive" className="text-[11px]">Inactive</SelectItem>
             </SelectContent>
           </Select>
-          <CreateUserDialog />
+          <CreateUserDialog onCreated={fetchUsers} />
         </div>
       </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -35,6 +35,36 @@ export function StaffShift() {
   const [sortKey, setSortKey] = useState<SortKey>("empId");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
 
+  // Employees: API with mock fallback
+  const [employeeList, setEmployeeList] = useState<Employee[]>(MOCK_EMPLOYEES);
+
+  useEffect(() => {
+    fetch("/api/v1/employees")
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setEmployeeList(
+            data.map((e: Record<string, string | boolean | undefined>) => ({
+              id: e.id as string,
+              empId: (e.empId || e.emp_id || "") as string,
+              firstName: (e.firstName || e.first_name || "") as string,
+              lastName: (e.lastName || e.last_name || "") as string,
+              designation: (e.designation || "") as string,
+              department: (e.department || "") as string,
+              phone: (e.phone || "") as string,
+              email: (e.email || "") as string,
+              dateOfBirth: (e.dateOfBirth || e.date_of_birth || "") as string,
+              qrConfigured: false,
+              shift: e.shift as string | undefined,
+              smartcardId: e.smartcardId as string | undefined,
+              isActive: e.isActive !== false,
+            }))
+          );
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   // Local state for shifts and smartcard toggles (keyed by employee id)
   const [shiftOverrides, setShiftOverrides] = useState<Record<string, string>>(
     () => {
@@ -54,6 +84,24 @@ export function StaffShift() {
     });
     return map;
   });
+
+  // Sync overrides when employee list changes from API
+  useEffect(() => {
+    setShiftOverrides((prev) => {
+      const map = { ...prev };
+      employeeList.forEach((emp) => {
+        if (emp.shift && !(emp.id in map)) map[emp.id] = emp.shift;
+      });
+      return map;
+    });
+    setSmartcardOverrides((prev) => {
+      const map = { ...prev };
+      employeeList.forEach((emp) => {
+        if (!(emp.id in map)) map[emp.id] = !!emp.smartcardId;
+      });
+      return map;
+    });
+  }, [employeeList]);
 
   const handleShiftChange = useCallback((empId: string, shift: string) => {
     setShiftOverrides((prev) => ({ ...prev, [empId]: shift }));
@@ -81,7 +129,7 @@ export function StaffShift() {
   );
 
   const filteredEmployees = useMemo(() => {
-    let list = MOCK_EMPLOYEES.filter((emp) => {
+    let list = employeeList.filter((emp) => {
       // Active/past filter
       const isActive = emp.isActive !== false;
       if (!showPastStaff && !isActive) return false;
@@ -133,7 +181,7 @@ export function StaffShift() {
     });
 
     return list;
-  }, [searchQuery, showPastStaff, sortKey, sortDir, shiftOverrides, smartcardOverrides]);
+  }, [searchQuery, showPastStaff, sortKey, sortDir, shiftOverrides, smartcardOverrides, employeeList]);
 
   const SortHeader = ({
     label,
@@ -278,7 +326,7 @@ export function StaffShift() {
       </div>
 
       <div className="text-[11px] text-slate-400">
-        Showing {filteredEmployees.length} of {MOCK_EMPLOYEES.length} employees
+        Showing {filteredEmployees.length} of {employeeList.length} employees
       </div>
     </div>
   );

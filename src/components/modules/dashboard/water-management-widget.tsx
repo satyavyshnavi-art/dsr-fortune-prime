@@ -10,21 +10,45 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-
-const waterData = [
-  { month: "Sep", level: 60, consumption: 45 },
-  { month: "Oct", level: 55, consumption: 40 },
-  { month: "Nov", level: 70, consumption: 50 },
-  { month: "Dec", level: 65, consumption: 48 },
-  { month: "Jan", level: 58, consumption: 42 },
-  { month: "Feb", level: 62, consumption: 44 },
-  { month: "Mar", level: 68, consumption: 52 },
-  { month: "Apr", level: 50, consumption: 38 },
-];
+import { useDashboard } from "@/hooks/use-dashboard";
 
 const tabs = ["Water Level", "Water Consumption"];
 
 export function WaterManagementWidget() {
+  const { data } = useDashboard();
+
+  const recentReadings = data?.waterReadings?.recentReadings ?? [];
+
+  // Build chart data from recent readings, grouped by date
+  const dateMap = new Map<string, { level: number; consumption: number }>();
+  for (const r of recentReadings) {
+    const dateLabel = r.date;
+    const existing = dateMap.get(dateLabel) ?? { level: 0, consumption: 0 };
+    existing.level = Math.max(existing.level, parseFloat(r.levelPercent ?? "0"));
+    existing.consumption += parseFloat(r.consumed ?? "0");
+    dateMap.set(dateLabel, existing);
+  }
+
+  const chartData = Array.from(dateMap.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([date, vals]) => {
+      const d = new Date(date + "T00:00:00");
+      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      return {
+        month: `${d.getDate()} ${months[d.getMonth()]}`,
+        level: Math.round(vals.level * 10) / 10,
+        consumption: Math.round(vals.consumption * 10) / 10,
+      };
+    });
+
+  // Fallback mock data if no real readings
+  const displayData =
+    chartData.length > 0
+      ? chartData
+      : [
+          { month: "No data", level: 0, consumption: 0 },
+        ];
+
   return (
     <ChartCard title="Water Management">
       <div className="space-y-2">
@@ -44,17 +68,23 @@ export function WaterManagementWidget() {
           ))}
         </div>
 
-        <p className="text-[10px] text-slate-400">Tank-wise (Percentage)</p>
+        <div className="flex items-center justify-between">
+          <p className="text-[10px] text-slate-400">Tank-wise (Percentage)</p>
+          <p className="text-[10px] text-slate-500 font-medium">
+            {data?.waterReadings?.activeSources ?? 0} sources |{" "}
+            {Math.round((data?.waterReadings?.totalLiters ?? 0) / 1000)} KL total
+          </p>
+        </div>
 
         {/* Bar Chart */}
         <div className="h-[140px]">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={waterData}
-              barCategoryGap="20%"
-              barGap={2}
-            >
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+            <BarChart data={displayData} barCategoryGap="20%" barGap={2}>
+              <CartesianGrid
+                strokeDasharray="3 3"
+                vertical={false}
+                stroke="#f1f5f9"
+              />
               <XAxis
                 dataKey="month"
                 axisLine={false}
@@ -65,7 +95,6 @@ export function WaterManagementWidget() {
                 axisLine={false}
                 tickLine={false}
                 tick={{ fontSize: 10, fill: "#94a3b8" }}
-                domain={[0, 100]}
                 width={28}
               />
               <Tooltip
@@ -78,14 +107,14 @@ export function WaterManagementWidget() {
               />
               <Bar
                 dataKey="level"
-                name="Water Level"
+                name="Water Level %"
                 fill="#f97316"
                 radius={[2, 2, 0, 0]}
                 barSize={10}
               />
               <Bar
                 dataKey="consumption"
-                name="Consumption"
+                name="Consumption (L)"
                 fill="#22d3ee"
                 radius={[2, 2, 0, 0]}
                 barSize={10}

@@ -7,7 +7,17 @@ import { Switch } from "@/components/ui/switch";
 import { Download, Search } from "lucide-react";
 import { toast } from "sonner";
 import { MOCK_EMPLOYEES, MOCK_ATTENDANCE } from "./mock-data";
+import type { Employee, AttendanceRecord } from "./mock-data";
 import { exportCSV, exportPDF, exportExcel } from "@/lib/export";
+
+// Map DB enum values to hours
+const DB_STATUS_HOURS: Record<string, number> = {
+  present: 8,
+  half_day: 4,
+  absent: 0,
+  leave: 0,
+  week_off: 0,
+};
 
 // Inline editable cell for hours
 function HourCell({
@@ -103,8 +113,35 @@ export function TimesheetView() {
     return result;
   }, [startDate, endDate]);
 
+  // Employees: API with mock fallback
+  const [employeeList, setEmployeeList] = useState<Employee[]>(MOCK_EMPLOYEES);
+
+  useEffect(() => {
+    fetch("/api/v1/employees")
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setEmployeeList(
+            data.map((e: Record<string, string>) => ({
+              id: e.id,
+              empId: e.empId || e.emp_id || "",
+              firstName: e.firstName || e.first_name || "",
+              lastName: e.lastName || e.last_name || "",
+              designation: e.designation || "",
+              department: e.department || "",
+              phone: e.phone || "",
+              email: e.email || "",
+              dateOfBirth: e.dateOfBirth || e.date_of_birth || "",
+              qrConfigured: false,
+            }))
+          );
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   const filteredEmployees = useMemo(() => {
-    return MOCK_EMPLOYEES.filter((emp) => {
+    return employeeList.filter((emp) => {
       if (!searchQuery) return true;
       return (
         `${emp.firstName} ${emp.lastName}`
@@ -113,16 +150,35 @@ export function TimesheetView() {
         emp.designation.toLowerCase().includes(searchQuery.toLowerCase())
       );
     });
-  }, [searchQuery]);
+  }, [searchQuery, employeeList]);
 
-  const hoursLookup = useMemo(() => {
+  // Attendance hours: API with mock fallback
+  const [hoursLookup, setHoursLookup] = useState<Record<string, Record<string, number>>>(() => {
     const lookup: Record<string, Record<string, number>> = {};
     MOCK_ATTENDANCE.forEach((rec) => {
       if (!lookup[rec.employeeId]) lookup[rec.employeeId] = {};
       lookup[rec.employeeId][rec.date] = rec.hours || 0;
     });
     return lookup;
-  }, []);
+  });
+
+  useEffect(() => {
+    if (!startDate || !endDate) return;
+    fetch(`/api/v1/attendance?dateFrom=${startDate}&dateTo=${endDate}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          const lookup: Record<string, Record<string, number>> = {};
+          data.forEach((rec: { employeeId: string; date: string; status: string; hours?: number }) => {
+            if (!lookup[rec.employeeId]) lookup[rec.employeeId] = {};
+            lookup[rec.employeeId][rec.date] =
+              rec.hours ?? DB_STATUS_HOURS[rec.status] ?? 0;
+          });
+          setHoursLookup(lookup);
+        }
+      })
+      .catch(() => {});
+  }, [startDate, endDate]);
 
   const getHours = useCallback(
     (empId: string, day: string): number => {

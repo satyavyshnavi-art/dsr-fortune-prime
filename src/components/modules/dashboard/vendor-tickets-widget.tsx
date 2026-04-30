@@ -9,19 +9,39 @@ import {
   Tooltip,
 } from "recharts";
 import { Ticket, CheckCircle2, TrendingUp } from "lucide-react";
-
-const vendorData = [
-  { name: "Pending", value: 8, color: "#f59e0b" },
-  { name: "In Progress", value: 4, color: "#3b82f6" },
-  { name: "Resolved", value: 3, color: "#22c55e" },
-];
+import { useDashboard } from "@/hooks/use-dashboard";
 
 export function VendorTicketsWidget() {
+  const { data } = useDashboard();
+
+  const total = data?.vendorTickets?.total ?? 0;
+  const open = data?.vendorTickets?.open ?? 0;
+  const inProgress = data?.vendorTickets?.inProgress ?? 0;
+  const resolved = data?.vendorTickets?.resolved ?? 0;
+  const closed = data?.vendorTickets?.closed ?? 0;
+  const avgDays = data?.vendorTickets?.avgResolutionDays ?? 0;
+
+  const resolutionRate =
+    total > 0 ? Math.round(((resolved + closed) / total) * 100) : 0;
+
+  const vendorData = [
+    { name: "Open", value: open + (data ? 0 : 0), color: "#f59e0b" },
+    { name: "In Progress", value: inProgress, color: "#3b82f6" },
+    { name: "Resolved", value: resolved + closed, color: "#22c55e" },
+  ].filter((d) => d.value > 0);
+
+  const chartData =
+    vendorData.length > 0
+      ? vendorData
+      : [{ name: "No data", value: 1, color: "#e2e8f0" }];
+
   return (
     <ChartCard
       title="Vendor Tickets"
       actions={
-        <span className="text-[10px] text-slate-400">Avg: 0 Days</span>
+        <span className="text-[10px] text-slate-400">
+          Avg: {avgDays} {avgDays === 1 ? "Day" : "Days"}
+        </span>
       }
     >
       <div className="space-y-2.5">
@@ -30,7 +50,7 @@ export function VendorTicketsWidget() {
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
-                data={vendorData}
+                data={chartData}
                 cx="50%"
                 cy="50%"
                 innerRadius={35}
@@ -39,7 +59,7 @@ export function VendorTicketsWidget() {
                 strokeWidth={2}
                 stroke="#fff"
               >
-                {vendorData.map((entry, idx) => (
+                {chartData.map((entry, idx) => (
                   <Cell key={idx} fill={entry.color} />
                 ))}
               </Pie>
@@ -57,7 +77,11 @@ export function VendorTicketsWidget() {
 
         {/* Legend */}
         <div className="flex justify-center gap-3">
-          {vendorData.map((item) => (
+          {[
+            { name: "Open", color: "#f59e0b" },
+            { name: "In Progress", color: "#3b82f6" },
+            { name: "Resolved", color: "#22c55e" },
+          ].map((item) => (
             <div
               key={item.name}
               className="flex items-center gap-1 text-[10px] text-slate-500"
@@ -76,21 +100,21 @@ export function VendorTicketsWidget() {
           <div className="text-center">
             <div className="flex items-center justify-center gap-1 text-blue-600">
               <Ticket className="h-3 w-3" />
-              <span className="text-[13px] font-bold">15</span>
+              <span className="text-[13px] font-bold">{total}</span>
             </div>
             <p className="text-[9px] text-slate-400 mt-0.5">Total Tickets</p>
           </div>
           <div className="text-center">
             <div className="flex items-center justify-center gap-1 text-green-600">
               <CheckCircle2 className="h-3 w-3" />
-              <span className="text-[13px] font-bold">13%</span>
+              <span className="text-[13px] font-bold">{resolutionRate}%</span>
             </div>
             <p className="text-[9px] text-slate-400 mt-0.5">Resolution Rate</p>
           </div>
           <div className="text-center">
             <div className="flex items-center justify-center gap-1 text-purple-600">
               <TrendingUp className="h-3 w-3" />
-              <span className="text-[13px] font-bold">0</span>
+              <span className="text-[13px] font-bold">{avgDays}</span>
             </div>
             <p className="text-[9px] text-slate-400 mt-0.5">Avg Resolution</p>
           </div>

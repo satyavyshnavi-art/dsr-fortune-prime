@@ -9,49 +9,55 @@ import {
   Bell,
   Inbox,
 } from "lucide-react";
-
-// -- Mock task data --
-const mockTasks = [
-  { id: 1, title: "Fix leakage issue in basement parking area", priority: "High" as const, status: "Pending" },
-  { id: 2, title: "inspection Maintenance - HVAC Chiller Unit Tower A", priority: "Medium" as const, status: "Pending" },
-  { id: 3, title: "inspection Maintenance - Fire Alarm Panel Block B", priority: "Medium" as const, status: "Pending" },
-  { id: 4, title: "inspection Maintenance - Earthing Pit Tower A", priority: "Medium" as const, status: "Pending" },
-  { id: 5, title: "inspection Maintenance - DG Set Primary", priority: "Medium" as const, status: "Pending" },
-  { id: 6, title: "inspection Maintenance - Lift Motor Tower B", priority: "Medium" as const, status: "Pending" },
-  { id: 7, title: "inspection Maintenance - STP Blower Unit", priority: "Medium" as const, status: "Pending" },
-];
-
-const eisenhowerQuadrants = [
-  {
-    label: "Do First",
-    color: "bg-red-50 border-red-200",
-    badgeColor: "bg-red-100 text-red-700",
-    tasks: 0,
-  },
-  {
-    label: "Schedule",
-    color: "bg-yellow-50 border-yellow-200",
-    badgeColor: "bg-yellow-100 text-yellow-700",
-    tasks: 73,
-  },
-  {
-    label: "Delegate",
-    color: "bg-blue-50 border-blue-200",
-    badgeColor: "bg-blue-100 text-blue-700",
-    tasks: 0,
-  },
-  {
-    label: "Eliminate",
-    color: "bg-slate-50 border-slate-200",
-    badgeColor: "bg-slate-100 text-slate-600",
-    tasks: 0,
-  },
-];
+import { useDashboard } from "@/hooks/use-dashboard";
 
 type TabId = "matrix" | "list";
 
 export function TaskStatusWidget() {
   const [activeTab, setActiveTab] = useState<TabId>("matrix");
+  const { data } = useDashboard();
+
+  const total = data?.tasks?.total ?? 0;
+  const completed = data?.tasks?.completed ?? 0;
+  const overdue = data?.tasks?.overdue ?? 0;
+  const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+  const eisenhower = data?.tasks?.eisenhower ?? {};
+  const eisenhowerQuadrants = [
+    {
+      label: "Do First",
+      key: "do_first",
+      color: "bg-red-50 border-red-200",
+      badgeColor: "bg-red-100 text-red-700",
+      tasks: eisenhower["do_first"] ?? eisenhower["Do First"] ?? 0,
+    },
+    {
+      label: "Schedule",
+      key: "schedule",
+      color: "bg-yellow-50 border-yellow-200",
+      badgeColor: "bg-yellow-100 text-yellow-700",
+      tasks: eisenhower["schedule"] ?? eisenhower["Schedule"] ?? 0,
+    },
+    {
+      label: "Delegate",
+      key: "delegate",
+      color: "bg-blue-50 border-blue-200",
+      badgeColor: "bg-blue-100 text-blue-700",
+      tasks: eisenhower["delegate"] ?? eisenhower["Delegate"] ?? 0,
+    },
+    {
+      label: "Eliminate",
+      key: "eliminate",
+      color: "bg-slate-50 border-slate-200",
+      badgeColor: "bg-slate-100 text-slate-600",
+      tasks: eisenhower["eliminate"] ?? eisenhower["Eliminate"] ?? 0,
+    },
+  ];
+
+  // If all quadrants are 0 but there are tasks, put unclassified tasks count
+  const unclassified = eisenhower["unclassified"] ?? eisenhower["null"] ?? 0;
+
+  const recentTasks = data?.tasks?.recentTasks ?? [];
 
   return (
     <ChartCard title="Task Status">
@@ -85,6 +91,11 @@ export function TaskStatusWidget() {
           <div>
             <p className="text-[10px] text-slate-500 font-medium mb-1.5">
               Task Classification & Progress Summary
+              {unclassified > 0 && (
+                <span className="text-slate-400 ml-1">
+                  ({unclassified} unclassified)
+                </span>
+              )}
             </p>
             <div className="grid grid-cols-2 gap-1.5">
               {eisenhowerQuadrants.map((q) => (
@@ -130,19 +141,48 @@ export function TaskStatusWidget() {
                 </tr>
               </thead>
               <tbody>
-                {mockTasks.map((task) => (
-                  <tr key={task.id} className="border-t border-slate-100 hover:bg-slate-50/50">
-                    <td className="text-[10px] text-slate-700 px-2.5 py-1 max-w-[180px] truncate">
-                      {task.title}
-                    </td>
-                    <td className="px-2.5 py-1">
-                      <StatusBadge status={task.priority} />
-                    </td>
-                    <td className="px-2.5 py-1">
-                      <StatusBadge status={task.status} />
+                {recentTasks.length > 0 ? (
+                  recentTasks.map((task) => (
+                    <tr
+                      key={task.id}
+                      className="border-t border-slate-100 hover:bg-slate-50/50"
+                    >
+                      <td className="text-[10px] text-slate-700 px-2.5 py-1 max-w-[180px] truncate">
+                        {task.title}
+                      </td>
+                      <td className="px-2.5 py-1">
+                        <StatusBadge
+                          status={
+                            task.priority
+                              ? task.priority.charAt(0).toUpperCase() +
+                                task.priority.slice(1)
+                              : "Low"
+                          }
+                        />
+                      </td>
+                      <td className="px-2.5 py-1">
+                        <StatusBadge
+                          status={
+                            task.status
+                              ? task.status
+                                  .replace(/_/g, " ")
+                                  .replace(/\b\w/g, (c) => c.toUpperCase())
+                              : "Pending"
+                          }
+                        />
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan={3}
+                      className="text-center text-[10px] text-slate-400 py-4"
+                    >
+                      No tasks found
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
@@ -153,28 +193,28 @@ export function TaskStatusWidget() {
           <div className="text-center">
             <div className="flex items-center justify-center gap-0.5 text-slate-500">
               <CalendarDays className="h-2.5 w-2.5" />
-              <span className="text-[12px] font-bold">73</span>
+              <span className="text-[12px] font-bold">{total}</span>
             </div>
             <p className="text-[9px] text-slate-400">Total Tasks</p>
           </div>
           <div className="text-center">
             <div className="flex items-center justify-center gap-0.5 text-green-600">
               <CheckCircle2 className="h-2.5 w-2.5" />
-              <span className="text-[12px] font-bold">0</span>
+              <span className="text-[12px] font-bold">{completed}</span>
             </div>
             <p className="text-[9px] text-slate-400">Completed</p>
           </div>
           <div className="text-center">
             <div className="flex items-center justify-center gap-0.5 text-blue-500">
               <TrendingUp className="h-2.5 w-2.5" />
-              <span className="text-[12px] font-bold">0%</span>
+              <span className="text-[12px] font-bold">{completionRate}%</span>
             </div>
             <p className="text-[9px] text-slate-400">Rate</p>
           </div>
           <div className="text-center">
             <div className="flex items-center justify-center gap-0.5 text-red-500">
               <Bell className="h-2.5 w-2.5" />
-              <span className="text-[12px] font-bold">73</span>
+              <span className="text-[12px] font-bold">{overdue}</span>
             </div>
             <p className="text-[9px] text-slate-400">Overdue</p>
           </div>

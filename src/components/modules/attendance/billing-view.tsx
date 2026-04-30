@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -14,7 +14,17 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { MOCK_EMPLOYEES, MOCK_ATTENDANCE } from "./mock-data";
+import type { Employee, AttendanceRecord } from "./mock-data";
 import { exportCSV, exportPDF } from "@/lib/export";
+
+// Map DB enum values to UI short codes
+const DB_TO_STATUS: Record<string, AttendanceRecord["status"]> = {
+  present: "P",
+  absent: "A",
+  half_day: "HD",
+  leave: "L",
+  week_off: "WO",
+};
 
 interface BillingRow {
   role: string;
@@ -39,6 +49,58 @@ export function BillingView() {
   const [showAgreed, setShowAgreed] = useState(true);
   const [downloading, setDownloading] = useState<"pdf" | "csv" | null>(null);
 
+  // Employees: API with mock fallback
+  const [employeeList, setEmployeeList] = useState<Employee[]>(MOCK_EMPLOYEES);
+
+  useEffect(() => {
+    fetch("/api/v1/employees")
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setEmployeeList(
+            data.map((e: Record<string, string>) => ({
+              id: e.id,
+              empId: e.empId || e.emp_id || "",
+              firstName: e.firstName || e.first_name || "",
+              lastName: e.lastName || e.last_name || "",
+              designation: e.designation || "",
+              department: e.department || "",
+              phone: e.phone || "",
+              email: e.email || "",
+              dateOfBirth: e.dateOfBirth || e.date_of_birth || "",
+              qrConfigured: false,
+            }))
+          );
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  // Attendance records: API with mock fallback
+  const [attendanceData, setAttendanceData] = useState<AttendanceRecord[]>(MOCK_ATTENDANCE);
+
+  const fetchAttendance = useCallback((from: string, to: string) => {
+    fetch(`/api/v1/attendance?dateFrom=${from}&dateTo=${to}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setAttendanceData(
+            data.map((rec: { employeeId: string; date: string; status: string; hours?: number }) => ({
+              employeeId: rec.employeeId,
+              date: rec.date,
+              status: (DB_TO_STATUS[rec.status] || rec.status) as AttendanceRecord["status"],
+              hours: rec.hours ?? 0,
+            }))
+          );
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    fetchAttendance(appliedStart, appliedEnd);
+  }, [appliedStart, appliedEnd, fetchAttendance]);
+
   const handleGo = useCallback(() => {
     setAppliedStart(startDate);
     setAppliedEnd(endDate);
@@ -53,16 +115,16 @@ export function BillingView() {
   }, [appliedStart, appliedEnd]);
 
   const filteredEmployees = useMemo(() => {
-    return MOCK_EMPLOYEES.filter((emp) => {
+    return employeeList.filter((emp) => {
       if (designationFilter !== "all" && emp.designation !== designationFilter) {
         return false;
       }
       return true;
     });
-  }, [designationFilter]);
+  }, [designationFilter, employeeList]);
 
   const billingData: BillingRow[] = useMemo(() => {
-    const groups: Record<string, typeof MOCK_EMPLOYEES> = {};
+    const groups: Record<string, Employee[]> = {};
     filteredEmployees.forEach((emp) => {
       if (!groups[emp.designation]) groups[emp.designation] = [];
       groups[emp.designation].push(emp);
@@ -75,7 +137,7 @@ export function BillingView() {
       let totalWeekoff = 0;
 
       emps.forEach((emp) => {
-        const records = MOCK_ATTENDANCE.filter(
+        const records = attendanceData.filter(
           (r) =>
             r.employeeId === emp.id &&
             r.date >= appliedStart &&
@@ -105,7 +167,7 @@ export function BillingView() {
         billable,
       };
     });
-  }, [filteredEmployees, appliedStart, appliedEnd, dayCount]);
+  }, [filteredEmployees, attendanceData, appliedStart, appliedEnd, dayCount]);
 
   const totals = useMemo(() => {
     return billingData.reduce(
@@ -173,7 +235,7 @@ export function BillingView() {
           <SelectContent>
             <SelectItem value="all" className="text-[12px]">All</SelectItem>
             {Array.from(
-              new Set(MOCK_EMPLOYEES.map((e) => e.designation))
+              new Set(employeeList.map((e) => e.designation))
             ).map((d) => (
               <SelectItem key={d} value={d} className="text-[12px]">{d}</SelectItem>
             ))}

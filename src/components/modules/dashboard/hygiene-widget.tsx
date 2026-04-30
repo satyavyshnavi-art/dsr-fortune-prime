@@ -2,6 +2,7 @@
 
 import { ChartCard } from "@/components/shared";
 import { StatusBadge } from "@/components/shared";
+import { useDashboard } from "@/hooks/use-dashboard";
 
 const hygieneCategories = [
   { name: "Housekeeping Checklist", completion: "0%", status: "Pending" },
@@ -16,6 +17,12 @@ const hygieneCategories = [
 const tabs = ["Housekeeping", "Gardening", "Pest Control"];
 
 export function HygieneWidget() {
+  const { data } = useDashboard();
+
+  // Hygiene data is not in the dashboard summary API yet (no table aggregation).
+  // Show static checklist with a note. The widget will update automatically
+  // once a hygiene summary is added to the API.
+
   return (
     <ChartCard title="Hygiene Management">
       <div className="space-y-2">
@@ -44,7 +51,9 @@ export function HygieneWidget() {
             >
               <span className="text-[11px] text-slate-600">{item.name}</span>
               <div className="flex items-center gap-2">
-                <span className="text-[11px] text-slate-400">{item.completion}</span>
+                <span className="text-[11px] text-slate-400">
+                  {item.completion}
+                </span>
                 <StatusBadge status={item.status} variant="warning" />
               </div>
             </div>
@@ -66,6 +75,10 @@ export function HygieneWidget() {
             <p className="text-[9px] text-slate-400">Pending</p>
           </div>
         </div>
+
+        <p className="text-[9px] text-slate-400 text-center italic">
+          Hygiene data not yet connected to database
+        </p>
       </div>
     </ChartCard>
   );

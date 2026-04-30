@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -24,7 +24,17 @@ import {
   MOCK_EMPLOYEES,
   MOCK_ATTENDANCE,
   type AttendanceRecord,
+  type Employee,
 } from "./mock-data";
+
+// Map DB enum values to UI short codes
+const DB_TO_STATUS: Record<string, AttendanceRecord["status"]> = {
+  present: "P",
+  absent: "A",
+  half_day: "HD",
+  leave: "L",
+  week_off: "WO",
+};
 
 const SHIFTS = [
   { id: "morning", name: "Morning (8 hrs)", startHour: 6, endHour: 14 },
@@ -54,12 +64,61 @@ export function ShiftView() {
   const [selectedShift, setSelectedShift] = useState("morning");
   const [showLogDialog, setShowLogDialog] = useState(false);
 
-  // Compute stats from mock attendance data for selected date range
+  // Employees + Attendance: API with mock fallback
+  const [employeeList, setEmployeeList] = useState<Employee[]>(MOCK_EMPLOYEES);
+  const [attendanceData, setAttendanceData] = useState<AttendanceRecord[]>(MOCK_ATTENDANCE);
+
+  useEffect(() => {
+    fetch("/api/v1/employees")
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setEmployeeList(
+            data.map((e: Record<string, string>) => ({
+              id: e.id,
+              empId: e.empId || e.emp_id || "",
+              firstName: e.firstName || e.first_name || "",
+              lastName: e.lastName || e.last_name || "",
+              designation: e.designation || "",
+              department: e.department || "",
+              phone: e.phone || "",
+              email: e.email || "",
+              dateOfBirth: e.dateOfBirth || e.date_of_birth || "",
+              qrConfigured: false,
+            }))
+          );
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!startDate || !endDate) return;
+    fetch(`/api/v1/attendance?dateFrom=${startDate}&dateTo=${endDate}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setAttendanceData(
+            data.map((rec: { employeeId: string; date: string; status: string; checkIn?: string; checkOut?: string; hours?: number }) => ({
+              employeeId: rec.employeeId,
+              date: rec.date,
+              status: (DB_TO_STATUS[rec.status] || rec.status) as AttendanceRecord["status"],
+              checkIn: rec.checkIn,
+              checkOut: rec.checkOut,
+              hours: rec.hours ?? 0,
+            }))
+          );
+        }
+      })
+      .catch(() => {});
+  }, [startDate, endDate]);
+
+  // Compute stats from attendance data for selected date range
   const stats = useMemo(() => {
-    const totalEmployees = MOCK_EMPLOYEES.length;
+    const totalEmployees = employeeList.length;
 
     // Get records in date range
-    const recordsInRange = MOCK_ATTENDANCE.filter((r) => {
+    const recordsInRange = attendanceData.filter((r) => {
       return r.date >= startDate && r.date <= endDate;
     });
 
@@ -77,7 +136,7 @@ export function ShiftView() {
 
     // Count unique statuses across the date range (use last date for daily snapshot)
     const lastDate = endDate <= today ? endDate : today;
-    const dayRecords = MOCK_ATTENDANCE.filter((r) => r.date === lastDate);
+    const dayRecords = attendanceData.filter((r) => r.date === lastDate);
 
     let present = 0;
     let leave = 0;
@@ -106,12 +165,12 @@ export function ShiftView() {
       reliever,
       pending,
     };
-  }, [startDate, endDate, today]);
+  }, [startDate, endDate, today, employeeList, attendanceData]);
 
   // Get today's attendance log for dialog
   const todayLog = useMemo(() => {
-    return MOCK_ATTENDANCE.filter((r) => r.date === today).map((r) => {
-      const emp = MOCK_EMPLOYEES.find((e) => e.id === r.employeeId);
+    return attendanceData.filter((r) => r.date === today).map((r) => {
+      const emp = employeeList.find((e) => e.id === r.employeeId);
       return {
         ...r,
         employeeName: emp
@@ -121,7 +180,7 @@ export function ShiftView() {
         designation: emp?.designation ?? "-",
       };
     });
-  }, [today]);
+  }, [today, attendanceData, employeeList]);
 
   const currentShift = SHIFTS.find((s) => s.id === selectedShift) ?? SHIFTS[0];
 
