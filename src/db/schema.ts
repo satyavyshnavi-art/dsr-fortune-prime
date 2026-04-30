@@ -1,5 +1,6 @@
 import {
   pgTable,
+  pgSchema,
   uuid,
   text,
   varchar,
