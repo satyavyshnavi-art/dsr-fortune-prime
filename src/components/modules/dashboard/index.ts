@@ -1,0 +1,9 @@
+export { AttendanceWidget } from "./attendance-widget";
+export { HygieneWidget } from "./hygiene-widget";
+export { PowerWidget } from "./power-widget";
+export { WaterManagementWidget } from "./water-management-widget";
+export { AssetSummaryWidget } from "./asset-summary-widget";
+export { WaterQualityWidget } from "./water-quality-widget";
+export { ComplaintWidget } from "./complaint-widget";
+export { TaskStatusWidget } from "./task-status-widget";
+export { VendorTicketsWidget } from "./vendor-tickets-widget";
