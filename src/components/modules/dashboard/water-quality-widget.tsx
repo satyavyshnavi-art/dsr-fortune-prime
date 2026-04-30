@@ -1,12 +1,18 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { ChartCard } from "@/components/shared";
 import { EmptyState } from "@/components/shared";
 import { Droplets } from "lucide-react";
-import { useDashboard } from "@/hooks/use-dashboard";
 
 export function WaterQualityWidget() {
-  const { data } = useDashboard();
+  const [data, setData] = useState<any>(null);
+  useEffect(() => {
+    fetch("/api/v1/dashboard/summary")
+      .then((r) => r.json())
+      .then((d) => { if (d && !d.error) setData(d); })
+      .catch(() => {});
+  }, []);
 
   const hasData = data?.waterQuality?.hasData ?? false;
   const readings = data?.waterQuality?.readings ?? [];
@@ -27,7 +33,7 @@ export function WaterQualityWidget() {
   return (
     <ChartCard title="Water Quality Monitoring">
       <div className="space-y-2">
-        {readings.map((reading, idx) => {
+        {readings.map((reading: any, idx: number) => {
           const params =
             typeof reading.parameters === "object" && reading.parameters
               ? Object.entries(reading.parameters as Record<string, any>)

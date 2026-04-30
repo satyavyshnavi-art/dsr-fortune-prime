@@ -1,7 +1,7 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { ChartCard, StatusBadge } from "@/components/shared";
-import { useDashboard } from "@/hooks/use-dashboard";
 
 const assetBreakdown = [
   { name: "Active", color: "#22c55e" },
@@ -10,7 +10,13 @@ const assetBreakdown = [
 ];
 
 export function AssetSummaryWidget() {
-  const { data } = useDashboard();
+  const [data, setData] = useState<any>(null);
+  useEffect(() => {
+    fetch("/api/v1/dashboard/summary")
+      .then((r) => r.json())
+      .then((d) => { if (d && !d.error) setData(d); })
+      .catch(() => {});
+  }, []);
 
   const total = data?.assets?.total ?? 0;
   const active = data?.assets?.active ?? 0;
@@ -135,7 +141,7 @@ export function AssetSummaryWidget() {
             />
           </div>
           <div className="grid grid-cols-4 gap-1.5">
-            {(data?.assets?.byCategory ?? []).slice(0, 4).map((cat) => (
+            {(data?.assets?.byCategory ?? []).slice(0, 4).map((cat: any) => (
               <div
                 key={cat.categoryName}
                 className="rounded-md bg-slate-50 border border-slate-100 px-1.5 py-1 text-center"

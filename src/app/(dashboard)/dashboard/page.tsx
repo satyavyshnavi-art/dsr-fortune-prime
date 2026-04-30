@@ -25,7 +25,6 @@ import {
   TaskStatusWidget,
   VendorTicketsWidget,
 } from "@/components/modules/dashboard";
-import { DashboardProvider, useDashboard } from "@/hooks/use-dashboard";
 
 function formatDateLabel(dateStr: string): string {
   if (!dateStr) return "";
@@ -43,13 +42,22 @@ function getDaysBetween(start: string, end: string): number {
   return Math.max(0, Math.round((e.getTime() - s.getTime()) / (1000 * 60 * 60 * 24)));
 }
 
-function DashboardContent() {
+export default function DashboardPage() {
   const [startDate, setStartDate] = useState("2026-03-31");
   const [endDate, setEndDate] = useState("2026-04-29");
   const [appliedRange, setAppliedRange] = useState({ start: "2026-03-31", end: "2026-04-29" });
   const [showApplied, setShowApplied] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { data: dashboardData } = useDashboard();
+  const [dashboardData, setDashboardData] = useState<any>(null);
+
+  useEffect(() => {
+    fetch("/api/v1/dashboard/summary")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d && !d.error) setDashboardData(d);
+      })
+      .catch(() => {});
+  }, []);
 
   const hasUnappliedChanges =
     startDate !== appliedRange.start || endDate !== appliedRange.end;
@@ -231,10 +239,3 @@ function DashboardContent() {
   );
 }
 
-export default function DashboardPage() {
-  return (
-    <DashboardProvider>
-      <DashboardContent />
-    </DashboardProvider>
-  );
-}

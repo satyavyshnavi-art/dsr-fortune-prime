@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChartCard, StatusBadge } from "@/components/shared";
 import {
   CalendarDays,
@@ -9,13 +9,18 @@ import {
   Bell,
   Inbox,
 } from "lucide-react";
-import { useDashboard } from "@/hooks/use-dashboard";
 
 type TabId = "matrix" | "list";
 
 export function TaskStatusWidget() {
   const [activeTab, setActiveTab] = useState<TabId>("matrix");
-  const { data } = useDashboard();
+  const [data, setData] = useState<any>(null);
+  useEffect(() => {
+    fetch("/api/v1/dashboard/summary")
+      .then((r) => r.json())
+      .then((d) => { if (d && !d.error) setData(d); })
+      .catch(() => {});
+  }, []);
 
   const total = data?.tasks?.total ?? 0;
   const completed = data?.tasks?.completed ?? 0;
@@ -142,7 +147,7 @@ export function TaskStatusWidget() {
               </thead>
               <tbody>
                 {recentTasks.length > 0 ? (
-                  recentTasks.map((task) => (
+                  recentTasks.map((task: any) => (
                     <tr
                       key={task.id}
                       className="border-t border-slate-100 hover:bg-slate-50/50"
@@ -166,7 +171,7 @@ export function TaskStatusWidget() {
                             task.status
                               ? task.status
                                   .replace(/_/g, " ")
-                                  .replace(/\b\w/g, (c) => c.toUpperCase())
+                                  .replace(/\b\w/g, (c: string) => c.toUpperCase())
                               : "Pending"
                           }
                         />

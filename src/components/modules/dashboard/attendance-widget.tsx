@@ -1,11 +1,17 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { ChartCard } from "@/components/shared";
 import { Users, UserCheck, UserX, Clock, TrendingUp } from "lucide-react";
-import { useDashboard } from "@/hooks/use-dashboard";
 
 export function AttendanceWidget() {
-  const { data, loading } = useDashboard();
+  const [data, setData] = useState<any>(null);
+  useEffect(() => {
+    fetch("/api/v1/dashboard/summary")
+      .then((r) => r.json())
+      .then((d) => { if (d && !d.error) setData(d); })
+      .catch(() => {});
+  }, []);
 
   const total = data?.employees?.total ?? 0;
   const present = data?.employees?.present ?? 0;

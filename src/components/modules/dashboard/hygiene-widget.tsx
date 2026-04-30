@@ -2,7 +2,6 @@
 
 import { ChartCard } from "@/components/shared";
 import { StatusBadge } from "@/components/shared";
-import { useDashboard } from "@/hooks/use-dashboard";
 
 const hygieneCategories = [
   { name: "Housekeeping Checklist", completion: "0%", status: "Pending" },
@@ -17,8 +16,6 @@ const hygieneCategories = [
 const tabs = ["Housekeeping", "Gardening", "Pest Control"];
 
 export function HygieneWidget() {
-  const { data } = useDashboard();
-
   // Hygiene data is not in the dashboard summary API yet (no table aggregation).
   // Show static checklist with a note. The widget will update automatically
   // once a hygiene summary is added to the API.

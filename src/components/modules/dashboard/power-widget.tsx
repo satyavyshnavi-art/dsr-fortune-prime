@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { ChartCard } from "@/components/shared";
 import {
   PieChart,
@@ -8,14 +9,19 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
-import { useDashboard } from "@/hooks/use-dashboard";
 
 const COLORS = ["#a855f7", "#3b82f6", "#22c55e", "#f59e0b", "#ef4444"];
 
 const tabs = ["EB Power", "DG Power", "Solar"];
 
 export function PowerWidget() {
-  const { data } = useDashboard();
+  const [data, setData] = useState<any>(null);
+  useEffect(() => {
+    fetch("/api/v1/dashboard/summary")
+      .then((r) => r.json())
+      .then((d) => { if (d && !d.error) setData(d); })
+      .catch(() => {});
+  }, []);
 
   const totalKwh = data?.powerReadings?.totalKwh ?? 0;
   const activeMeters = data?.powerReadings?.activeMeters ?? 0;
