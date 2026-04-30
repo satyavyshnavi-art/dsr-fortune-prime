@@ -17,33 +17,21 @@ import {
   ChevronLeft,
   ChevronRight,
   Leaf,
+  type LucideIcon,
 } from "lucide-react";
 import { useState } from "react";
 
-const iconMap = {
-  LayoutDashboard,
-  CalendarDays,
-  UserCheck,
-  Package,
-  Settings,
-  Bell,
-  BarChart3,
-  Bot,
-  Users,
-  Fingerprint,
-} as const;
-
-const navItems = [
-  { label: "Dashboard", href: "/dashboard", icon: "LayoutDashboard" as const },
-  { label: "Daily Update", href: "/daily-updates", icon: "CalendarDays" as const },
-  { label: "Attendance", href: "/attendance", icon: "UserCheck" as const },
-  { label: "Asset Management", href: "/asset-management", icon: "Package" as const },
-  { label: "Facility Config", href: "/facility-config", icon: "Settings" as const },
-  { label: "Alerts", href: "/alerts", icon: "Bell" as const },
-  { label: "Reports", href: "/reports", icon: "BarChart3" as const },
-  { label: "AI Agent", href: "/ai-agent", icon: "Bot" as const },
-  { label: "User Management", href: "/user-management", icon: "Users" as const },
-  { label: "Biometric Devices", href: "/biometric-devices", icon: "Fingerprint" as const },
+const navItems: { label: string; href: string; Icon: LucideIcon }[] = [
+  { label: "Dashboard", href: "/dashboard", Icon: LayoutDashboard },
+  { label: "Daily Update", href: "/daily-updates", Icon: CalendarDays },
+  { label: "Attendance", href: "/attendance", Icon: UserCheck },
+  { label: "Asset Management", href: "/asset-management", Icon: Package },
+  { label: "Facility Config", href: "/facility-config", Icon: Settings },
+  { label: "Alerts", href: "/alerts", Icon: Bell },
+  { label: "Reports", href: "/reports", Icon: BarChart3 },
+  { label: "AI Agent", href: "/ai-agent", Icon: Bot },
+  { label: "User Management", href: "/user-management", Icon: Users },
+  { label: "Biometric Devices", href: "/biometric-devices", Icon: Fingerprint },
 ];
 
 export function Sidebar() {
@@ -77,9 +65,7 @@ export function Sidebar() {
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto py-2 px-1.5 space-y-0.5">
         {navItems.map((item) => {
-          const Icon = iconMap[item.icon];
           const isActive = pathname.startsWith(item.href);
-
           return (
             <Link
               key={item.href}
@@ -91,7 +77,7 @@ export function Sidebar() {
                   : "text-white/50 hover:bg-white/8 hover:text-white/80"
               )}
             >
-              <Icon className="h-[16px] w-[16px] shrink-0" />
+              <item.Icon className="h-[16px] w-[16px] shrink-0" />
               {!collapsed && <span>{item.label}</span>}
             </Link>
           );
