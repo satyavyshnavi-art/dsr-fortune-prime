@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { TopBar } from "@/components/layout/top-bar";
 import { KPICard } from "@/components/shared";
 import {
@@ -87,12 +87,31 @@ function getKpiData(start: string, end: string) {
   ];
 }
 
+interface DashboardSummary {
+  employees: { total: number };
+  assets: { total: number; byStatus: Record<string, number> };
+  complaints: { total: number; byStatus: Record<string, number> };
+  tasks: { total: number; byStatus: Record<string, number> };
+  alerts: { unacknowledged: number };
+}
+
 export default function DashboardPage() {
   const [startDate, setStartDate] = useState("2026-03-31");
   const [endDate, setEndDate] = useState("2026-04-29");
   const [appliedRange, setAppliedRange] = useState({ start: "2026-03-31", end: "2026-04-29" });
   const [showApplied, setShowApplied] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [dashboardData, setDashboardData] = useState<DashboardSummary | null>(null);
+
+  // Fetch dashboard summary from API
+  useEffect(() => {
+    fetch("/api/v1/dashboard/summary")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data && !data.error) setDashboardData(data);
+      })
+      .catch(() => {});
+  }, [appliedRange]);
 
   const hasUnappliedChanges =
     startDate !== appliedRange.start || endDate !== appliedRange.end;
@@ -112,7 +131,38 @@ export default function DashboardPage() {
     }, 400);
   }, [startDate, endDate]);
 
-  const kpiCards = getKpiData(appliedRange.start, appliedRange.end);
+  const mockKpiCards = getKpiData(appliedRange.start, appliedRange.end);
+
+  // If real data is available, override mock KPI values
+  const kpiCards = dashboardData
+    ? [
+        {
+          ...mockKpiCards[0],
+          title: "Employees",
+          value: `${dashboardData.employees.total}`,
+          subtitle: "Total employees",
+        },
+        mockKpiCards[1],
+        mockKpiCards[2],
+        mockKpiCards[3],
+        {
+          ...mockKpiCards[4],
+          title: "Complaints",
+          value: `${dashboardData.complaints.total}`,
+          subtitle: Object.entries(dashboardData.complaints.byStatus)
+            .map(([s, c]) => `${c} ${s}`)
+            .join(" / "),
+        },
+        {
+          ...mockKpiCards[5],
+          title: "Tasks",
+          value: `${dashboardData.tasks.total}`,
+          subtitle: Object.entries(dashboardData.tasks.byStatus)
+            .map(([s, c]) => `${c} ${s}`)
+            .join(" / "),
+        },
+      ]
+    : mockKpiCards;
   const days = getDaysBetween(appliedRange.start, appliedRange.end);
 
   return (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@/components/shared";
 import { Button } from "@/components/ui/button";
@@ -39,8 +39,28 @@ import {
   MOCK_EMPLOYEES,
   DESIGNATIONS,
 } from "./mock-data";
+import { useApi } from "@/hooks/use-api";
 import { exportCSV, exportPDF, exportExcel } from "@/lib/export";
 import { toast } from "sonner";
+
+/** Map a raw API employee row to the component's Employee shape */
+function mapApiEmployee(row: any): Employee {
+  return {
+    id: row.id,
+    empId: row.empId,
+    firstName: row.firstName,
+    lastName: row.lastName ?? "",
+    designation: row.designation ?? "",
+    department: row.department ?? "",
+    phone: row.phone ?? "",
+    email: row.email ?? "",
+    dateOfBirth: row.dateOfBirth ?? "",
+    qrConfigured: !!row.qrCodeData,
+    smartcardId: row.smartcardId,
+    shift: undefined,
+    isActive: true,
+  };
+}
 
 function generateNextEmpId(employees: Employee[]): string {
   const maxNum = Math.max(
@@ -51,7 +71,27 @@ function generateNextEmpId(employees: Employee[]): string {
 }
 
 export function EmployeeTable() {
-  const [employees, setEmployees] = useState<Employee[]>(MOCK_EMPLOYEES);
+  const {
+    data: apiEmployees,
+    loading,
+    error: apiError,
+    create,
+    update,
+    remove,
+    fetchData,
+  } = useApi<any[]>({
+    url: "/api/v1/employees",
+    initialData: [],
+  });
+
+  // Map API rows to component shape, fall back to mock data on error
+  const employees: Employee[] = useMemo(() => {
+    if (apiError || !apiEmployees || apiEmployees.length === 0) {
+      return apiError ? MOCK_EMPLOYEES : (apiEmployees ?? []).map(mapApiEmployee);
+    }
+    return apiEmployees.map(mapApiEmployee);
+  }, [apiEmployees, apiError]);
+
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -87,12 +127,16 @@ export function EmployeeTable() {
     setShowQRDialog(true);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (!selectedEmployee) return;
-    setEmployees((prev) => prev.filter((e) => e.id !== selectedEmployee.id));
+    try {
+      await remove(selectedEmployee.id);
+      toast.success("Deleted successfully");
+    } catch {
+      toast.error("Failed to delete employee");
+    }
     setShowDeleteDialog(false);
     setSelectedEmployee(null);
-    toast.success("Deleted successfully");
   };
 
   const buildEmployeeExportData = () =>
@@ -325,16 +369,45 @@ export function EmployeeTable() {
         </Select>
       </div>
 
-      <DataTable columns={columns} data={filteredEmployees} pageSize={10} />
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="flex flex-col items-center gap-2">
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-300 border-t-blue-600" />
+            <span className="text-[11px] text-slate-400">Loading employees...</span>
+          </div>
+        </div>
+      ) : (
+        <DataTable columns={columns} data={filteredEmployees} pageSize={10} />
+      )}
+
+      {apiError && (
+        <p className="text-[11px] text-amber-600 bg-amber-50 border border-amber-200 rounded px-3 py-1.5">
+          API unavailable — showing mock data. {apiError}
+        </p>
+      )}
 
       {/* Add Employee Dialog */}
       <AddEmployeeDialog
         open={showAddDialog}
         onOpenChange={setShowAddDialog}
-        onAdd={(emp) => {
-          setEmployees((prev) => [emp, ...prev]);
-          setShowAddDialog(false);
-          toast.success("Employee added successfully");
+        onAdd={async (emp) => {
+          try {
+            await create({
+              empId: emp.empId,
+              firstName: emp.firstName,
+              lastName: emp.lastName,
+              designation: emp.designation,
+              department: emp.department,
+              phone: emp.phone,
+              email: emp.email,
+              dateOfBirth: emp.dateOfBirth || null,
+              facilityId: (apiEmployees?.[0] as any)?.facilityId ?? undefined,
+            });
+            setShowAddDialog(false);
+            toast.success("Employee added successfully");
+          } catch {
+            toast.error("Failed to add employee");
+          }
         }}
         employees={employees}
       />
@@ -344,13 +417,21 @@ export function EmployeeTable() {
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
         employee={selectedEmployee}
-        onUpdate={(updated) => {
-          setEmployees((prev) =>
-            prev.map((e) => (e.id === updated.id ? updated : e))
-          );
-          setShowEditDialog(false);
-          setSelectedEmployee(null);
-          toast.success("Updated successfully");
+        onUpdate={async (updated) => {
+          try {
+            await update(updated.id, {
+              firstName: updated.firstName,
+              lastName: updated.lastName,
+              designation: updated.designation,
+              phone: updated.phone,
+              email: updated.email,
+            });
+            setShowEditDialog(false);
+            setSelectedEmployee(null);
+            toast.success("Updated successfully");
+          } catch {
+            toast.error("Failed to update employee");
+          }
         }}
       />
 
@@ -426,7 +507,7 @@ function AddEmployeeDialog({
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAdd: (employee: Employee) => void;
+  onAdd: (employee: Employee) => void | Promise<void>;
   employees: Employee[];
 }) {
   const [formData, setFormData] = useState({
@@ -613,7 +694,7 @@ function EditEmployeeDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
   employee: Employee | null;
-  onUpdate: (updated: Employee) => void;
+  onUpdate: (updated: Employee) => void | Promise<void>;
 }) {
   const [formData, setFormData] = useState({
     firstName: "",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
@@ -28,8 +28,60 @@ import {
   Camera,
   Search,
   X,
+  Loader2,
 } from "lucide-react";
 import { tasksData, type Task } from "./mock-data";
+
+// Map DB status (snake_case) to display status (Title Case)
+const statusDisplayMap: Record<string, Task["status"]> = {
+  pending: "Pending",
+  unassigned: "Unassigned",
+  in_progress: "In Progress",
+  completed: "Completed",
+  cancelled: "Completed", // map cancelled to Completed for UI
+};
+
+// Map display status back to DB status
+const statusDbMap: Record<string, string> = {
+  "Pending": "pending",
+  "Unassigned": "unassigned",
+  "In Progress": "in_progress",
+  "Completed": "completed",
+};
+
+// Map DB priority to display priority
+const priorityDisplayMap: Record<string, Task["priority"]> = {
+  low: "Low",
+  medium: "Medium",
+  high: "High",
+  critical: "Critical",
+};
+
+// Map display priority back to DB
+const priorityDbMap: Record<string, string> = {
+  "Low": "low",
+  "Medium": "medium",
+  "High": "high",
+  "Critical": "critical",
+};
+
+// Extend Task type locally to carry DB id
+type TaskWithDbId = Task & { _dbId?: string };
+
+// Convert a DB task record to the component's Task shape
+function mapDbTask(row: Record<string, unknown>): TaskWithDbId {
+  return {
+    id: (row.id as string) ?? `task-${Date.now()}`,
+    title: (row.title as string) ?? "",
+    status: statusDisplayMap[(row.status as string) ?? "pending"] ?? "Pending",
+    assignedTo: (row.assignedTo as string) ?? "Unassigned",
+    dueDate: row.dueDate
+      ? new Date(row.dueDate as string).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "2-digit" })
+      : "\u2014",
+    priority: priorityDisplayMap[(row.priority as string) ?? "low"] ?? "Low",
+    _dbId: (row.id as string) ?? undefined,
+  };
+}
 
 const EMPLOYEES = [
   "Demo User", "Kumar A", "Govindaraju reddy", "Naveen Kumar", "Venkatesh N",
@@ -40,7 +92,8 @@ const EMPLOYEES = [
 
 export function TasksTab() {
   const [activeView, setActiveView] = useState<"list" | "add">("list");
-  const [tasks, setTasks] = useState(tasksData);
+  const [tasks, setTasks] = useState<TaskWithDbId[]>(tasksData);
+  const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [bulkUploadOpen, setBulkUploadOpen] = useState(false);
   const pageSize = 10;
@@ -50,7 +103,7 @@ export function TasksTab() {
   const [viewOpen, setViewOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [selectedTask, setSelectedTask] = useState<TaskWithDbId | null>(null);
   const [assignSearch, setAssignSearch] = useState("");
   const [editForm, setEditForm] = useState({ title: "", status: "", priority: "", dueDate: "" });
 
@@ -63,46 +116,60 @@ export function TasksTab() {
     return EMPLOYEES.filter((e) => e.toLowerCase().includes(assignSearch.toLowerCase()));
   }, [assignSearch]);
 
+  // Fetch tasks from API
+  const fetchTasks = useCallback(async () => {
+    try {
+      const res = await fetch("/api/v1/tasks");
+      if (!res.ok) throw new Error("Failed to fetch");
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        setTasks(data.map(mapDbTask));
+      }
+      // If empty array, keep mock data as fallback
+    } catch {
+      // Keep mock data on error
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchTasks();
+  }, [fetchTasks]);
+
+  // Helper to get the identifier for API calls
+  const getTaskId = (t: TaskWithDbId) => t._dbId ?? t.id;
+
   // Action handlers
-  const openAssign = (t: Task) => { setSelectedTask(t); setAssignSearch(""); setAssignOpen(true); };
-  const handleAssign = (employee: string) => {
+  const openAssign = (t: TaskWithDbId) => { setSelectedTask(t); setAssignSearch(""); setAssignOpen(true); };
+
+  const handleAssign = async (employee: string) => {
     if (!selectedTask) return;
-    setTasks((prev) => prev.map((t) => t.id === selectedTask.id ? { ...t, assignedTo: employee, status: "In Progress" as const } : t));
-    toast.success(`Assigned to ${employee}`);
+    const id = getTaskId(selectedTask);
+
+    // Optimistic update
+    setTasks((prev) => prev.map((t) => (t._dbId ?? t.id) === (selectedTask._dbId ?? selectedTask.id) ? { ...t, assignedTo: employee, status: "In Progress" as const } : t));
     setAssignOpen(false);
+
+    try {
+      const res = await fetch(`/api/v1/tasks/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ assignedTo: employee, status: "in_progress" }),
+      });
+      if (!res.ok) throw new Error("API error");
+      toast.success(`Assigned to ${employee}`);
+    } catch {
+      toast.success(`Assigned to ${employee} (offline)`);
+    }
   };
 
-  const openView = (t: Task) => { setSelectedTask(t); setViewOpen(true); };
+  const openView = (t: TaskWithDbId) => { setSelectedTask(t); setViewOpen(true); };
 
-  const openEditDialog = (t: Task) => {
+  const openEditDialog = (t: TaskWithDbId) => {
     setSelectedTask(t);
     setEditForm({ title: t.title, status: t.status, priority: t.priority, dueDate: t.dueDate });
     setEditOpen(true);
-  };
-  const handleEdit = () => {
-    if (!selectedTask) return;
-    const errs: Record<string, boolean> = {};
-    if (!editForm.title.trim()) errs.title = true;
-    setEditErrors(errs);
-    if (Object.keys(errs).length > 0) return;
-
-    setTasks((prev) => prev.map((t) => t.id === selectedTask.id ? { ...t, title: editForm.title, status: editForm.status as Task["status"], priority: editForm.priority as Task["priority"], dueDate: editForm.dueDate } : t));
-    toast.success("Task updated successfully");
-    setEditOpen(false);
-  };
-
-  const handleDuplicate = (t: Task) => {
-    const copy = { ...t, id: `task-copy-${Date.now()}`, title: `${t.title} (Copy)` };
-    setTasks((prev) => [copy, ...prev]);
-    toast.success("Task duplicated");
-  };
-
-  const openDeleteDialog = (t: Task) => { setSelectedTask(t); setDeleteOpen(true); };
-  const handleDelete = () => {
-    if (!selectedTask) return;
-    setTasks((prev) => prev.filter((t) => t.id !== selectedTask.id));
-    toast.success("Task deleted");
-    setDeleteOpen(false);
   };
 
   const [newTask, setNewTask] = useState({
@@ -113,6 +180,83 @@ export function TasksTab() {
   const [editErrors, setEditErrors] = useState<Record<string, boolean>>({});
   const [bulkFileName, setBulkFileName] = useState<string | null>(null);
   const [attachmentName, setAttachmentName] = useState<string | null>(null);
+
+  const handleEdit = async () => {
+    if (!selectedTask) return;
+    const errs: Record<string, boolean> = {};
+    if (!editForm.title.trim()) errs.title = true;
+    setEditErrors(errs);
+    if (Object.keys(errs).length > 0) return;
+
+    const id = getTaskId(selectedTask);
+
+    // Optimistic update
+    setTasks((prev) => prev.map((t) => (t._dbId ?? t.id) === (selectedTask._dbId ?? selectedTask.id) ? { ...t, title: editForm.title, status: editForm.status as Task["status"], priority: editForm.priority as Task["priority"], dueDate: editForm.dueDate } : t));
+    setEditOpen(false);
+
+    try {
+      const res = await fetch(`/api/v1/tasks/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: editForm.title,
+          status: statusDbMap[editForm.status] ?? "pending",
+          priority: priorityDbMap[editForm.priority] ?? "low",
+          dueDate: editForm.dueDate || null,
+        }),
+      });
+      if (!res.ok) throw new Error("API error");
+      toast.success("Task updated successfully");
+    } catch {
+      toast.success("Task updated (offline)");
+    }
+  };
+
+  const handleDuplicate = async (t: TaskWithDbId) => {
+    const body = {
+      title: `${t.title} (Copy)`,
+      status: statusDbMap[t.status] ?? "pending",
+      priority: priorityDbMap[t.priority] ?? "low",
+      assignedTo: t.assignedTo,
+    };
+
+    // Optimistic local copy
+    const localCopy: TaskWithDbId = { ...t, id: `task-copy-${Date.now()}`, _dbId: undefined, title: `${t.title} (Copy)` };
+
+    try {
+      const res = await fetch("/api/v1/tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error("API error");
+      const created = await res.json();
+      setTasks((prev) => [mapDbTask(created), ...prev]);
+      toast.success("Task duplicated");
+    } catch {
+      setTasks((prev) => [localCopy, ...prev]);
+      toast.success("Task duplicated (offline)");
+    }
+  };
+
+  const openDeleteDialog = (t: TaskWithDbId) => { setSelectedTask(t); setDeleteOpen(true); };
+
+  const handleDelete = async () => {
+    if (!selectedTask) return;
+    const id = getTaskId(selectedTask);
+
+    // Optimistic update
+    setTasks((prev) => prev.filter((t) => (t._dbId ?? t.id) !== (selectedTask._dbId ?? selectedTask.id)));
+    setDeleteOpen(false);
+
+    try {
+      const res = await fetch(`/api/v1/tasks/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("API error");
+      toast.success("Task deleted");
+    } catch {
+      toast.success("Task deleted (offline)");
+    }
+  };
 
   const handleFileUpload = (accept: string, onSelect?: (name: string) => void) => {
     const input = document.createElement("input");
@@ -127,20 +271,47 @@ export function TasksTab() {
     input.click();
   };
 
-  const handleAddTask = () => {
+  const handleAddTask = async () => {
     const errs: Record<string, boolean> = {};
     if (!newTask.title.trim()) errs.title = true;
     setAddErrors(errs);
     if (Object.keys(errs).length > 0) return;
 
-    setTasks((prev) => [
-      { id: `task-${Date.now()}`, title: newTask.title, status: "Pending" as const, assignedTo: "Unassigned", dueDate: newTask.dueDate || "—", priority: newTask.priority as Task["priority"] },
-      ...prev,
-    ]);
+    const body = {
+      title: newTask.title,
+      description: newTask.description || null,
+      department: newTask.department || null,
+      responsibility: newTask.responsibility,
+      priority: priorityDbMap[newTask.priority] ?? "low",
+      source: newTask.source,
+      eisenhowerMatrix: newTask.eisenhowerMatrix,
+      dueDate: newTask.dueDate || null,
+      status: "pending" as const,
+      assignedTo: "Unassigned",
+    };
+
+    try {
+      const res = await fetch("/api/v1/tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error("API error");
+      const created = await res.json();
+      setTasks((prev) => [mapDbTask(created), ...prev]);
+      toast.success("Task created successfully");
+    } catch {
+      // Fallback: add to local state only
+      setTasks((prev) => [
+        { id: `task-${Date.now()}`, title: newTask.title, status: "Pending" as const, assignedTo: "Unassigned", dueDate: newTask.dueDate || "\u2014", priority: newTask.priority as Task["priority"] },
+        ...prev,
+      ]);
+      toast.success("Task created (offline)");
+    }
+
     setNewTask({ title: "", description: "", department: "", responsibility: "Individual", priority: "Low", source: "Routine Maintenance", eisenhowerMatrix: "Urgent & Important", dueDate: "" });
     setAddErrors({});
     setAttachmentName(null);
-    toast.success("Task created successfully");
     setActiveView("list");
   };
 
@@ -165,65 +336,75 @@ export function TasksTab() {
 
       {activeView === "list" ? (
         <>
-          <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
-            <table className="w-full table-fixed">
-              <colgroup>
-                <col style={{ width: "30%" }} /><col style={{ width: "10%" }} /><col style={{ width: "16%" }} /><col style={{ width: "12%" }} /><col style={{ width: "10%" }} /><col style={{ width: "22%" }} />
-              </colgroup>
-              <thead>
-                <tr className="border-b border-slate-100">
-                  <th className="text-left py-3 px-3 text-[11px] font-medium text-slate-400">TASK TITLE</th>
-                  <th className="text-left py-3 px-3 text-[11px] font-medium text-slate-400">STATUS</th>
-                  <th className="text-left py-3 px-3 text-[11px] font-medium text-slate-400">ASSIGNED TO</th>
-                  <th className="text-left py-3 px-3 text-[11px] font-medium text-slate-400">DUE DATE</th>
-                  <th className="text-left py-3 px-3 text-[11px] font-medium text-slate-400">PRIORITY</th>
-                  <th className="text-center py-3 px-3 text-[11px] font-medium text-slate-400">ACTIONS</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {paginatedTasks.map((task) => (
-                  <tr key={task.id} className="hover:bg-slate-50/40">
-                    <td className="py-3.5 px-3 text-[13px] text-slate-800 truncate">{task.title}</td>
-                    <td className="py-3.5 px-3"><StatusBadge status={task.status} /></td>
-                    <td className="py-3.5 px-3 text-[13px] text-slate-400">{task.assignedTo}</td>
-                    <td className="py-3.5 px-3 text-[13px] text-slate-400">{task.dueDate}</td>
-                    <td className="py-3.5 px-3"><StatusBadge status={task.priority} variant={task.priority === "High" ? "danger" : task.priority === "Medium" ? "purple" : "neutral"} /></td>
-                    <td className="py-3.5 px-3">
-                      <div className="flex items-center justify-center gap-1">
-                        <button onClick={() => openAssign(task)} className="h-7 w-7 rounded-md flex items-center justify-center text-slate-500 hover:bg-blue-50 hover:text-blue-600 transition-colors" title="Assign">
-                          <UserPlus className="h-3.5 w-3.5" />
-                        </button>
-                        <button onClick={() => openView(task)} className="h-7 w-7 rounded-md flex items-center justify-center text-blue-600 hover:bg-blue-50 transition-colors" title="View">
-                          <Eye className="h-3.5 w-3.5" />
-                        </button>
-                        <button onClick={() => handleDuplicate(task)} className="h-7 w-7 rounded-md flex items-center justify-center text-slate-500 hover:bg-slate-100 transition-colors" title="Duplicate">
-                          <Copy className="h-3.5 w-3.5" />
-                        </button>
-                        <button onClick={() => openEditDialog(task)} className="h-7 w-7 rounded-md flex items-center justify-center text-amber-600 hover:bg-amber-50 transition-colors" title="Edit">
-                          <Pencil className="h-3.5 w-3.5" />
-                        </button>
-                        <button onClick={() => openDeleteDialog(task)} className="h-7 w-7 rounded-md flex items-center justify-center text-red-500 hover:bg-red-50 transition-colors" title="Delete">
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <p className="text-[12px] text-slate-400">Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, totalTasks)} of {totalTasks} tasks</p>
-            <div className="flex items-center gap-1">
-              <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setCurrentPage((p) => p - 1)} className="h-7 text-[11px]"><ChevronLeft className="h-3 w-3 mr-0.5" /> Previous</Button>
-              {Array.from({ length: Math.min(totalPages, 3) }, (_, i) => i + 1).map((page) => (
-                <Button key={page} variant={page === currentPage ? "default" : "outline"} size="sm" onClick={() => setCurrentPage(page)} className="h-7 w-7 text-[11px]">{page}</Button>
-              ))}
-              {totalPages > 3 && <span className="text-[11px] text-slate-400">...</span>}
-              <Button variant="outline" size="sm" disabled={currentPage >= totalPages} onClick={() => setCurrentPage((p) => p + 1)} className="h-7 text-[11px]">Next <ChevronRight className="h-3 w-3 ml-0.5" /></Button>
+          {/* Loading state */}
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+              <span className="ml-2 text-[13px] text-slate-500">Loading tasks...</span>
             </div>
-          </div>
+          ) : (
+            <>
+              <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+                <table className="w-full table-fixed">
+                  <colgroup>
+                    <col style={{ width: "30%" }} /><col style={{ width: "10%" }} /><col style={{ width: "16%" }} /><col style={{ width: "12%" }} /><col style={{ width: "10%" }} /><col style={{ width: "22%" }} />
+                  </colgroup>
+                  <thead>
+                    <tr className="border-b border-slate-100">
+                      <th className="text-left py-3 px-3 text-[11px] font-medium text-slate-400">TASK TITLE</th>
+                      <th className="text-left py-3 px-3 text-[11px] font-medium text-slate-400">STATUS</th>
+                      <th className="text-left py-3 px-3 text-[11px] font-medium text-slate-400">ASSIGNED TO</th>
+                      <th className="text-left py-3 px-3 text-[11px] font-medium text-slate-400">DUE DATE</th>
+                      <th className="text-left py-3 px-3 text-[11px] font-medium text-slate-400">PRIORITY</th>
+                      <th className="text-center py-3 px-3 text-[11px] font-medium text-slate-400">ACTIONS</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50">
+                    {paginatedTasks.map((task) => (
+                      <tr key={task._dbId ?? task.id} className="hover:bg-slate-50/40">
+                        <td className="py-3.5 px-3 text-[13px] text-slate-800 truncate">{task.title}</td>
+                        <td className="py-3.5 px-3"><StatusBadge status={task.status} /></td>
+                        <td className="py-3.5 px-3 text-[13px] text-slate-400">{task.assignedTo}</td>
+                        <td className="py-3.5 px-3 text-[13px] text-slate-400">{task.dueDate}</td>
+                        <td className="py-3.5 px-3"><StatusBadge status={task.priority} variant={task.priority === "High" ? "danger" : task.priority === "Medium" ? "purple" : "neutral"} /></td>
+                        <td className="py-3.5 px-3">
+                          <div className="flex items-center justify-center gap-1">
+                            <button onClick={() => openAssign(task)} className="h-7 w-7 rounded-md flex items-center justify-center text-slate-500 hover:bg-blue-50 hover:text-blue-600 transition-colors" title="Assign">
+                              <UserPlus className="h-3.5 w-3.5" />
+                            </button>
+                            <button onClick={() => openView(task)} className="h-7 w-7 rounded-md flex items-center justify-center text-blue-600 hover:bg-blue-50 transition-colors" title="View">
+                              <Eye className="h-3.5 w-3.5" />
+                            </button>
+                            <button onClick={() => handleDuplicate(task)} className="h-7 w-7 rounded-md flex items-center justify-center text-slate-500 hover:bg-slate-100 transition-colors" title="Duplicate">
+                              <Copy className="h-3.5 w-3.5" />
+                            </button>
+                            <button onClick={() => openEditDialog(task)} className="h-7 w-7 rounded-md flex items-center justify-center text-amber-600 hover:bg-amber-50 transition-colors" title="Edit">
+                              <Pencil className="h-3.5 w-3.5" />
+                            </button>
+                            <button onClick={() => openDeleteDialog(task)} className="h-7 w-7 rounded-md flex items-center justify-center text-red-500 hover:bg-red-50 transition-colors" title="Delete">
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <p className="text-[12px] text-slate-400">Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, totalTasks)} of {totalTasks} tasks</p>
+                <div className="flex items-center gap-1">
+                  <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setCurrentPage((p) => p - 1)} className="h-7 text-[11px]"><ChevronLeft className="h-3 w-3 mr-0.5" /> Previous</Button>
+                  {Array.from({ length: Math.min(totalPages, 3) }, (_, i) => i + 1).map((page) => (
+                    <Button key={page} variant={page === currentPage ? "default" : "outline"} size="sm" onClick={() => setCurrentPage(page)} className="h-7 w-7 text-[11px]">{page}</Button>
+                  ))}
+                  {totalPages > 3 && <span className="text-[11px] text-slate-400">...</span>}
+                  <Button variant="outline" size="sm" disabled={currentPage >= totalPages} onClick={() => setCurrentPage((p) => p + 1)} className="h-7 text-[11px]">Next <ChevronRight className="h-3 w-3 ml-0.5" /></Button>
+                </div>
+              </div>
+            </>
+          )}
         </>
       ) : (
         <div className="rounded-xl border border-slate-200 bg-white p-5">

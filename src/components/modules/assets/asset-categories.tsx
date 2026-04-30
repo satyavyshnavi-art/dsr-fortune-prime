@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -78,7 +78,7 @@ function getCategoryIcon(iconName: string) {
 }
 
 export function AssetCategories() {
-  const [categories] = useState<AssetCategory[]>(mockCategories);
+  const [categories, setCategories] = useState<AssetCategory[]>(mockCategories);
   const [assets, setAssets] = useState<Asset[]>(mockAssets);
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -90,6 +90,62 @@ export function AssetCategories() {
   // File picker refs
   const bulkUploadRef = useRef<HTMLInputElement>(null);
   const categoryUploadRefs = useRef<Record<string, HTMLInputElement | null>>({});
+
+  // Fetch assets from API
+  useEffect(() => {
+    fetch("/api/v1/assets")
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          const mapped: Asset[] = data.map((a: Record<string, unknown>) => ({
+            id: a.id as string,
+            name: a.name as string,
+            assetTag: (a.assetTag as string) || "",
+            categoryId: a.categoryId as string,
+            categoryName: (a.categoryName as string) || "",
+            location: (a.location as string) || "",
+            status: (a.status as "active" | "maintenance" | "inactive") || "active",
+            maintenanceFrequency: (a.maintenanceFrequency as string) || "Monthly",
+            lastChecked: (a.lastChecked as string) || "",
+            serviceHistory: (a.serviceHistory as string) || "",
+            qrCodeData: (a.qrCodeData as string) || `asset|${a.assetTag || a.id}`,
+          }));
+          setAssets(mapped);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  // Fetch categories from API and build AssetCategory shape from raw + assets
+  useEffect(() => {
+    fetch("/api/v1/assets/categories")
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          const built: AssetCategory[] = data.map((cat: Record<string, unknown>) => {
+            const catAssets = assets.filter((a) => a.categoryId === cat.id);
+            const activeCount = catAssets.filter((a) => a.status === "active").length;
+            const maintenanceCount = catAssets.filter((a) => a.status === "maintenance").length;
+            const inactiveCount = catAssets.filter((a) => a.status === "inactive").length;
+            const mostRecent = catAssets[catAssets.length - 1];
+            return {
+              id: cat.id as string,
+              name: cat.name as string,
+              icon: (cat.icon as string) || "Package",
+              activeCount,
+              maintenanceCount,
+              inactiveCount,
+              totalAssets: catAssets.length,
+              mostRecentAsset: mostRecent
+                ? { name: mostRecent.name, location: mostRecent.location }
+                : { name: "-", location: "-" },
+            };
+          });
+          setCategories(built);
+        }
+      })
+      .catch(() => {});
+  }, [assets]);
 
   // Form state for add/edit
   const [formData, setFormData] = useState({
@@ -135,34 +191,130 @@ export function AssetCategories() {
     setShowQRModal(true);
   };
 
-  const handleAddAsset = () => {
+  const handleAddAsset = async () => {
     const cat = categories.find((c) => c.id === addCategoryId);
-    const newAsset: Asset = {
+    const localAsset: Asset = {
       id: `asset-${Date.now()}`,
       ...formData,
       categoryId: addCategoryId,
       categoryName: cat?.name || "",
       qrCodeData: `asset|${formData.assetTag}`,
     };
-    setAssets([...assets, newAsset]);
+
+    try {
+      const res = await fetch("/api/v1/assets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name,
+          assetTag: formData.assetTag,
+          location: formData.location,
+          status: formData.status,
+          maintenanceFrequency: formData.maintenanceFrequency,
+          lastChecked: formData.lastChecked || null,
+          serviceHistory: formData.serviceHistory || null,
+          categoryId: addCategoryId,
+          qrCodeData: `asset|${formData.assetTag}`,
+        }),
+      });
+      if (res.ok) {
+        const created = await res.json();
+        const mapped: Asset = {
+          id: created.id,
+          name: created.name,
+          assetTag: created.assetTag || "",
+          categoryId: created.categoryId,
+          categoryName: cat?.name || "",
+          location: created.location || "",
+          status: created.status || "active",
+          maintenanceFrequency: created.maintenanceFrequency || "Monthly",
+          lastChecked: created.lastChecked || "",
+          serviceHistory: created.serviceHistory || "",
+          qrCodeData: created.qrCodeData || `asset|${created.assetTag || created.id}`,
+        };
+        setAssets([...assets, mapped]);
+        setShowAddModal(false);
+        toast.success("Asset added successfully");
+        return;
+      }
+    } catch {
+      // Fall through to local-only
+    }
+
+    // Fallback: local state mutation
+    setAssets([...assets, localAsset]);
     setShowAddModal(false);
-    toast.success("Asset added successfully");
+    toast.success("Asset added locally");
   };
 
-  const handleUpdateAsset = () => {
+  const handleUpdateAsset = async () => {
     if (!selectedAsset) return;
+
+    try {
+      const res = await fetch(`/api/v1/assets/${selectedAsset.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name,
+          assetTag: formData.assetTag,
+          location: formData.location,
+          status: formData.status,
+          maintenanceFrequency: formData.maintenanceFrequency,
+          lastChecked: formData.lastChecked || null,
+          serviceHistory: formData.serviceHistory || null,
+        }),
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setAssets(
+          assets.map((a) =>
+            a.id === selectedAsset.id
+              ? {
+                  ...a,
+                  name: updated.name || formData.name,
+                  assetTag: updated.assetTag || formData.assetTag,
+                  location: updated.location || formData.location,
+                  status: updated.status || formData.status,
+                  maintenanceFrequency: updated.maintenanceFrequency || formData.maintenanceFrequency,
+                  lastChecked: updated.lastChecked || formData.lastChecked,
+                  serviceHistory: updated.serviceHistory || formData.serviceHistory,
+                }
+              : a
+          )
+        );
+        setShowEditModal(false);
+        toast.success("Asset updated successfully");
+        return;
+      }
+    } catch {
+      // Fall through to local-only
+    }
+
+    // Fallback: local state mutation
     setAssets(
       assets.map((a) =>
         a.id === selectedAsset.id ? { ...a, ...formData } : a
       )
     );
     setShowEditModal(false);
-    toast.success("Asset updated successfully");
+    toast.success("Asset updated locally");
   };
 
-  const handleDeleteAsset = (assetId: string) => {
+  const handleDeleteAsset = async (assetId: string) => {
+    try {
+      const res = await fetch(`/api/v1/assets/${assetId}`, { method: "DELETE" });
+      if (res.ok) {
+        setAssets(assets.filter((a) => a.id !== assetId));
+        toast.success("Asset deleted successfully");
+        return;
+      }
+    } catch {
+      // Fall through to local-only
+    }
+
+    // Fallback: local state mutation
     setAssets(assets.filter((a) => a.id !== assetId));
-    toast.success("Asset deleted successfully");
+    toast.success("Asset deleted locally");
   };
 
   const handleBulkUpload = (e: React.ChangeEvent<HTMLInputElement>) => {

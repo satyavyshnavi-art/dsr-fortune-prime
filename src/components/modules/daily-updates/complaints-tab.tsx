@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { KPICard } from "@/components/shared/kpi-card";
 import { StatusBadge } from "@/components/shared/status-badge";
@@ -24,35 +24,70 @@ import {
   Plus,
   Search,
   X,
+  Loader2,
 } from "lucide-react";
 import { complaintsData, type Complaint } from "./mock-data";
 
+// Map DB status (snake_case) to display status (Title Case)
+const statusDisplayMap: Record<string, Complaint["status"]> = {
+  open: "Open",
+  in_progress: "In Progress",
+  resolved: "Resolved",
+  closed: "Resolved", // map "closed" to "Resolved" for UI
+};
+
+// Map display status back to DB status
+const statusDbMap: Record<string, string> = {
+  "Open": "open",
+  "In Progress": "in_progress",
+  "Resolved": "resolved",
+};
+
+// Convert a DB complaint record to the component's Complaint shape
+function mapDbComplaint(row: Record<string, unknown>): Complaint {
+  return {
+    ticketId: (row.ticketId as string) ?? (row.id as string) ?? "",
+    title: (row.title as string) ?? "",
+    status: statusDisplayMap[(row.status as string) ?? "open"] ?? "Open",
+    assignedTo: (row.assignedTo as string) ?? "Unassigned",
+    date: row.createdAt
+      ? new Date(row.createdAt as string).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "2-digit" })
+      : "",
+    // Keep the DB id for API calls
+    _dbId: (row.id as string) ?? undefined,
+  } as Complaint & { _dbId?: string };
+}
+
+// Extend Complaint type locally to carry DB id
+type ComplaintWithDbId = Complaint & { _dbId?: string };
+
 // Mock employees for assignment
 const EMPLOYEES = [
-  "Demo User ①",
-  "Kumar A ①",
-  "Govindaraju reddy ①",
-  "Naveen Kumar ①",
-  "Venkatesh N ①",
-  "Nataraj P ①",
-  "Alok kumar malik ①",
-  "Sanjeevini G ①",
-  "Sudhir Kumar ①",
-  "Bhagyalaxmi D ①",
-  "Bhagirathi Dev ①",
-  "Tatkal Anand MD ①",
-  "Janmejay M ①",
-  "Prakash reddy ①",
-  "Prasanti reddy ①",
-  "Bhim C ①",
-  "Dhive G ①",
-  "Veerabhadreshwaramma Lakshmippa ①",
-  "Karna V ①",
+  "Demo User \u2460",
+  "Kumar A \u2460",
+  "Govindaraju reddy \u2460",
+  "Naveen Kumar \u2460",
+  "Venkatesh N \u2460",
+  "Nataraj P \u2460",
+  "Alok kumar malik \u2460",
+  "Sanjeevini G \u2460",
+  "Sudhir Kumar \u2460",
+  "Bhagyalaxmi D \u2460",
+  "Bhagirathi Dev \u2460",
+  "Tatkal Anand MD \u2460",
+  "Janmejay M \u2460",
+  "Prakash reddy \u2460",
+  "Prasanti reddy \u2460",
+  "Bhim C \u2460",
+  "Dhive G \u2460",
+  "Veerabhadreshwaramma Lakshmippa \u2460",
+  "Karna V \u2460",
 ];
 
 export function ComplaintsTab() {
   const [activeView, setActiveView] = useState<"list" | "add">("list");
-  const [complaints, setComplaints] = useState(complaintsData);
+  const [complaints, setComplaints] = useState<ComplaintWithDbId[]>(complaintsData);
+  const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
 
@@ -61,7 +96,7 @@ export function ComplaintsTab() {
   const [viewOpen, setViewOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [selectedComplaint, setSelectedComplaint] = useState<Complaint | null>(null);
+  const [selectedComplaint, setSelectedComplaint] = useState<ComplaintWithDbId | null>(null);
   const [assignSearch, setAssignSearch] = useState("");
   const [editForm, setEditForm] = useState({ title: "", status: "", priority: "" });
 
@@ -71,6 +106,27 @@ export function ComplaintsTab() {
   });
   const [addErrors, setAddErrors] = useState<Record<string, boolean>>({});
   const [editErrors, setEditErrors] = useState<Record<string, boolean>>({});
+
+  // Fetch complaints from API
+  const fetchComplaints = useCallback(async () => {
+    try {
+      const res = await fetch("/api/v1/complaints");
+      if (!res.ok) throw new Error("Failed to fetch");
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        setComplaints(data.map(mapDbComplaint));
+      }
+      // If empty array, keep mock data as fallback
+    } catch {
+      // Keep mock data on error
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchComplaints();
+  }, [fetchComplaints]);
 
   const totalComplaints = complaints.length;
   const openCount = complaints.filter((c) => c.status === "Open").length;
@@ -91,69 +147,113 @@ export function ComplaintsTab() {
     );
   }, [assignSearch]);
 
+  // Helper to get the identifier for API calls (DB id or ticketId)
+  const getComplaintId = (c: ComplaintWithDbId) => c._dbId ?? c.ticketId;
+
   // Action handlers
-  const openAssign = (c: Complaint) => {
+  const openAssign = (c: ComplaintWithDbId) => {
     setSelectedComplaint(c);
     setAssignSearch("");
     setAssignOpen(true);
   };
 
-  const handleAssign = (employee: string) => {
+  const handleAssign = async (employee: string) => {
     if (!selectedComplaint) return;
-    const name = employee.replace(/ ①$/, "");
+    const name = employee.replace(/ \u2460$/, "");
+    const id = getComplaintId(selectedComplaint);
+
+    // Optimistic update
     setComplaints((prev) =>
       prev.map((c) =>
-        c.ticketId === selectedComplaint.ticketId
+        (c._dbId ?? c.ticketId) === (selectedComplaint._dbId ?? selectedComplaint.ticketId)
           ? { ...c, assignedTo: name, status: "In Progress" as const }
           : c
       )
     );
-    toast.success(`Assigned to ${name}`);
     setAssignOpen(false);
+
+    try {
+      const res = await fetch(`/api/v1/complaints/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ assignedTo: name, status: "in_progress" }),
+      });
+      if (!res.ok) throw new Error("API error");
+      toast.success(`Assigned to ${name}`);
+    } catch {
+      toast.success(`Assigned to ${name} (offline)`);
+    }
   };
 
-  const openView = (c: Complaint) => {
+  const openView = (c: ComplaintWithDbId) => {
     setSelectedComplaint(c);
     setViewOpen(true);
   };
 
-  const openEditDialog = (c: Complaint) => {
+  const openEditDialog = (c: ComplaintWithDbId) => {
     setSelectedComplaint(c);
     setEditForm({ title: c.title, status: c.status, priority: "Medium" });
     setEditOpen(true);
   };
 
-  const handleEdit = () => {
+  const handleEdit = async () => {
     if (!selectedComplaint) return;
     const errs: Record<string, boolean> = {};
     if (!editForm.title.trim()) errs.title = true;
     setEditErrors(errs);
     if (Object.keys(errs).length > 0) return;
 
+    const id = getComplaintId(selectedComplaint);
+
+    // Optimistic update
     setComplaints((prev) =>
       prev.map((c) =>
-        c.ticketId === selectedComplaint.ticketId
+        (c._dbId ?? c.ticketId) === (selectedComplaint._dbId ?? selectedComplaint.ticketId)
           ? { ...c, title: editForm.title, status: editForm.status as Complaint["status"] }
           : c
       )
     );
-    toast.success("Complaint updated successfully");
     setEditOpen(false);
+
+    try {
+      const res = await fetch(`/api/v1/complaints/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: editForm.title,
+          status: statusDbMap[editForm.status] ?? "open",
+        }),
+      });
+      if (!res.ok) throw new Error("API error");
+      toast.success("Complaint updated successfully");
+    } catch {
+      toast.success("Complaint updated (offline)");
+    }
   };
 
-  const openDeleteDialog = (c: Complaint) => {
+  const openDeleteDialog = (c: ComplaintWithDbId) => {
     setSelectedComplaint(c);
     setDeleteOpen(true);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!selectedComplaint) return;
-    setComplaints((prev) => prev.filter((c) => c.ticketId !== selectedComplaint.ticketId));
-    toast.success("Complaint deleted");
+    const id = getComplaintId(selectedComplaint);
+
+    // Optimistic update
+    setComplaints((prev) => prev.filter((c) => (c._dbId ?? c.ticketId) !== (selectedComplaint._dbId ?? selectedComplaint.ticketId)));
     setDeleteOpen(false);
+
+    try {
+      const res = await fetch(`/api/v1/complaints/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("API error");
+      toast.success("Complaint deleted");
+    } catch {
+      toast.success("Complaint deleted (offline)");
+    }
   };
 
-  const handleAddComplaint = () => {
+  const handleAddComplaint = async () => {
     const errs: Record<string, boolean> = {};
     if (!newComplaint.title.trim()) errs.title = true;
     if (!newComplaint.description.trim()) errs.description = true;
@@ -161,20 +261,43 @@ export function ComplaintsTab() {
     setAddErrors(errs);
     if (Object.keys(errs).length > 0) return;
 
-    const id = `GV-${String(complaints.length + 1).padStart(5, "0")}`;
-    setComplaints((prev) => [
-      {
-        ticketId: id,
-        title: newComplaint.title,
-        status: "Open" as const,
-        assignedTo: "Unassigned",
-        date: new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "2-digit" }),
-      },
-      ...prev,
-    ]);
+    const body = {
+      title: newComplaint.title,
+      description: newComplaint.description,
+      department: newComplaint.department,
+      priority: newComplaint.priority as "low" | "medium" | "high" | "critical",
+      status: "open" as const,
+      assignedTo: "Unassigned",
+    };
+
+    try {
+      const res = await fetch("/api/v1/complaints", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error("API error");
+      const created = await res.json();
+      setComplaints((prev) => [mapDbComplaint(created), ...prev]);
+      toast.success("Complaint created successfully");
+    } catch {
+      // Fallback: add to local state only
+      const localId = `GV-${String(complaints.length + 1).padStart(5, "0")}`;
+      setComplaints((prev) => [
+        {
+          ticketId: localId,
+          title: newComplaint.title,
+          status: "Open" as const,
+          assignedTo: "Unassigned",
+          date: new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "2-digit" }),
+        },
+        ...prev,
+      ]);
+      toast.success("Complaint created (offline)");
+    }
+
     setNewComplaint({ title: "", description: "", department: "", priority: "medium" });
     setAddErrors({});
-    toast.success("Complaint created successfully");
     setActiveView("list");
   };
 
@@ -218,97 +341,107 @@ export function ComplaintsTab() {
             <KPICard title="Resolved" value={resolvedCount} color="green" />
           </div>
 
-          {/* Table */}
-          <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
-            <table className="w-full table-fixed">
-              <colgroup>
-                <col style={{ width: "12%" }} />
-                <col style={{ width: "30%" }} />
-                <col style={{ width: "12%" }} />
-                <col style={{ width: "16%" }} />
-                <col style={{ width: "14%" }} />
-                <col style={{ width: "16%" }} />
-              </colgroup>
-              <thead>
-                <tr className="border-b border-slate-100">
-                  <th className="text-left py-3 px-3 text-[11px] font-medium text-slate-400">TICKET ID</th>
-                  <th className="text-left py-3 px-3 text-[11px] font-medium text-slate-400">TITLE</th>
-                  <th className="text-left py-3 px-3 text-[11px] font-medium text-slate-400">STATUS</th>
-                  <th className="text-left py-3 px-3 text-[11px] font-medium text-slate-400">ASSIGNED TO</th>
-                  <th className="text-left py-3 px-3 text-[11px] font-medium text-slate-400">DATE</th>
-                  <th className="text-center py-3 px-3 text-[11px] font-medium text-slate-400">ACTIONS</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {paginatedComplaints.map((c) => (
-                  <tr key={c.ticketId} className="hover:bg-slate-50/40">
-                    <td className="py-3.5 px-3 text-[13px] font-medium text-slate-800">{c.ticketId}</td>
-                    <td className="py-3.5 px-3 text-[13px] text-slate-700 truncate">{c.title}</td>
-                    <td className="py-3.5 px-3">
-                      <StatusBadge
-                        status={c.status}
-                        variant={c.status === "Open" ? "danger" : c.status === "In Progress" ? "warning" : "success"}
-                      />
-                    </td>
-                    <td className="py-3.5 px-3 text-[13px] text-slate-400">{c.assignedTo}</td>
-                    <td className="py-3.5 px-3 text-[13px] text-slate-400">{c.date}</td>
-                    <td className="py-3.5 px-3">
-                      <div className="flex items-center justify-center gap-1">
-                        <button
-                          onClick={() => openAssign(c)}
-                          className="h-7 w-7 rounded-md flex items-center justify-center text-slate-500 hover:bg-blue-50 hover:text-blue-600 transition-colors"
-                          title="Assign"
-                        >
-                          <UserPlus className="h-3.5 w-3.5" />
-                        </button>
-                        <button
-                          onClick={() => openView(c)}
-                          className="h-7 w-7 rounded-md flex items-center justify-center text-blue-600 hover:bg-blue-50 transition-colors"
-                          title="View"
-                        >
-                          <Eye className="h-3.5 w-3.5" />
-                        </button>
-                        <button
-                          onClick={() => openEditDialog(c)}
-                          className="h-7 w-7 rounded-md flex items-center justify-center text-amber-600 hover:bg-amber-50 transition-colors"
-                          title="Edit"
-                        >
-                          <Pencil className="h-3.5 w-3.5" />
-                        </button>
-                        <button
-                          onClick={() => openDeleteDialog(c)}
-                          className="h-7 w-7 rounded-md flex items-center justify-center text-red-500 hover:bg-red-50 transition-colors"
-                          title="Delete"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Pagination */}
-          <div className="flex items-center justify-between">
-            <p className="text-[12px] text-slate-400">
-              Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, totalComplaints)} of {totalComplaints} complaints
-            </p>
-            <div className="flex items-center gap-1">
-              <Button variant="outline" size="sm" onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} disabled={currentPage === 1} className="h-7 text-[11px]">
-                <ChevronLeft className="h-3 w-3 mr-0.5" /> Previous
-              </Button>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <Button key={page} variant={page === currentPage ? "default" : "outline"} size="sm" onClick={() => setCurrentPage(page)} className="h-7 w-7 text-[11px]">
-                  {page}
-                </Button>
-              ))}
-              <Button variant="outline" size="sm" onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="h-7 text-[11px]">
-                Next <ChevronRight className="h-3 w-3 ml-0.5" />
-              </Button>
+          {/* Loading state */}
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+              <span className="ml-2 text-[13px] text-slate-500">Loading complaints...</span>
             </div>
-          </div>
+          ) : (
+            <>
+              {/* Table */}
+              <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+                <table className="w-full table-fixed">
+                  <colgroup>
+                    <col style={{ width: "12%" }} />
+                    <col style={{ width: "30%" }} />
+                    <col style={{ width: "12%" }} />
+                    <col style={{ width: "16%" }} />
+                    <col style={{ width: "14%" }} />
+                    <col style={{ width: "16%" }} />
+                  </colgroup>
+                  <thead>
+                    <tr className="border-b border-slate-100">
+                      <th className="text-left py-3 px-3 text-[11px] font-medium text-slate-400">TICKET ID</th>
+                      <th className="text-left py-3 px-3 text-[11px] font-medium text-slate-400">TITLE</th>
+                      <th className="text-left py-3 px-3 text-[11px] font-medium text-slate-400">STATUS</th>
+                      <th className="text-left py-3 px-3 text-[11px] font-medium text-slate-400">ASSIGNED TO</th>
+                      <th className="text-left py-3 px-3 text-[11px] font-medium text-slate-400">DATE</th>
+                      <th className="text-center py-3 px-3 text-[11px] font-medium text-slate-400">ACTIONS</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50">
+                    {paginatedComplaints.map((c) => (
+                      <tr key={c._dbId ?? c.ticketId} className="hover:bg-slate-50/40">
+                        <td className="py-3.5 px-3 text-[13px] font-medium text-slate-800">{c.ticketId}</td>
+                        <td className="py-3.5 px-3 text-[13px] text-slate-700 truncate">{c.title}</td>
+                        <td className="py-3.5 px-3">
+                          <StatusBadge
+                            status={c.status}
+                            variant={c.status === "Open" ? "danger" : c.status === "In Progress" ? "warning" : "success"}
+                          />
+                        </td>
+                        <td className="py-3.5 px-3 text-[13px] text-slate-400">{c.assignedTo}</td>
+                        <td className="py-3.5 px-3 text-[13px] text-slate-400">{c.date}</td>
+                        <td className="py-3.5 px-3">
+                          <div className="flex items-center justify-center gap-1">
+                            <button
+                              onClick={() => openAssign(c)}
+                              className="h-7 w-7 rounded-md flex items-center justify-center text-slate-500 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                              title="Assign"
+                            >
+                              <UserPlus className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              onClick={() => openView(c)}
+                              className="h-7 w-7 rounded-md flex items-center justify-center text-blue-600 hover:bg-blue-50 transition-colors"
+                              title="View"
+                            >
+                              <Eye className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              onClick={() => openEditDialog(c)}
+                              className="h-7 w-7 rounded-md flex items-center justify-center text-amber-600 hover:bg-amber-50 transition-colors"
+                              title="Edit"
+                            >
+                              <Pencil className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              onClick={() => openDeleteDialog(c)}
+                              className="h-7 w-7 rounded-md flex items-center justify-center text-red-500 hover:bg-red-50 transition-colors"
+                              title="Delete"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
+              <div className="flex items-center justify-between">
+                <p className="text-[12px] text-slate-400">
+                  Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, totalComplaints)} of {totalComplaints} complaints
+                </p>
+                <div className="flex items-center gap-1">
+                  <Button variant="outline" size="sm" onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} disabled={currentPage === 1} className="h-7 text-[11px]">
+                    <ChevronLeft className="h-3 w-3 mr-0.5" /> Previous
+                  </Button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <Button key={page} variant={page === currentPage ? "default" : "outline"} size="sm" onClick={() => setCurrentPage(page)} className="h-7 w-7 text-[11px]">
+                      {page}
+                    </Button>
+                  ))}
+                  <Button variant="outline" size="sm" onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="h-7 text-[11px]">
+                    Next <ChevronRight className="h-3 w-3 ml-0.5" />
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
         </>
       ) : (
         /* Add Complaint Form */
