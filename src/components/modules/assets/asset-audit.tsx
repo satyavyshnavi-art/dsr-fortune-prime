@@ -74,12 +74,28 @@ export function AssetAudit() {
   const [deleteConfigId, setDeleteConfigId] = useState<string | null>(null);
   const [showDeleteConfigModal, setShowDeleteConfigModal] = useState(false);
 
-  // --- Start Scan state ---
+  // --- Real assets from API ---
+  interface RealAsset { id: string; name: string; assetTag: string; categoryId: string; location: string; status: string; }
+  interface RealCategory { id: string; name: string; }
+  const [realAssets, setRealAssets] = useState<RealAsset[]>([]);
+  const [realCategories, setRealCategories] = useState<RealCategory[]>([]);
+
+  // Fetch real assets + categories on mount
+  useEffect(() => {
+    fetch("/api/v1/assets").then(r => r.json()).then(d => { if (Array.isArray(d)) setRealAssets(d); }).catch(() => {});
+    fetch("/api/v1/assets/categories").then(r => r.json()).then(d => { if (Array.isArray(d)) setRealCategories(d); }).catch(() => {});
+  }, []);
+
+  // --- Scan state ---
   const [showStartScanModal, setShowStartScanModal] = useState(false);
+  const [showIndividualScanModal, setShowIndividualScanModal] = useState(false);
   const [scanCategory, setScanCategory] = useState("");
   const [scanProgress, setScanProgress] = useState(0);
   const [scanning, setScanning] = useState(false);
   const [scanComplete, setScanComplete] = useState(false);
+  const [individualAssetId, setIndividualAssetId] = useState("");
+  const [individualCondition, setIndividualCondition] = useState<"Good" | "Needs Repair" | "Damaged">("Good");
+  const [individualNotes, setIndividualNotes] = useState("");
 
   // --- Scan Report view detail ---
   const [viewScanOpen, setViewScanOpen] = useState(false);
@@ -93,10 +109,66 @@ export function AssetAudit() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [dismissedAlerts, setDismissedAlerts] = useState<number[]>([]);
 
-  // --- Scan results tracking ---
+  // --- Scan results tracking (keyed by asset ID to prevent duplicates) ---
   const [scanResults, setScanResults] = useState<AuditScanRecord[]>([...mockAuditScans]);
-  const [scannedCount, setScannedCount] = useState(0);
-  const [scannedCategories, setScannedCategories] = useState<Record<string, number>>({});
+  const [scannedAssetIds, setScannedAssetIds] = useState<Set<string>>(new Set());
+
+  // Derived counts
+  const scannedCount = scannedAssetIds.size;
+  const scannedCategories: Record<string, number> = {};
+  scannedAssetIds.forEach(assetId => {
+    const asset = realAssets.find(a => a.id === assetId);
+    if (asset) {
+      const cat = realCategories.find(c => c.id === asset.categoryId);
+      if (cat) {
+        scannedCategories[cat.name] = (scannedCategories[cat.name] || 0) + 1;
+      }
+    }
+  });
+
+  // Get assets for a category (for scan dialog)
+  const getAssetsForCategory = (catName: string) => {
+    const cat = realCategories.find(c => c.name === catName);
+    if (!cat) return [];
+    return realAssets.filter(a => a.categoryId === cat.id);
+  };
+
+  // Individual scan handler
+  const handleIndividualScan = () => {
+    if (!individualAssetId) {
+      toast.error("Please select an asset to scan");
+      return;
+    }
+    const asset = realAssets.find(a => a.id === individualAssetId);
+    if (!asset) return;
+    const cat = realCategories.find(c => c.id === asset.categoryId);
+
+    const now = new Date();
+    const dateStr = now.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) +
+      ", " + now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true });
+
+    const newScan: AuditScanRecord = {
+      id: `scan-${Date.now()}`,
+      assetTag: asset.assetTag,
+      assetName: asset.name,
+      blockType: asset.location?.split(",")[0] || "-",
+      block: "-",
+      floor: "-",
+      condition: individualCondition,
+      scannedBy: "Demo User",
+      dateTime: dateStr,
+      notes: individualNotes,
+      gps: true,
+    };
+
+    setScanResults(prev => [newScan, ...prev]);
+    setScannedAssetIds(prev => new Set([...prev, individualAssetId]));
+    toast.success(`Scanned: ${asset.name} (${asset.assetTag}) — ${individualCondition}`);
+    setShowIndividualScanModal(false);
+    setIndividualAssetId("");
+    setIndividualCondition("Good");
+    setIndividualNotes("");
+  };
 
   const handleAddConfig = () => {
     if (!newConfigCategory || !newConfigFrequency) {
@@ -163,16 +235,15 @@ export function AssetAudit() {
     if (scanProgress >= 100) {
       setScanning(false);
       setScanComplete(true);
-      // Add scan results to the scan report
+      // Add scan results using REAL assets from DB
       const now = new Date();
       const dateStr = now.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) + ", " + now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true });
-      const categoryAssets = mockCategories.find(c => c.name === scanCategory);
-      const count = categoryAssets?.totalAssets || 5;
-      const newScans: AuditScanRecord[] = Array.from({ length: Math.min(count, 5) }, (_, i) => ({
-        id: `scan-new-${Date.now()}-${i}`,
-        assetTag: `${scanCategory.slice(0, 4).toUpperCase()}_${i + 1}`,
-        assetName: `${scanCategory} Asset ${i + 1}`,
-        blockType: "-",
+      const catAssets = getAssetsForCategory(scanCategory).filter(a => !scannedAssetIds.has(a.id));
+      const newScans: AuditScanRecord[] = catAssets.map((asset) => ({
+        id: `scan-${Date.now()}-${asset.id.slice(0, 8)}`,
+        assetTag: asset.assetTag,
+        assetName: asset.name,
+        blockType: asset.location?.split(",")[0] || "-",
         block: "-",
         floor: "-",
         condition: "Good" as const,
@@ -181,13 +252,17 @@ export function AssetAudit() {
         notes: "",
         gps: true,
       }));
-      setScanResults(prev => [...newScans, ...prev]);
-      setScannedCount(prev => prev + newScans.length);
-      setScannedCategories(prev => ({
-        ...prev,
-        [scanCategory]: (prev[scanCategory] || 0) + newScans.length,
-      }));
-      toast.success(`Scan complete! ${newScans.length} assets scanned in ${scanCategory}`);
+      if (newScans.length > 0) {
+        setScanResults(prev => [...newScans, ...prev]);
+        setScannedAssetIds(prev => {
+          const next = new Set(prev);
+          catAssets.forEach(a => next.add(a.id));
+          return next;
+        });
+        toast.success(`Scan complete! ${newScans.length} real assets scanned in ${scanCategory}`);
+      } else {
+        toast.info(`All assets in ${scanCategory} have already been scanned`);
+      }
       return;
     }
     const timer = setTimeout(() => {
@@ -238,22 +313,38 @@ export function AssetAudit() {
         })}
       </div>
 
-      {/* Notification toggle + Start Scan */}
+      {/* Actions: Scan buttons + Notifications */}
       <div className="flex justify-between">
-        <Button
-          size="sm"
-          className="h-7 text-[11px] px-2.5 bg-blue-600 hover:bg-blue-700 text-white"
-          onClick={() => {
-            setScanCategory("");
-            setScanProgress(0);
-            setScanning(false);
-            setScanComplete(false);
-            setShowStartScanModal(true);
-          }}
-        >
-          <ScanLine className="h-3 w-3 mr-1" />
-          Start Scan
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            className="h-7 text-[11px] px-2.5 bg-blue-600 hover:bg-blue-700 text-white"
+            onClick={() => {
+              setScanCategory("");
+              setScanProgress(0);
+              setScanning(false);
+              setScanComplete(false);
+              setShowStartScanModal(true);
+            }}
+          >
+            <ScanLine className="h-3 w-3 mr-1" />
+            Bulk Scan Category
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-7 text-[11px] px-2.5"
+            onClick={() => {
+              setIndividualAssetId("");
+              setIndividualCondition("Good");
+              setIndividualNotes("");
+              setShowIndividualScanModal(true);
+            }}
+          >
+            <Eye className="h-3 w-3 mr-1" />
+            Scan Individual Asset
+          </Button>
+        </div>
         <Button
           variant="outline"
           size="sm"
@@ -306,7 +397,7 @@ export function AssetAudit() {
       </div>
 
       {/* Content based on sub-tab */}
-      {activeSubTab === "dashboard" && <AuditDashboard extraScanned={scannedCount} scannedCategories={scannedCategories} />}
+      {activeSubTab === "dashboard" && <AuditDashboard extraScanned={scannedCount} scannedCategories={scannedCategories} realAssets={realAssets} realCategories={realCategories} />}
       {activeSubTab === "audit-report" && <AuditReport />}
       {activeSubTab === "scan-report" && <ScanReport onView={openViewScan} scans={scanResults} />}
       {activeSubTab === "my-scans" && <MyScans />}
@@ -391,6 +482,88 @@ export function AssetAudit() {
                 </Button>
               </div>
             )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ===== INDIVIDUAL SCAN DIALOG ===== */}
+      <Dialog open={showIndividualScanModal} onOpenChange={setShowIndividualScanModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-[15px]">Scan Individual Asset</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 pt-1">
+            <div>
+              <Label className="text-[12px] text-slate-600 mb-1.5 block">Select Asset *</Label>
+              <select
+                value={individualAssetId}
+                onChange={(e) => setIndividualAssetId(e.target.value)}
+                className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 text-[13px]"
+              >
+                <option value="">Choose an asset...</option>
+                {realCategories.map(cat => {
+                  const catAssets = realAssets.filter(a => a.categoryId === cat.id);
+                  if (catAssets.length === 0) return null;
+                  return (
+                    <optgroup key={cat.id} label={cat.name}>
+                      {catAssets.map(asset => (
+                        <option key={asset.id} value={asset.id} disabled={scannedAssetIds.has(asset.id)}>
+                          {asset.name} ({asset.assetTag}) {scannedAssetIds.has(asset.id) ? "✓ Scanned" : ""}
+                        </option>
+                      ))}
+                    </optgroup>
+                  );
+                })}
+              </select>
+            </div>
+            <div>
+              <Label className="text-[12px] text-slate-600 mb-1.5 block">Condition *</Label>
+              <div className="flex gap-2">
+                {(["Good", "Needs Repair", "Damaged"] as const).map(c => (
+                  <button
+                    key={c}
+                    onClick={() => setIndividualCondition(c)}
+                    className={`flex-1 h-9 rounded-lg border text-[12px] font-medium transition-colors ${
+                      individualCondition === c
+                        ? c === "Good" ? "border-green-400 bg-green-50 text-green-700"
+                          : c === "Needs Repair" ? "border-amber-400 bg-amber-50 text-amber-700"
+                          : "border-red-400 bg-red-50 text-red-700"
+                        : "border-slate-200 text-slate-500 hover:bg-slate-50"
+                    }`}
+                  >
+                    {c}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <Label className="text-[12px] text-slate-600 mb-1.5 block">Notes (optional)</Label>
+              <textarea
+                value={individualNotes}
+                onChange={(e) => setIndividualNotes(e.target.value)}
+                placeholder="Add observation notes..."
+                rows={2}
+                className="flex w-full rounded-lg border border-input bg-transparent px-3 py-2 text-[13px]"
+              />
+            </div>
+            {individualAssetId && (
+              <div className="bg-blue-50 border border-blue-100 rounded-lg p-2.5">
+                <p className="text-[11px] text-blue-700">
+                  Asset: <span className="font-semibold">{realAssets.find(a => a.id === individualAssetId)?.name}</span>
+                  {" · "}Tag: <span className="font-semibold">{realAssets.find(a => a.id === individualAssetId)?.assetTag}</span>
+                </p>
+              </div>
+            )}
+            <div className="flex justify-end gap-2 pt-1">
+              <Button variant="outline" onClick={() => setShowIndividualScanModal(false)} className="h-9 text-[13px] rounded-lg">Cancel</Button>
+              <Button
+                onClick={handleIndividualScan}
+                disabled={!individualAssetId}
+                className="h-9 text-[13px] rounded-lg bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                <CheckCircle className="h-3.5 w-3.5 mr-1.5" /> Record Scan
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
@@ -590,18 +763,30 @@ export function AssetAudit() {
 
 // -------- Sub-tab components --------
 
-function AuditDashboard({ extraScanned = 0, scannedCategories = {} }: { extraScanned?: number; scannedCategories?: Record<string, number> }) {
-  const totalAssets = auditDashboardSummary.totalAssets;
-  const scanned = auditDashboardSummary.scanned + extraScanned;
+function AuditDashboard({ extraScanned = 0, scannedCategories = {}, realAssets = [], realCategories = [] }: { extraScanned?: number; scannedCategories?: Record<string, number>; realAssets?: { id: string; categoryId: string }[]; realCategories?: { id: string; name: string }[] }) {
+  // Use real asset counts if available
+  const totalAssets = realAssets.length > 0 ? realAssets.length : auditDashboardSummary.totalAssets;
+  const scanned = extraScanned;
   const remaining = Math.max(0, totalAssets - scanned);
   const overallCompletion = totalAssets > 0 ? Math.min(100, Math.round((scanned / totalAssets) * 100)) : 0;
 
-  // Build category data with live scan counts
-  const categories = auditDashboardSummary.categories.map((cat) => {
-    const extraForCat = scannedCategories[cat.name] || 0;
-    const catScanned = cat.scanned + extraForCat;
-    return { ...cat, scanned: catScanned };
-  });
+  // Build category data from real DB categories + real asset counts
+  const categories = realCategories.length > 0
+    ? realCategories.map((cat) => {
+        const catAssetCount = realAssets.filter(a => a.categoryId === cat.id).length;
+        const catScanned = scannedCategories[cat.name] || 0;
+        return {
+          name: cat.name,
+          frequency: "Monthly",
+          period: "01 Apr - 01 May",
+          total: catAssetCount,
+          scanned: catScanned,
+        };
+      }).filter(c => c.total > 0)
+    : auditDashboardSummary.categories.map((cat) => ({
+        ...cat,
+        scanned: cat.scanned + (scannedCategories[cat.name] || 0),
+      }));
 
   return (
     <div className="space-y-4">
