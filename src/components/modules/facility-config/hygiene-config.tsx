@@ -150,6 +150,133 @@ const mockHygieneData: HygieneCategory[] = [
   },
 ];
 
+// Gardening zone schedule data
+const GARDENING_ACTIVITIES = [
+  "TREE MAINTENANCE", "PLANT TRIMMING", "WEEDING & SOIL LOOSENING",
+  "WATERING", "LAWN MOWING", "MANURE APPLY", "MEDICINES", "DRY LEAVES CLEANING",
+] as const;
+
+const GARDENING_ZONES = [
+  { location: "Phase - 1 Park 1", activities: ["Monthly", "Monthly", "Weekly", "Daily", "Monthly", "Weekly", "Weekly", "Daily"] },
+  { location: "Phase - 1 Park 2", activities: ["Monthly", "Monthly", "Weekly", "Daily", "Monthly", "Weekly", "Weekly", "Daily"] },
+  { location: "Phase - 1 Park 3", activities: ["Monthly", "Monthly", "Weekly", "Daily", "Monthly", "Weekly", "Weekly", "Daily"] },
+  { location: "Phase - 1 Park 4", activities: ["Monthly", "Monthly", "Weekly", "Daily", "Monthly", "Weekly", "Weekly", "Daily"] },
+  { location: "Phase - 1 Park 5", activities: ["Monthly", "Monthly", "Weekly", "Daily", "Monthly", "Weekly", "Weekly", "Daily"] },
+  { location: "Phase - 1 Park 12", activities: ["Monthly", "Monthly", "Weekly", "Daily", "Monthly", "Weekly", "Weekly", "Daily"] },
+  { location: "Phase - 1 Park 13", activities: ["Monthly", "Monthly", "Weekly", "Daily", "Monthly", "Weekly", "Weekly", "Daily"] },
+  { location: "Phase - 1 Park A1", activities: ["Monthly", "Monthly", "Weekly", "Daily", "Monthly", "Weekly", "Weekly", "Daily"] },
+];
+
+function FrequencyBadge({ freq }: { freq: string }) {
+  const colors = {
+    Daily: "bg-red-100 text-red-700",
+    Weekly: "bg-yellow-100 text-yellow-700",
+    Monthly: "bg-green-100 text-green-700",
+  };
+  return (
+    <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${colors[freq as keyof typeof colors] || "bg-slate-100 text-slate-600"}`}>
+      {freq}
+    </span>
+  );
+}
+
+function GardeningSection() {
+  const [version, setVersion] = useState("v2 (Active)");
+  const [zone, setZone] = useState("Zone - 1 - Phase D1 - Park 1 to 5, 12,13 & A1");
+
+  return (
+    <div className="col-span-1 lg:col-span-2 space-y-3 mt-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-lg">🌿</span>
+          <h3 className="text-[14px] font-semibold text-slate-800">Gardening</h3>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            className="flex items-center gap-1 text-[11px] text-blue-600 hover:text-blue-700 font-medium"
+            onClick={() => toast.success("Downloading QR codes for Gardening...")}
+          >
+            <Download className="h-3 w-3" />
+            Download QRs
+          </button>
+        </div>
+      </div>
+
+      {/* Version / Zone selectors */}
+      <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex items-center gap-1.5">
+          <span className="text-[11px] text-slate-500">Version:</span>
+          <select className="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px]">
+            <option>v2 (Active) · 8 zones</option>
+            <option>v1</option>
+          </select>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[11px] text-slate-500">Zone:</span>
+          <select className="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] min-w-[280px]">
+            <option>Zone - 1 - Phase D1 - Park 1 to 5, 12,13 &amp; A1</option>
+            <option>Zone - 2 - Phase D2</option>
+          </select>
+        </div>
+        <div className="ml-auto flex items-center gap-2">
+          <Button variant="outline" className="h-7 text-[11px] px-2.5" onClick={() => toast.success("Downloading sample template...")}>
+            <Download className="h-3 w-3 mr-1" />
+            Sample Template
+          </Button>
+          <Button className="h-7 text-[11px] px-2.5 bg-green-600 hover:bg-green-700 text-white" onClick={() => {
+            const input = document.createElement("input");
+            input.type = "file";
+            input.accept = ".xlsx,.xls,.csv";
+            input.onchange = () => toast.success("Gardening schedule uploaded");
+            input.click();
+          }}>
+            <Plus className="h-3 w-3 mr-1" />
+            Upload Excel
+          </Button>
+        </div>
+      </div>
+
+      {/* Zone Schedule Header */}
+      <Card className="shadow-none border border-slate-200 rounded-lg overflow-hidden">
+        <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-200">
+          <h4 className="text-[12px] font-semibold text-slate-700">
+            Zone - 1 : Phase D1 - Park 1 to 5, 12,13 &amp; A1
+          </h4>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-slate-100">
+                <th className="text-left py-2.5 px-3 text-[10px] font-semibold text-slate-500 uppercase tracking-wider min-w-[140px] sticky left-0 bg-white">Location</th>
+                {GARDENING_ACTIVITIES.map((act) => (
+                  <th key={act} className="text-center py-2.5 px-2 text-[9px] font-semibold text-slate-500 uppercase tracking-wider min-w-[90px]">
+                    {act}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-50">
+              {GARDENING_ZONES.map((zone, idx) => (
+                <tr key={idx} className="hover:bg-slate-50/50">
+                  <td className="py-2.5 px-3 text-[12px] font-medium text-slate-800 sticky left-0 bg-white">
+                    {zone.location}
+                  </td>
+                  {zone.activities.map((freq, i) => (
+                    <td key={i} className="py-2.5 px-2 text-center">
+                      <FrequencyBadge freq={freq} />
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
 function getFrequencyFromTitle(title: string): string {
   if (title.toLowerCase().includes("daily")) return "Daily";
   if (title.toLowerCase().includes("weekly")) return "Weekly";
@@ -194,13 +321,6 @@ function TemplateRow({
           onClick={() => onView(template)}
         >
           <QrCode className="h-3.5 w-3.5" />
-        </button>
-        <button
-          className="p-1.5 rounded-md hover:bg-blue-50 text-blue-500 transition-colors"
-          title="Edit template"
-          onClick={() => onEdit(template)}
-        >
-          <Pencil className="h-3.5 w-3.5" />
         </button>
         <button
           className="p-1.5 rounded-md hover:bg-blue-50 text-blue-500 transition-colors"
@@ -500,6 +620,9 @@ export function HygieneConfig() {
             </div>
           </div>
         ))}
+
+        {/* Gardening Zone Schedule */}
+        <GardeningSection />
       </div>
 
       {/* ===== EDIT TEMPLATE DIALOG ===== */}
