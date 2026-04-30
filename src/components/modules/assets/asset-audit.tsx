@@ -96,6 +96,7 @@ export function AssetAudit() {
   // --- Scan results tracking ---
   const [scanResults, setScanResults] = useState<AuditScanRecord[]>([...mockAuditScans]);
   const [scannedCount, setScannedCount] = useState(0);
+  const [scannedCategories, setScannedCategories] = useState<Record<string, number>>({});
 
   const handleAddConfig = () => {
     if (!newConfigCategory || !newConfigFrequency) {
@@ -182,6 +183,10 @@ export function AssetAudit() {
       }));
       setScanResults(prev => [...newScans, ...prev]);
       setScannedCount(prev => prev + newScans.length);
+      setScannedCategories(prev => ({
+        ...prev,
+        [scanCategory]: (prev[scanCategory] || 0) + newScans.length,
+      }));
       toast.success(`Scan complete! ${newScans.length} assets scanned in ${scanCategory}`);
       return;
     }
@@ -301,7 +306,7 @@ export function AssetAudit() {
       </div>
 
       {/* Content based on sub-tab */}
-      {activeSubTab === "dashboard" && <AuditDashboard extraScanned={scannedCount} />}
+      {activeSubTab === "dashboard" && <AuditDashboard extraScanned={scannedCount} scannedCategories={scannedCategories} />}
       {activeSubTab === "audit-report" && <AuditReport />}
       {activeSubTab === "scan-report" && <ScanReport onView={openViewScan} scans={scanResults} />}
       {activeSubTab === "my-scans" && <MyScans />}
@@ -585,41 +590,27 @@ export function AssetAudit() {
 
 // -------- Sub-tab components --------
 
-function AuditDashboard({ extraScanned = 0 }: { extraScanned?: number }) {
-  const [data, setData] = useState(auditDashboardSummary);
+function AuditDashboard({ extraScanned = 0, scannedCategories = {} }: { extraScanned?: number; scannedCategories?: Record<string, number> }) {
+  const totalAssets = auditDashboardSummary.totalAssets;
+  const scanned = auditDashboardSummary.scanned + extraScanned;
+  const remaining = Math.max(0, totalAssets - scanned);
+  const overallCompletion = totalAssets > 0 ? Math.min(100, Math.round((scanned / totalAssets) * 100)) : 0;
 
-  // Fetch real asset counts from API
-  useEffect(() => {
-    fetch("/api/v1/assets")
-      .then((r) => r.json())
-      .then((assets) => {
-        if (Array.isArray(assets) && assets.length > 0) {
-          const totalAssets = assets.length;
-          // Use mock scanned/remaining ratios scaled to real count
-          const baseScanned = auditDashboardSummary.scanned;
-          const scanned = baseScanned + extraScanned;
-          const remaining = Math.max(0, totalAssets - scanned);
-          const overallCompletion = totalAssets > 0 ? Math.min(100, Math.round((scanned / totalAssets) * 100)) : 0;
-          setData((prev) => ({
-            ...prev,
-            totalAssets,
-            scanned,
-            remaining,
-            overallCompletion,
-          }));
-        }
-      })
-      .catch(() => {}); // keep mock data
-  }, []);
+  // Build category data with live scan counts
+  const categories = auditDashboardSummary.categories.map((cat) => {
+    const extraForCat = scannedCategories[cat.name] || 0;
+    const catScanned = cat.scanned + extraForCat;
+    return { ...cat, scanned: catScanned };
+  });
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-[13px] font-semibold text-slate-700 flex items-center gap-1.5">
           <BarChart3 className="h-3.5 w-3.5" />
-          Scan Progress -- Current Period
+          Scan Progress — Current Period
         </h3>
-        <Button variant="ghost" size="icon" className="h-6 w-6">
+        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => toast.info("Refreshing scan data...")}>
           <RefreshCw className="h-3.5 w-3.5" />
         </Button>
       </div>
@@ -627,15 +618,15 @@ function AuditDashboard({ extraScanned = 0 }: { extraScanned?: number }) {
       {/* Progress KPIs */}
       <div className="grid grid-cols-3 gap-3">
         <div className="border border-slate-200 rounded-lg px-3 py-2.5 text-center">
-          <p className="text-xl font-bold text-green-600">{data.totalAssets}</p>
+          <p className="text-xl font-bold text-green-600">{totalAssets}</p>
           <p className="text-[10px] text-slate-400 mt-0.5">Total Assets</p>
         </div>
         <div className="border border-slate-200 rounded-lg px-3 py-2.5 text-center">
-          <p className="text-xl font-bold text-blue-600">{data.scanned}</p>
+          <p className="text-xl font-bold text-blue-600">{scanned}</p>
           <p className="text-[10px] text-slate-400 mt-0.5">Scanned</p>
         </div>
         <div className="border border-slate-200 rounded-lg px-3 py-2.5 text-center">
-          <p className="text-xl font-bold text-red-600">{data.remaining}</p>
+          <p className="text-xl font-bold text-red-600">{remaining}</p>
           <p className="text-[10px] text-slate-400 mt-0.5">Remaining</p>
         </div>
       </div>
@@ -644,45 +635,56 @@ function AuditDashboard({ extraScanned = 0 }: { extraScanned?: number }) {
       <div>
         <div className="flex items-center justify-between mb-1">
           <p className="text-[12px] text-slate-500">Overall Completion</p>
-          <p className="text-[12px] font-medium text-slate-700">{data.overallCompletion}%</p>
+          <p className="text-[12px] font-medium text-slate-700">{overallCompletion}%</p>
         </div>
         <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
           <div
-            className="h-full bg-green-500 rounded-full transition-all"
-            style={{ width: `${data.overallCompletion}%` }}
+            className="h-full bg-green-500 rounded-full transition-all duration-500"
+            style={{ width: `${overallCompletion}%` }}
           />
         </div>
       </div>
 
-      {/* Category breakdown */}
+      {/* Category breakdown — updates live after scans */}
       <div className="space-y-3">
-        {data.categories.map((cat) => (
-          <div key={cat.name} className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <div>
-                <span className="text-[12px] font-medium text-slate-600">{cat.name}</span>
-                <span className="text-[10px] text-slate-400 ml-1.5">({cat.frequency})</span>
+        {categories.map((cat) => {
+          const catRemaining = Math.max(0, cat.total - cat.scanned);
+          const catPct = cat.total > 0 ? Math.min(100, Math.round((cat.scanned / cat.total) * 100)) : 0;
+          return (
+            <div key={cat.name} className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-[12px] font-medium text-slate-600">{cat.name}</span>
+                  <span className="text-[10px] text-slate-400 ml-1.5">({cat.frequency})</span>
+                </div>
+                <div className="text-right">
+                  <p className="text-[10px] text-slate-400">
+                    <Clock className="h-2.5 w-2.5 inline mr-0.5" />
+                    {cat.period}
+                  </p>
+                  <p className="text-[11px] font-medium text-slate-600">{cat.scanned}/{cat.total}</p>
+                </div>
               </div>
-              <div className="text-right">
-                <p className="text-[10px] text-slate-400">
-                  <Clock className="h-2.5 w-2.5 inline mr-0.5" />
-                  {cat.period}
+              <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-green-500 rounded-full transition-all duration-500"
+                  style={{ width: `${catPct}%` }}
+                />
+              </div>
+              {catRemaining > 0 ? (
+                <p className="text-[10px] text-red-500">
+                  <AlertTriangle className="h-2.5 w-2.5 inline mr-0.5" />
+                  {catRemaining} assets remaining
                 </p>
-                <p className="text-[11px] font-medium text-slate-600">{cat.scanned}/{cat.total}</p>
-              </div>
+              ) : (
+                <p className="text-[10px] text-green-600">
+                  <CheckCircle className="h-2.5 w-2.5 inline mr-0.5" />
+                  All assets scanned
+                </p>
+              )}
             </div>
-            <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-green-500 rounded-full"
-                style={{ width: `${cat.total > 0 ? (cat.scanned / cat.total) * 100 : 0}%` }}
-              />
-            </div>
-            <p className="text-[10px] text-red-500">
-              <AlertTriangle className="h-2.5 w-2.5 inline mr-0.5" />
-              {cat.total - cat.scanned} assets remaining
-            </p>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
