@@ -1148,8 +1148,7 @@ function MyScans({ scans }: { scans: AuditScanRecord[] }) {
               </div>
               <div className="flex items-center gap-4 text-[10px] text-slate-400">
                 <span>{scan.dateTime}</span>
-                <span>{scan.blockType !== "-" ? scan.blockType : ""}</span>
-                {scan.gps && <span className="text-green-500">📍 GPS</span>}
+                {scan.blockType && scan.blockType !== "-" && <span>{scan.blockType}</span>}
                 {scan.notes && <span className="italic text-slate-500">"{scan.notes}"</span>}
               </div>
             </div>
