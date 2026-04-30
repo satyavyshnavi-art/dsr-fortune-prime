@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { PageHeader } from "@/components/shared";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   CalendarDays,
   BarChart3,
@@ -15,7 +14,16 @@ import { KPITrafficLight } from "@/components/modules/reports/kpi-traffic-light"
 import { AnalyticsTab } from "@/components/modules/reports/analytics-tab";
 import { ReportsTab } from "@/components/modules/reports/reports-tab";
 
+type TabId = "dashboard" | "analytics" | "reports";
+
+const tabs = [
+  { id: "dashboard" as TabId, label: "Dashboard", icon: BarChart3 },
+  { id: "analytics" as TabId, label: "Analytics", icon: LineChart },
+  { id: "reports" as TabId, label: "Reports", icon: FileText },
+];
+
 export default function ReportsPage() {
+  const [activeTab, setActiveTab] = useState<TabId>("dashboard");
   const [dateFrom] = useState("29-Mar-26");
   const [dateTo] = useState("27-Apr-26");
 
@@ -42,40 +50,34 @@ export default function ReportsPage() {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue={0}>
-        <TabsList variant="line">
-          <TabsTrigger value={0} className="text-[12px] font-medium">
-            <BarChart3 className="h-3.5 w-3.5" />
-            Dashboard
-          </TabsTrigger>
-          <TabsTrigger value={1} className="text-[12px] font-medium">
-            <LineChart className="h-3.5 w-3.5" />
-            Analytics
-          </TabsTrigger>
-          <TabsTrigger value={2} className="text-[12px] font-medium">
-            <FileText className="h-3.5 w-3.5" />
-            Reports
-          </TabsTrigger>
-        </TabsList>
+      <div className="flex items-center gap-1 border-b overflow-x-auto pb-px">
+        {tabs.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium whitespace-nowrap border-b-2 transition-colors ${
+                isActive
+                  ? "border-blue-600 text-blue-600"
+                  : "border-transparent text-slate-400 hover:text-slate-600 hover:border-slate-300"
+              }`}
+            >
+              <Icon className="h-3.5 w-3.5" />
+              {tab.label}
+            </button>
+          );
+        })}
+      </div>
 
-        <TabsContent value={0}>
-          <div className="pt-3">
-            <KPITrafficLight dateRange={dateRange} />
-          </div>
-        </TabsContent>
-
-        <TabsContent value={1}>
-          <div className="pt-3">
-            <AnalyticsTab />
-          </div>
-        </TabsContent>
-
-        <TabsContent value={2}>
-          <div className="pt-3">
-            <ReportsTab />
-          </div>
-        </TabsContent>
-      </Tabs>
+      <div>
+        {activeTab === "dashboard" && (
+          <KPITrafficLight dateRange={dateRange} />
+        )}
+        {activeTab === "analytics" && <AnalyticsTab />}
+        {activeTab === "reports" && <ReportsTab />}
+      </div>
     </div>
   );
 }

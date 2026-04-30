@@ -1,77 +1,58 @@
 "use client";
 
-import { PageHeader } from "@/components/shared";
-import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContent,
-} from "@/components/ui/tabs";
+import { useState } from "react";
+import { PageHeader, EmptyState } from "@/components/shared";
 import { FacilityDetailsForm } from "@/components/modules/facility-config/facility-details-form";
 import { DailyUpdateConfig } from "@/components/modules/facility-config/daily-update-config";
-import { EmptyState } from "@/components/shared";
-import { Users, Truck } from "lucide-react";
+import { Settings, CalendarDays, Users, Truck } from "lucide-react";
+
+type TabId = "config" | "daily-update" | "employee" | "service-provider";
+
+const tabs: { id: TabId; label: string; icon: React.ElementType }[] = [
+  { id: "config", label: "Facility Config", icon: Settings },
+  { id: "daily-update", label: "Daily Update", icon: CalendarDays },
+  { id: "employee", label: "Employee", icon: Users },
+  { id: "service-provider", label: "Service Provider", icon: Truck },
+];
 
 export default function FacilityConfigPage() {
+  const [activeTab, setActiveTab] = useState<TabId>("config");
+
   return (
-    <div className="p-5 space-y-4 max-w-[1400px]">
-      <PageHeader
-        title="Facility Config"
-        description="Manage your facility settings, daily update templates, and service providers."
-      />
+    <div className="p-5 space-y-4">
+      <PageHeader title="Facility Config" />
 
-      <Tabs defaultValue={0}>
-        <TabsList variant="line" className="border-b border-slate-200 w-full justify-start gap-0">
-          <TabsTrigger
-            value={0}
-            className="px-3 py-1.5 text-[12px] font-medium data-active:text-blue-600 data-active:after:bg-blue-600"
-          >
-            Facility Config
-          </TabsTrigger>
-          <TabsTrigger
-            value={1}
-            className="px-3 py-1.5 text-[12px] font-medium data-active:text-blue-600 data-active:after:bg-blue-600"
-          >
-            Daily Update
-          </TabsTrigger>
-          <TabsTrigger
-            value={2}
-            className="px-3 py-1.5 text-[12px] font-medium data-active:text-blue-600 data-active:after:bg-blue-600"
-          >
-            Employee
-          </TabsTrigger>
-          <TabsTrigger
-            value={3}
-            className="px-3 py-1.5 text-[12px] font-medium data-active:text-blue-600 data-active:after:bg-blue-600"
-          >
-            Service Provider
-          </TabsTrigger>
-        </TabsList>
+      <div className="flex items-center gap-1 border-b overflow-x-auto pb-px">
+        {tabs.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium whitespace-nowrap border-b-2 transition-colors ${
+                isActive
+                  ? "border-blue-600 text-blue-600"
+                  : "border-transparent text-slate-400 hover:text-slate-600 hover:border-slate-300"
+              }`}
+            >
+              <Icon className="h-3.5 w-3.5" />
+              {tab.label}
+            </button>
+          );
+        })}
+      </div>
 
-        <TabsContent value={0} className="pt-4">
-          <FacilityDetailsForm />
-        </TabsContent>
-
-        <TabsContent value={1} className="pt-4">
-          <DailyUpdateConfig />
-        </TabsContent>
-
-        <TabsContent value={2} className="pt-4">
-          <EmptyState
-            icon={Users}
-            title="Employee Configuration"
-            description="Employee management settings will be configured here."
-          />
-        </TabsContent>
-
-        <TabsContent value={3} className="pt-4">
-          <EmptyState
-            icon={Truck}
-            title="Service Provider Configuration"
-            description="Manage your facility service providers and vendor contacts here."
-          />
-        </TabsContent>
-      </Tabs>
+      <div>
+        {activeTab === "config" && <FacilityDetailsForm />}
+        {activeTab === "daily-update" && <DailyUpdateConfig />}
+        {activeTab === "employee" && (
+          <EmptyState icon={Users} title="Employee Configuration" description="Employee management settings will be configured here." />
+        )}
+        {activeTab === "service-provider" && (
+          <EmptyState icon={Truck} title="Service Provider Configuration" description="Manage your facility service providers and vendor contacts here." />
+        )}
+      </div>
     </div>
   );
 }
