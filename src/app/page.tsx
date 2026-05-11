@@ -3,15 +3,28 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Leaf } from "lucide-react";
+import { demoLogin } from "@/lib/auth";
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("demo@dsrfortuneprime.com");
   const [password, setPassword] = useState("demo123");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    router.push("/dashboard");
+    setError("");
+    setLoading(true);
+
+    const result = demoLogin(email, password);
+
+    if (result.success) {
+      router.push("/dashboard");
+    } else {
+      setError(result.error);
+      setLoading(false);
+    }
   }
 
   return (
@@ -56,17 +69,34 @@ export default function LoginPage() {
               />
             </div>
 
+            {error && (
+              <p className="text-[12px] text-red-500 bg-red-50 rounded-lg px-3 py-2">
+                {error}
+              </p>
+            )}
+
             <button
               type="submit"
-              className="w-full rounded-lg bg-[#10b981] py-2.5 text-[13px] font-semibold text-white hover:bg-[#059669] active:bg-[#047857] transition-colors mt-2"
+              disabled={loading}
+              className="w-full rounded-lg bg-[#10b981] py-2.5 text-[13px] font-semibold text-white hover:bg-[#059669] active:bg-[#047857] transition-colors mt-2 disabled:opacity-50"
             >
-              Sign In
+              {loading ? "Signing in..." : "Sign In"}
             </button>
           </form>
 
-          <p className="text-center text-[11px] text-slate-400 mt-4">
-            Demo credentials pre-filled
-          </p>
+          <div className="mt-5 pt-4 border-t border-slate-100">
+            <p className="text-center text-[10px] text-slate-400 mb-2">
+              Demo Account
+            </p>
+            <button
+              type="button"
+              onClick={() => { setEmail("demo@dsrfortuneprime.com"); setPassword("demo123"); }}
+              className="w-full flex items-center justify-between rounded-md border border-slate-200 px-3 py-1.5 text-[11px] text-slate-500 hover:bg-slate-50 transition-colors cursor-pointer"
+            >
+              <span>demo@dsrfortuneprime.com</span>
+              <span className="text-[10px] text-slate-400">Facility Manager</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -176,6 +176,12 @@ const CATEGORY_LABELS: Record<string, string> = {
   complaints: "Complaints",
   critical_systems: "Critical Systems",
   general: "General",
+  // DB seed uses short category names
+  maintenance: "Maintenance",
+  water: "Water Management",
+  power: "Power Management",
+  fire_safety: "Fire Safety",
+  security: "Security",
 };
 
 // Map DB alert row to AlertItem shape
@@ -200,7 +206,7 @@ export function AlertsList() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [loading, setLoading] = useState(true);
 
-  // Fetch alerts from API on mount
+  // Fetch alerts from API
   const fetchAlerts = useCallback(() => {
     setLoading(true);
     fetch("/api/v1/alerts")
@@ -208,14 +214,30 @@ export function AlertsList() {
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
           setAlerts(data.map(mapAlertFromDb));
+        } else {
+          setAlerts(MOCK_ALERTS);
         }
-        // If empty array or not array, keep mock data
       })
       .catch(() => {
-        // API unavailable — keep mock data
+        setAlerts(MOCK_ALERTS);
       })
       .finally(() => setLoading(false));
   }, []);
+
+  // Generate alerts from facility data, then fetch
+  const generateAndFetch = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/v1/alerts/generate", { method: "POST" });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success(`Generated ${data.count} alerts from facility data`);
+      }
+    } catch {
+      toast.error("Failed to generate alerts");
+    }
+    fetchAlerts();
+  }, [fetchAlerts]);
 
   useEffect(() => {
     fetchAlerts();
@@ -297,9 +319,9 @@ export function AlertsList() {
           <span className="font-semibold text-slate-800">{unacknowledgedCount} unacknowledged alerts</span>
           {" "}out of {filtered.length} filtered / {totalCount} total
         </p>
-        <Button variant="outline" size="sm" className="h-7 text-[11px] px-2.5" onClick={() => { toast.info("Refreshing alerts..."); fetchAlerts(); }}>
+        <Button variant="outline" size="sm" className="h-7 text-[11px] px-2.5" onClick={generateAndFetch} disabled={loading}>
           <RefreshCw className={`h-3 w-3 mr-1 ${loading ? "animate-spin" : ""}`} />
-          {loading ? "Loading..." : "Refresh & Generate"}
+          {loading ? "Generating..." : "Refresh & Generate"}
         </Button>
       </div>
 

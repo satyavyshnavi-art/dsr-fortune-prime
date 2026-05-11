@@ -1,26 +1,33 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import {
   Bell,
-  RotateCcw,
   CheckCircle,
   Mail,
   MessageSquare,
   Smartphone,
   Send,
+  Shield,
+  Droplets,
+  Zap,
+  Users,
+  Wrench,
+  AlertTriangle,
+  MessageCircle,
+  Info,
+  RotateCcw,
 } from "lucide-react";
 import { toast } from "sonner";
 
 interface CategoryToggle {
   key: string;
   label: string;
+  icon: React.ElementType;
   enabled: boolean;
 }
 
@@ -34,14 +41,14 @@ interface NotificationChannel {
 }
 
 const INITIAL_CATEGORIES: CategoryToggle[] = [
-  { key: "attendance", label: "Attendance & Staffing", enabled: true },
-  { key: "asset_maintenance", label: "Asset Maintenance", enabled: true },
-  { key: "water_management", label: "Water Management", enabled: true },
-  { key: "power_management", label: "Power Management", enabled: false },
-  { key: "hygiene", label: "Hygiene", enabled: false },
-  { key: "complaints", label: "Complaints", enabled: true },
-  { key: "critical_systems", label: "Critical Systems", enabled: true },
-  { key: "general", label: "General", enabled: true },
+  { key: "attendance", label: "Attendance & Staffing", icon: Users, enabled: true },
+  { key: "asset_maintenance", label: "Asset Maintenance", icon: Wrench, enabled: true },
+  { key: "water_management", label: "Water Management", icon: Droplets, enabled: true },
+  { key: "power_management", label: "Power Management", icon: Zap, enabled: false },
+  { key: "hygiene", label: "Hygiene", icon: Shield, enabled: false },
+  { key: "complaints", label: "Complaints", icon: MessageCircle, enabled: true },
+  { key: "critical_systems", label: "Critical Systems", icon: AlertTriangle, enabled: true },
+  { key: "general", label: "General", icon: Info, enabled: true },
 ];
 
 const ROLES = ["Admin", "Facility Manager", "Manager", "Supervisor", "Technical Supervisor", "Soft Services Supervisor"];
@@ -89,23 +96,19 @@ export function AlertConfiguration() {
   const [categories, setCategories] = useState(INITIAL_CATEGORIES);
   const [channels, setChannels] = useState(INITIAL_CHANNELS);
 
-  // Attendance thresholds
   const [shortageTrigger, setShortageTrigger] = useState("80");
   const [criticalPriority, setCriticalPriority] = useState("50");
   const [highPriority, setHighPriority] = useState("30");
 
-  // Maintenance thresholds
   const [criticalAfterDays, setCriticalAfterDays] = useState("7");
   const [highAfterDays, setHighAfterDays] = useState("3");
   const [lookaheadDays, setLookaheadDays] = useState("7");
 
-  // Water Quality (MLSS)
   const [mlssMin, setMlssMin] = useState("2000");
   const [mlssMax, setMlssMax] = useState("4000");
   const [mlssCriticalFactor, setMlssCriticalFactor] = useState("0.5");
   const [mlssHighFactor, setMlssHighFactor] = useState("0.75");
 
-  // Audit Deadline Reminders
   const [auditWeekly, setAuditWeekly] = useState("2");
   const [auditMonthly, setAuditMonthly] = useState("3");
   const [auditQuarterly, setAuditQuarterly] = useState("7");
@@ -166,217 +169,164 @@ export function AlertConfiguration() {
   }
 
   return (
-    <div className="space-y-4 max-w-3xl">
-      {/* Header with actions */}
+    <div className="space-y-5 max-w-4xl">
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="h-8 w-8 rounded-md bg-slate-100 flex items-center justify-center">
-            <Bell className="h-4 w-4 text-slate-500" />
+        <div className="flex items-center gap-3">
+          <div className="h-9 w-9 rounded-lg bg-blue-50 flex items-center justify-center">
+            <Bell className="h-4.5 w-4.5 text-blue-600" />
           </div>
           <div>
-            <h3 className="font-semibold text-[13px] text-slate-900">Alert Configuration</h3>
-            <p className="text-[11px] text-slate-400">
-              Configure thresholds, notification channels, and alert categories for this facility.
+            <h3 className="font-semibold text-[14px] text-slate-900">Alert Configuration</h3>
+            <p className="text-[11px] text-slate-500">
+              Configure thresholds, notification channels, and alert categories.
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-1.5">
-          <Button variant="outline" size="sm" className="h-7 text-[11px] px-2.5" onClick={handleResetDefaults}>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" className="h-8 text-[12px] px-3" onClick={handleResetDefaults}>
+            <RotateCcw className="h-3 w-3 mr-1.5" />
             Reset Defaults
           </Button>
-          <Button size="sm" className="h-7 text-[11px] px-2.5 bg-blue-600 hover:bg-blue-700 text-white" onClick={handleSaveConfiguration}>
-            <CheckCircle className="h-3 w-3 mr-1" />
+          <Button size="sm" className="h-8 text-[12px] px-3 bg-blue-600 hover:bg-blue-700 text-white" onClick={handleSaveConfiguration}>
+            <CheckCircle className="h-3 w-3 mr-1.5" />
             Save Changes
           </Button>
         </div>
       </div>
 
       {/* Master toggle */}
-      <Card className="shadow-none border-slate-200">
-        <CardContent className="p-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <Bell className="h-4 w-4 text-slate-400" />
-              <div>
-                <p className="font-medium text-[12px] text-slate-800">Alerts Enabled</p>
-                <p className="text-[10px] text-slate-400">Master toggle for all alert generation and notifications</p>
-              </div>
+      <Section>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 rounded-lg bg-emerald-50 flex items-center justify-center">
+              <Bell className="h-4 w-4 text-emerald-600" />
             </div>
-            <Checkbox
-              checked={alertsEnabled}
-              onCheckedChange={() => setAlertsEnabled(!alertsEnabled)}
-            />
+            <div>
+              <p className="font-semibold text-[13px] text-slate-900">Alerts Enabled</p>
+              <p className="text-[11px] text-slate-500">Master toggle for all alert generation and notifications</p>
+            </div>
           </div>
-        </CardContent>
-      </Card>
+          <Switch
+            checked={alertsEnabled}
+            onCheckedChange={() => setAlertsEnabled(!alertsEnabled)}
+          />
+        </div>
+      </Section>
 
       {/* Alert Categories */}
-      <Card className="shadow-none border-slate-200">
-        <CardHeader className="px-4 py-3 pb-2">
-          <CardTitle className="text-[12px] font-semibold text-slate-800">Alert Categories</CardTitle>
-          <CardDescription className="text-[10px] text-slate-400">Enable or disable specific alert types</CardDescription>
-        </CardHeader>
-        <CardContent className="px-4 pb-3">
-          <div className="grid grid-cols-2 gap-2">
-            {categories.map((cat) => (
-              <label
+      <Section title="Alert Categories" description="Enable or disable specific alert types">
+        <div className="grid grid-cols-2 gap-2.5">
+          {categories.map((cat) => {
+            const CatIcon = cat.icon;
+            return (
+              <button
                 key={cat.key}
-                className="flex items-center justify-between rounded-md border border-slate-200 px-3 py-2 cursor-pointer hover:bg-slate-50/60 transition-colors"
+                onClick={() => toggleCategory(cat.key)}
+                className={`flex items-center justify-between rounded-lg border px-3.5 py-2.5 cursor-pointer transition-all ${
+                  cat.enabled
+                    ? "border-blue-200 bg-blue-50/50 hover:bg-blue-50"
+                    : "border-slate-200 bg-white hover:bg-slate-50"
+                }`}
               >
-                <span className="text-[12px] text-slate-700">{cat.label}</span>
-                <Checkbox
-                  checked={cat.enabled}
-                  onCheckedChange={() => toggleCategory(cat.key)}
-                />
-              </label>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+                <div className="flex items-center gap-2.5">
+                  <CatIcon className={`h-3.5 w-3.5 ${cat.enabled ? "text-blue-600" : "text-slate-400"}`} />
+                  <span className={`text-[12px] font-medium ${cat.enabled ? "text-blue-700" : "text-slate-600"}`}>
+                    {cat.label}
+                  </span>
+                </div>
+                <div className={`h-4.5 w-4.5 rounded flex items-center justify-center text-white transition-colors ${
+                  cat.enabled ? "bg-blue-600" : "border border-slate-300 bg-white"
+                }`}>
+                  {cat.enabled && <CheckCircle className="h-3 w-3" />}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </Section>
 
-      {/* Attendance Thresholds */}
-      <Card className="shadow-none border-slate-200">
-        <CardHeader className="px-4 py-3 pb-2">
-          <CardTitle className="text-[12px] font-semibold text-slate-800">Attendance Thresholds</CardTitle>
-          <CardDescription className="text-[10px] text-slate-400">Configure when attendance alerts trigger and their priority levels</CardDescription>
-        </CardHeader>
-        <CardContent className="px-4 pb-3">
+      {/* Threshold sections in 2-column layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        {/* Attendance Thresholds */}
+        <Section title="Attendance Thresholds" description="When attendance alerts trigger and their priority levels">
           <div className="grid grid-cols-3 gap-3">
-            <ThresholdInput
-              label="Shortage Trigger (%)"
-              value={shortageTrigger}
-              onChange={setShortageTrigger}
-              hint="Alert when present < this % of required"
-            />
-            <ThresholdInput
-              label="Critical Priority (%)"
-              value={criticalPriority}
-              onChange={setCriticalPriority}
-              hint="Critical when shortage >= this %"
-            />
-            <ThresholdInput
-              label="High Priority (%)"
-              value={highPriority}
-              onChange={setHighPriority}
-              hint="High when shortage >= this %"
-            />
+            <ThresholdInput label="Shortage Trigger (%)" value={shortageTrigger} onChange={setShortageTrigger} hint="Present < this %" />
+            <ThresholdInput label="Critical (%)" value={criticalPriority} onChange={setCriticalPriority} hint="Shortage >= this %" />
+            <ThresholdInput label="High (%)" value={highPriority} onChange={setHighPriority} hint="Shortage >= this %" />
           </div>
-        </CardContent>
-      </Card>
+        </Section>
 
-      {/* Maintenance Thresholds */}
-      <Card className="shadow-none border-slate-200">
-        <CardHeader className="px-4 py-3 pb-2">
-          <CardTitle className="text-[12px] font-semibold text-slate-800">Maintenance Thresholds</CardTitle>
-          <CardDescription className="text-[10px] text-slate-400">Days overdue that trigger different priority levels</CardDescription>
-        </CardHeader>
-        <CardContent className="px-4 pb-3">
+        {/* Maintenance Thresholds */}
+        <Section title="Maintenance Thresholds" description="Days overdue that trigger different priority levels">
           <div className="grid grid-cols-3 gap-3">
-            <ThresholdInput
-              label="Critical After (days)"
-              value={criticalAfterDays}
-              onChange={setCriticalAfterDays}
-              hint="Critical priority threshold"
-            />
-            <ThresholdInput
-              label="High After (days)"
-              value={highAfterDays}
-              onChange={setHighAfterDays}
-              hint="High priority threshold"
-            />
-            <ThresholdInput
-              label="Lookahead (days)"
-              value={lookaheadDays}
-              onChange={setLookaheadDays}
-              hint="Days ahead to generate schedules"
-            />
+            <ThresholdInput label="Critical (days)" value={criticalAfterDays} onChange={setCriticalAfterDays} hint="Critical threshold" />
+            <ThresholdInput label="High (days)" value={highAfterDays} onChange={setHighAfterDays} hint="High threshold" />
+            <ThresholdInput label="Lookahead (days)" value={lookaheadDays} onChange={setLookaheadDays} hint="Days ahead" />
           </div>
-        </CardContent>
-      </Card>
+        </Section>
+      </div>
 
-      {/* Water Quality (MLSS) */}
-      <Card className="shadow-none border-slate-200">
-        <CardHeader className="px-4 py-3 pb-2">
-          <CardTitle className="text-[12px] font-semibold text-slate-800">Water Quality (MLSS)</CardTitle>
-          <CardDescription className="text-[10px] text-slate-400">STP MLSS range thresholds in mg/L</CardDescription>
-        </CardHeader>
-        <CardContent className="px-4 pb-3 space-y-3">
-          <div className="grid grid-cols-2 gap-3">
-            <ThresholdInput label="Min Normal (mg/L)" value={mlssMin} onChange={setMlssMin} />
-            <ThresholdInput label="Max Normal (mg/L)" value={mlssMax} onChange={setMlssMax} />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <ThresholdInput
-              label="Critical Factor"
-              value={mlssCriticalFactor}
-              onChange={setMlssCriticalFactor}
-              hint="e.g. 0.5 = Critical if <50% of min"
-              step="0.05"
-            />
-            <ThresholdInput
-              label="High Factor"
-              value={mlssHighFactor}
-              onChange={setMlssHighFactor}
-              hint="e.g. 0.75 = High if <75% of min"
-              step="0.05"
-            />
-          </div>
-        </CardContent>
-      </Card>
+      {/* Water Quality */}
+      <Section title="Water Quality (MLSS)" description="STP MLSS range thresholds in mg/L">
+        <div className="grid grid-cols-4 gap-3">
+          <ThresholdInput label="Min Normal (mg/L)" value={mlssMin} onChange={setMlssMin} />
+          <ThresholdInput label="Max Normal (mg/L)" value={mlssMax} onChange={setMlssMax} />
+          <ThresholdInput label="Critical Factor" value={mlssCriticalFactor} onChange={setMlssCriticalFactor} hint="e.g. 0.5" step="0.05" />
+          <ThresholdInput label="High Factor" value={mlssHighFactor} onChange={setMlssHighFactor} hint="e.g. 0.75" step="0.05" />
+        </div>
+      </Section>
 
       {/* Audit Deadline Reminders */}
-      <Card className="shadow-none border-slate-200">
-        <CardHeader className="px-4 py-3 pb-2">
-          <CardTitle className="text-[12px] font-semibold text-slate-800">Audit Deadline Reminders</CardTitle>
-          <CardDescription className="text-[10px] text-slate-400">Days before deadline to send reminders per frequency</CardDescription>
-        </CardHeader>
-        <CardContent className="px-4 pb-3">
-          <div className="grid grid-cols-5 gap-2.5">
-            <ThresholdInput label="Weekly" value={auditWeekly} onChange={setAuditWeekly} hint="days before" />
-            <ThresholdInput label="Monthly" value={auditMonthly} onChange={setAuditMonthly} hint="days before" />
-            <ThresholdInput label="Quarterly" value={auditQuarterly} onChange={setAuditQuarterly} hint="days before" />
-            <ThresholdInput label="Half Yearly" value={auditHalfYearly} onChange={setAuditHalfYearly} hint="days before" />
-            <ThresholdInput label="Yearly" value={auditYearly} onChange={setAuditYearly} hint="days before" />
-          </div>
-        </CardContent>
-      </Card>
+      <Section title="Audit Deadline Reminders" description="Days before deadline to send reminders per frequency">
+        <div className="grid grid-cols-5 gap-2.5">
+          <ThresholdInput label="Weekly" value={auditWeekly} onChange={setAuditWeekly} hint="days before" />
+          <ThresholdInput label="Monthly" value={auditMonthly} onChange={setAuditMonthly} hint="days before" />
+          <ThresholdInput label="Quarterly" value={auditQuarterly} onChange={setAuditQuarterly} hint="days before" />
+          <ThresholdInput label="Half Yearly" value={auditHalfYearly} onChange={setAuditHalfYearly} hint="days before" />
+          <ThresholdInput label="Yearly" value={auditYearly} onChange={setAuditYearly} hint="days before" />
+        </div>
+      </Section>
 
       {/* Notification Channels */}
-      <Card className="shadow-none border-slate-200">
-        <CardHeader className="px-4 py-3 pb-2">
-          <CardTitle className="text-[12px] font-semibold text-slate-800">Notification Channels</CardTitle>
-          <CardDescription className="text-[10px] text-slate-400">Configure which channels are active and who receives notifications</CardDescription>
-        </CardHeader>
-        <CardContent className="px-4 pb-3 space-y-3">
-          {channels.map((channel, idx) => {
+      <Section title="Notification Channels" description="Configure which channels are active and who receives notifications">
+        <div className="space-y-0 divide-y divide-slate-100">
+          {channels.map((channel) => {
             const Icon = channel.icon;
             return (
-              <div key={channel.key} className="space-y-2">
+              <div key={channel.key} className="py-3 first:pt-0 last:pb-0">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <Icon className="h-3.5 w-3.5 text-slate-400" />
+                  <div className="flex items-center gap-3">
+                    <div className={`h-7 w-7 rounded-md flex items-center justify-center ${
+                      channel.enabled ? "bg-blue-50" : "bg-slate-100"
+                    }`}>
+                      <Icon className={`h-3.5 w-3.5 ${channel.enabled ? "text-blue-600" : "text-slate-400"}`} />
+                    </div>
                     <div>
-                      <p className="text-[12px] font-medium text-slate-800">{channel.label}</p>
+                      <p className={`text-[12px] font-medium ${channel.enabled ? "text-slate-900" : "text-slate-500"}`}>
+                        {channel.label}
+                      </p>
                       {channel.description && (
                         <p className="text-[10px] text-slate-400">{channel.description}</p>
                       )}
                     </div>
                   </div>
-                  <Checkbox
+                  <Switch
                     checked={channel.enabled}
                     onCheckedChange={() => toggleChannel(channel.key)}
+                    size="sm"
                   />
                 </div>
                 {channel.enabled && channel.roles.length > 0 && (
-                  <div className="flex flex-wrap gap-1 ml-6">
+                  <div className="flex flex-wrap gap-1.5 ml-10 mt-2">
                     {channel.roles.map((role) => (
                       <button
                         key={role.name}
                         onClick={() => toggleChannelRole(channel.key, role.name)}
-                        className={`inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[10px] font-medium border transition-colors cursor-pointer ${
+                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-medium border transition-all cursor-pointer ${
                           role.active
-                            ? "bg-blue-50 border-blue-200 text-blue-700"
-                            : "bg-white border-slate-200 text-slate-500 hover:border-slate-300"
+                            ? "bg-blue-50 border-blue-200 text-blue-700 shadow-sm"
+                            : "bg-white border-slate-200 text-slate-500 hover:border-slate-300 hover:bg-slate-50"
                         }`}
                       >
                         {role.active && <CheckCircle className="h-2.5 w-2.5" />}
@@ -385,20 +335,20 @@ export function AlertConfiguration() {
                     ))}
                   </div>
                 )}
-                {idx < channels.length - 1 && <Separator className="mt-2" />}
               </div>
             );
           })}
-        </CardContent>
-      </Card>
+        </div>
+      </Section>
 
       {/* Bottom action bar */}
-      <div className="flex items-center justify-end gap-2 pt-1 pb-4">
-        <Button variant="outline" size="sm" className="h-7 text-[11px] px-3" onClick={handleResetDefaults}>
+      <div className="flex items-center justify-end gap-2 pt-1 pb-6">
+        <Button variant="outline" size="sm" className="h-8 text-[12px] px-4" onClick={handleResetDefaults}>
+          <RotateCcw className="h-3 w-3 mr-1.5" />
           Reset Defaults
         </Button>
-        <Button size="sm" className="h-7 text-[11px] px-3 bg-blue-600 hover:bg-blue-700 text-white" onClick={handleSaveConfiguration}>
-          <CheckCircle className="h-3 w-3 mr-1" />
+        <Button size="sm" className="h-8 text-[12px] px-4 bg-blue-600 hover:bg-blue-700 text-white" onClick={handleSaveConfiguration}>
+          <CheckCircle className="h-3 w-3 mr-1.5" />
           Save Configuration
         </Button>
       </div>
@@ -406,7 +356,32 @@ export function AlertConfiguration() {
   );
 }
 
-/* Reusable threshold input field */
+/* Section wrapper */
+function Section({
+  title,
+  description,
+  children,
+}: {
+  title?: string;
+  description?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white p-4">
+      {title && (
+        <div className="mb-3">
+          <h4 className="font-semibold text-[13px] text-slate-900">{title}</h4>
+          {description && (
+            <p className="text-[11px] text-slate-500 mt-0.5">{description}</p>
+          )}
+        </div>
+      )}
+      {children}
+    </div>
+  );
+}
+
+/* Threshold input */
 function ThresholdInput({
   label,
   value,
@@ -421,16 +396,16 @@ function ThresholdInput({
   step?: string;
 }) {
   return (
-    <div className="space-y-1">
-      <Label className="text-[11px] font-medium text-slate-500">{label}</Label>
+    <div className="space-y-1.5">
+      <Label className="text-[11px] font-medium text-slate-600">{label}</Label>
       <Input
         type="number"
         step={step}
         value={value}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
-        className="h-8 text-[12px]"
+        className="h-9 text-[12px] bg-slate-50/50 border-slate-200 focus:bg-white"
       />
-      {hint && <p className="text-[9px] text-slate-400">{hint}</p>}
+      {hint && <p className="text-[10px] text-slate-400">{hint}</p>}
     </div>
   );
 }

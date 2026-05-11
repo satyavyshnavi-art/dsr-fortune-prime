@@ -14,7 +14,7 @@ import * as schema from "./schema";
 
 const connectionString =
   process.env.DATABASE_URL ??
-  "postgresql://neondb_owner:npg_u3DNyhlO5iKQ@ep-odd-pond-a155vlkp.ap-southeast-1.aws.neon.tech/neondb?sslmode=require";
+  "postgresql://neondb_owner:npg_u3DNyhlO5iKQ@ep-odd-pond-a155vlkp.ap-southeast-1.aws.neon.tech/spotworks?sslmode=require";
 
 const client = postgres(connectionString);
 const db = drizzle(client, { schema });

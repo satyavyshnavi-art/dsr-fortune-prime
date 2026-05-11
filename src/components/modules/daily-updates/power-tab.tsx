@@ -67,12 +67,26 @@ function mapDbPowerReading(row: Record<string, unknown>): ConsumptionRow {
   };
 }
 
+// Parse display date like "27-Apr-26" or "11-Apr-26" back to "2026-04-27" for comparison
+function parseDisplayDate(display: string): string | null {
+  const months: Record<string, string> = {
+    Jan: "01", Feb: "02", Mar: "03", Apr: "04", May: "05", Jun: "06",
+    Jul: "07", Aug: "08", Sep: "09", Oct: "10", Nov: "11", Dec: "12",
+  };
+  const parts = display.split("-");
+  if (parts.length !== 3) return null;
+  const [day, mon, yr] = parts;
+  const mm = months[mon];
+  if (!mm) return null;
+  return `20${yr}-${mm}-${day.padStart(2, "0")}`;
+}
+
 export function PowerTab() {
   const [data, setData] = useState(initialData);
   const [loading, setLoading] = useState(true);
   const [meterFilter, setMeterFilter] = useState("all");
-  const [dateFrom, setDateFrom] = useState("2026-03-30");
-  const [dateTo, setDateTo] = useState("2026-04-29");
+  const [dateFrom, setDateFrom] = useState("2026-03-01");
+  const [dateTo, setDateTo] = useState("2026-05-11");
 
   // Fetch power readings from API
   const fetchPowerReadings = useCallback(async () => {
@@ -204,7 +218,28 @@ export function PowerTab() {
     }
   };
 
-  const totalConsumption = data.reduce((sum, r) => {
+  // Apply filters
+  const filteredData = useMemo(() => {
+    return data.filter((row) => {
+      // Meter type filter
+      if (meterFilter !== "all") {
+        const id = row.meterId.toLowerCase();
+        if (meterFilter === "eb" && (id.startsWith("dg") || id.startsWith("test"))) return false;
+        if (meterFilter === "dg" && !id.startsWith("dg")) return false;
+      }
+      // Date range filter — parse the display date back to comparable format
+      if (dateFrom || dateTo) {
+        const parsed = parseDisplayDate(row.date);
+        if (parsed) {
+          if (dateFrom && parsed < dateFrom) return false;
+          if (dateTo && parsed > dateTo) return false;
+        }
+      }
+      return true;
+    });
+  }, [data, meterFilter, dateFrom, dateTo]);
+
+  const totalConsumption = filteredData.reduce((sum, r) => {
     const val = parseFloat(r.unitsConsumed.replace(/[^0-9.-]/g, "")) || 0;
     return sum + val;
   }, 0);
@@ -247,8 +282,8 @@ export function PowerTab() {
       {/* KPI Summary Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <KPICard title="Total Consumption" value={`${totalConsumption.toFixed(2)} kWh`} color="green" />
-        <KPICard title="Average Daily" value={`${(totalConsumption / Math.max(data.length, 1)).toFixed(2)} kWh`} color="blue" />
-        <KPICard title="Total Records" value={data.length} color="red" />
+        <KPICard title="Average Daily" value={`${(totalConsumption / Math.max(filteredData.length, 1)).toFixed(2)} kWh`} color="blue" />
+        <KPICard title="Total Records" value={filteredData.length} color="red" />
         <KPICard title="Active Meters" value={7} color="green" />
       </div>
 
@@ -288,8 +323,10 @@ export function PowerTab() {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50">
-            {data.map((row, idx) => (
-              <tr key={idx} className="hover:bg-slate-50/40">
+            {filteredData.map((row) => {
+              const originalIdx = data.indexOf(row);
+              return (
+              <tr key={originalIdx} className="hover:bg-slate-50/40">
                 <td className="py-3.5 px-3 text-[13px] text-slate-800">{row.date}</td>
                 <td className="py-3.5 px-3 text-[13px] text-slate-800 font-medium">{row.meterId}</td>
                 <td className="py-3.5 px-3 text-[13px] text-slate-500 truncate">{row.location}</td>
@@ -303,13 +340,13 @@ export function PowerTab() {
                 <td className="py-3.5 px-3">
                   <div className="flex items-center justify-center gap-1">
                     <button
-                      onClick={() => openEdit(idx)}
+                      onClick={() => openEdit(originalIdx)}
                       className="h-7 w-7 rounded-md flex items-center justify-center text-blue-600 hover:bg-blue-50 transition-colors"
                     >
                       <Pencil className="h-3.5 w-3.5" />
                     </button>
                     <button
-                      onClick={() => handleDelete(idx)}
+                      onClick={() => handleDelete(originalIdx)}
                       className="h-7 w-7 rounded-md flex items-center justify-center text-red-500 hover:bg-red-50 transition-colors"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
@@ -317,7 +354,8 @@ export function PowerTab() {
                   </div>
                 </td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>

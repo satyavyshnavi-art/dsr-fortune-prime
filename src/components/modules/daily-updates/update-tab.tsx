@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,6 +59,18 @@ function ReadingTable({
 function PowerReadingsSection() {
   const [ebData, setEbData] = useState(ebMeters);
   const [dgData, setDgData] = useState(dgMeters);
+  const [facilityId, setFacilityId] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/v1/facilities")
+      .then(res => res.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setFacilityId(data[0].id);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const updateEB = (idx: number, field: string, value: string) => {
     setEbData((prev) =>
@@ -96,15 +108,20 @@ function PowerReadingsSection() {
           </div>
         </div>
         <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white h-9 text-[13px] px-5 rounded-lg shadow-sm" onClick={async () => {
+          if (!facilityId) {
+            toast.error("Facility not loaded yet. Please try again.");
+            return;
+          }
           try {
             const allMeters = [...ebData, ...dgData].filter(m => m.currentKwh !== 0 && m.currentKwh !== null);
             const today = new Date().toISOString().split("T")[0];
             for (const meter of allMeters) {
               const units = (meter.currentKwh - meter.previousKwh) * meter.mf;
-              await fetch("/api/v1/power-readings", {
+              const res = await fetch("/api/v1/power-readings", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
+                  facilityId,
                   meterId: meter.meterId,
                   meterType: meter.meterId.startsWith("DG") ? "dg" : "eb",
                   location: meter.location,
@@ -115,10 +132,13 @@ function PowerReadingsSection() {
                   date: today,
                 }),
               });
+              if (!res.ok) {
+                throw new Error("Failed to save reading for " + meter.meterId);
+              }
             }
             toast.success("Power readings saved successfully");
-          } catch {
-            toast.success("Power readings saved (offline)");
+          } catch (err) {
+            toast.error(err instanceof Error ? err.message : "Failed to save power readings");
           }
         }}>
           <Save className="h-3.5 w-3.5 mr-2" />
@@ -340,6 +360,18 @@ function WaterReadingsSection() {
   const [borewells, setBorewells] = useState(waterBorewells);
   const [cavern, setCavern] = useState(waterCavern);
   const [tanker, setTanker] = useState(waterTanker);
+  const [facilityId, setFacilityId] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/v1/facilities")
+      .then(res => res.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setFacilityId(data[0].id);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const makeHandler =
     (setter: React.Dispatch<React.SetStateAction<WaterRow[]>>) =>
@@ -365,6 +397,10 @@ function WaterReadingsSection() {
           </div>
         </div>
         <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white h-9 text-[13px] px-5 rounded-lg shadow-sm" onClick={async () => {
+          if (!facilityId) {
+            toast.error("Facility not loaded yet. Please try again.");
+            return;
+          }
           try {
             const allSources = [
               ...tanks.map(r => ({ ...r, sourceType: r.type === "tank" ? "tank_overhead" : "tank_underground" })),
@@ -375,10 +411,11 @@ function WaterReadingsSection() {
             const today = new Date().toISOString().split("T")[0];
             for (const src of allSources) {
               const consumed = src.currentL - src.previousL;
-              await fetch("/api/v1/water-readings", {
+              const res = await fetch("/api/v1/water-readings", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
+                  facilityId,
                   sourceName: src.source,
                   sourceType: src.sourceType,
                   previousLiters: String(src.previousL),
@@ -388,10 +425,13 @@ function WaterReadingsSection() {
                   date: today,
                 }),
               });
+              if (!res.ok) {
+                throw new Error("Failed to save reading for " + src.source);
+              }
             }
             toast.success("Water readings saved successfully");
-          } catch {
-            toast.success("Water readings saved (offline)");
+          } catch (err) {
+            toast.error(err instanceof Error ? err.message : "Failed to save water readings");
           }
         }}>
           <Save className="h-3.5 w-3.5 mr-2" />

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
@@ -17,9 +17,11 @@ import {
   ChevronLeft,
   ChevronRight,
   Leaf,
+  LogOut,
   type LucideIcon,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getDemoUser, demoLogout, type DemoUser } from "@/lib/auth";
 
 const navItems: { label: string; href: string; Icon: LucideIcon }[] = [
   { label: "Dashboard", href: "/dashboard", Icon: LayoutDashboard },
@@ -36,7 +38,18 @@ const navItems: { label: string; href: string; Icon: LucideIcon }[] = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
+  const [user, setUser] = useState<DemoUser | null>(null);
+
+  useEffect(() => {
+    setUser(getDemoUser());
+  }, []);
+
+  function handleLogout() {
+    demoLogout();
+    router.push("/");
+  }
 
   return (
     <aside
@@ -84,17 +97,50 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* Collapse Toggle */}
-      <button
-        onClick={() => setCollapsed(!collapsed)}
-        className="flex items-center justify-center py-2.5 border-t border-white/10 text-white/30 hover:text-white/60 transition-colors"
-      >
-        {collapsed ? (
-          <ChevronRight className="h-3.5 w-3.5" />
-        ) : (
-          <ChevronLeft className="h-3.5 w-3.5" />
+      {/* User section + Collapse */}
+      <div className="border-t border-white/10">
+        {/* User info */}
+        {user && (
+          <div className={cn(
+            "flex items-center gap-2.5 px-3 py-2.5",
+            collapsed ? "justify-center" : ""
+          )}>
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#10b981]/20 text-[#34d399] text-[10px] font-semibold shrink-0">
+              {user.initials}
+            </div>
+            {!collapsed && (
+              <div className="flex-1 min-w-0">
+                <p className="text-[12px] font-medium text-white/80 truncate">{user.name}</p>
+                <p className="text-[10px] text-white/40 truncate">{user.role}</p>
+              </div>
+            )}
+          </div>
         )}
-      </button>
+
+        {/* Logout */}
+        <button
+          onClick={handleLogout}
+          className={cn(
+            "flex items-center gap-2.5 w-full px-3 py-2 text-white/40 hover:text-red-400 hover:bg-white/5 transition-colors",
+            collapsed ? "justify-center" : ""
+          )}
+        >
+          <LogOut className="h-3.5 w-3.5 shrink-0" />
+          {!collapsed && <span className="text-[12px]">Sign Out</span>}
+        </button>
+
+        {/* Collapse Toggle */}
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className="flex items-center justify-center w-full py-2 border-t border-white/10 text-white/30 hover:text-white/60 transition-colors"
+        >
+          {collapsed ? (
+            <ChevronRight className="h-3.5 w-3.5" />
+          ) : (
+            <ChevronLeft className="h-3.5 w-3.5" />
+          )}
+        </button>
+      </div>
     </aside>
   );
 }

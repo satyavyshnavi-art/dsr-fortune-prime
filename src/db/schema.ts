@@ -152,7 +152,10 @@ export const userProfiles = pgTable("user_profiles", {
   auth0UserId: varchar("auth0_user_id", { length: 255 }).notNull().unique(),
   facilityId: uuid("facility_id").references(() => facilities.id),
   displayName: varchar("display_name", { length: 255 }),
+  email: varchar("email", { length: 255 }),
   phone: varchar("phone", { length: 20 }),
+  role: varchar("role", { length: 50 }).default("facility_manager"),
+  status: varchar("user_status", { length: 20 }).default("active"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

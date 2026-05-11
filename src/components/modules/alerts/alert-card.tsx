@@ -72,7 +72,7 @@ const severityConfig: Record<
   },
 };
 
-const categoryIcons: Record<AlertCategory, React.ElementType> = {
+const categoryIcons: Record<string, React.ElementType> = {
   attendance: Users,
   asset_maintenance: Wrench,
   water_management: Droplets,
@@ -81,6 +81,12 @@ const categoryIcons: Record<AlertCategory, React.ElementType> = {
   complaints: AlertTriangle,
   critical_systems: XCircle,
   general: AlertTriangle,
+  // DB seed uses short category names
+  maintenance: Wrench,
+  security: XCircle,
+  water: Droplets,
+  power: AlertTriangle,
+  fire_safety: AlertTriangle,
 };
 
 interface AlertCardProps {
@@ -98,8 +104,8 @@ export function AlertCard({
   onResolve,
   onReschedule,
 }: AlertCardProps) {
-  const config = severityConfig[alert.severity];
-  const CategoryIcon = categoryIcons[alert.category];
+  const config = severityConfig[alert.severity] || severityConfig.medium;
+  const CategoryIcon = categoryIcons[alert.category] || AlertTriangle;
   const timeAgo = getTimeAgo(alert.createdAt);
 
   return (

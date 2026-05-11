@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { PageHeader, EmptyState } from "@/components/shared";
+import { PageHeader } from "@/components/shared";
 import { FacilityDetailsForm } from "@/components/modules/facility-config/facility-details-form";
 import { DailyUpdateConfig } from "@/components/modules/facility-config/daily-update-config";
+import { EmployeeConfig } from "@/components/modules/facility-config/employee-config";
+import { ServiceProviderConfig } from "@/components/modules/facility-config/service-provider-config";
 import { Settings, CalendarDays, Users, Truck } from "lucide-react";
 
 type TabId = "config" | "daily-update" | "employee" | "service-provider";
@@ -46,12 +48,8 @@ export default function FacilityConfigPage() {
       <div>
         {activeTab === "config" && <FacilityDetailsForm />}
         {activeTab === "daily-update" && <DailyUpdateConfig />}
-        {activeTab === "employee" && (
-          <EmptyState icon={Users} title="Employee Configuration" description="Employee management settings will be configured here." />
-        )}
-        {activeTab === "service-provider" && (
-          <EmptyState icon={Truck} title="Service Provider Configuration" description="Manage your facility service providers and vendor contacts here." />
-        )}
+        {activeTab === "employee" && <EmployeeConfig />}
+        {activeTab === "service-provider" && <ServiceProviderConfig />}
       </div>
     </div>
   );

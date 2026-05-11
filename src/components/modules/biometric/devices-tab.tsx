@@ -36,8 +36,8 @@ interface BiometricDevice {
   registeredAt: string;
 }
 
-const deviceColumns: ColumnDef<BiometricDevice, unknown>[] = [
-  {
+function buildDeviceColumns(onDelete: (id: string) => void): ColumnDef<BiometricDevice, unknown>[] {
+  return [{
     accessorKey: "deviceName",
     header: "Device Name",
   },
@@ -76,13 +76,18 @@ const deviceColumns: ColumnDef<BiometricDevice, unknown>[] = [
   {
     id: "actions",
     header: "",
-    cell: () => (
-      <Button variant="ghost" size="icon-sm" className="h-6 w-6 text-slate-400 hover:text-red-500">
+    cell: ({ row }) => (
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        className="h-6 w-6 text-slate-400 hover:text-red-500"
+        onClick={() => onDelete(row.original.id)}
+      >
         <Trash2 className="h-3.5 w-3.5" />
       </Button>
     ),
-  },
-];
+  }];
+}
 
 export function DevicesTab() {
   const [devices, setDevices] = useState<BiometricDevice[]>([]);
@@ -121,11 +126,18 @@ export function DevicesTab() {
     toast.success("Device registered successfully");
   }
 
+  function handleDeleteDevice(id: string) {
+    setDevices((prev) => prev.filter((d) => d.id !== id));
+    toast.success("Device removed");
+  }
+
   function handleRefresh() {
     setIsRefreshing(true);
     toast.info("Refreshing...");
     setTimeout(() => setIsRefreshing(false), 1000);
   }
+
+  const deviceColumns = buildDeviceColumns(handleDeleteDevice);
 
   return (
     <div className="space-y-3">
