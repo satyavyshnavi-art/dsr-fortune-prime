@@ -486,113 +486,111 @@ export async function GET(request: NextRequest) {
 
     const totalAlerts = alertStats.reduce((sum, s) => sum + s.count, 0);
 
-    // If DB is essentially empty, return demo data
-    const hasRealData =
-      empCount.count > 0 ||
-      totalAssets > 0 ||
-      totalComplaints > 0 ||
-      totalTasks > 0 ||
-      powerAgg.totalKwh > 0 ||
-      waterAgg.totalLiters > 0;
-
-    if (!hasRealData) {
-      return NextResponse.json(DEMO_SUMMARY);
-    }
+    // Per-section fallback: use real data if it exists, otherwise demo data
+    const realEmployees = {
+      total: empCount.count,
+      present: presentCount,
+      absent: absentCount + leaveCount,
+      late: halfDayCount,
+    };
+    const realAttendance = {
+      rate: attendanceRate,
+      recentCheckIns,
+      byStatus: Object.fromEntries(
+        attendanceStats.map((s) => [s.status, s.count])
+      ),
+    };
+    const realAssets = {
+      total: totalAssets,
+      active: activeAssets,
+      maintenance: maintenanceAssets,
+      inactive: inactiveAssets,
+      byCategory: assetsByCategory,
+      byStatus: Object.fromEntries(
+        assetStats.map((s) => [s.status, s.count])
+      ),
+      gatePasses: { out: gatePassOut, pending: gatePassPending },
+    };
+    const realComplaints = {
+      total: totalComplaints,
+      open: openComplaints,
+      inProgress: inProgressComplaints,
+      resolved: resolvedComplaints,
+      closed: closedComplaints,
+      avgResolutionDays: avgResolution.avgDays,
+      recentComplaints,
+      byStatus: Object.fromEntries(
+        complaintStats.map((s) => [s.status, s.count])
+      ),
+    };
+    const realTasks = {
+      total: totalTasks,
+      pending: pendingTasks,
+      unassigned: unassignedTasks,
+      inProgress: inProgressTasks,
+      completed: completedTasks,
+      cancelled: cancelledTasks,
+      overdue: overdueCount.count,
+      eisenhower: Object.fromEntries(
+        eisenhowerStats.map((s) => [s.matrix ?? "unclassified", s.count])
+      ),
+      recentTasks,
+      byStatus: Object.fromEntries(
+        taskStats.map((s) => [s.status, s.count])
+      ),
+    };
+    const realPower = {
+      totalKwh: powerAgg.totalKwh,
+      avgDaily:
+        powerAgg.readingCount > 0
+          ? Math.round(powerAgg.totalKwh / Math.max(1, powerAgg.readingCount))
+          : 0,
+      activeMeters: meterCount.count,
+      byType: Object.fromEntries(
+        powerByType.map((p) => [
+          p.meterType,
+          { totalUnits: p.totalUnits, meterCount: p.meterCount },
+        ])
+      ),
+      recentReadings: recentPowerReadings,
+    };
+    const realWater = {
+      totalLiters: waterAgg.totalLiters,
+      avgDaily:
+        waterAgg.readingCount > 0
+          ? Math.round(
+              waterAgg.totalLiters / Math.max(1, waterAgg.readingCount)
+            )
+          : 0,
+      activeSources: waterAgg.activeSources,
+      recentReadings: recentWaterReadings,
+    };
+    const realWaterQuality = {
+      readings: waterQualityData,
+      hasData: waterQualityData.length > 0,
+    };
+    const realVendor = {
+      total: totalVendorTickets,
+      open: openVendor,
+      inProgress: inProgressVendor,
+      resolved: resolvedVendor,
+      closed: closedVendor,
+      avgResolutionDays: avgVendorResolution.avgDays,
+      byStatus: Object.fromEntries(
+        vendorStats.map((s) => [s.status, s.count])
+      ),
+    };
 
     return NextResponse.json({
-      employees: {
-        total: empCount.count,
-        present: presentCount,
-        absent: absentCount + leaveCount,
-        late: halfDayCount,
-      },
-      attendance: {
-        rate: attendanceRate,
-        recentCheckIns,
-        byStatus: Object.fromEntries(
-          attendanceStats.map((s) => [s.status, s.count])
-        ),
-      },
-      assets: {
-        total: totalAssets,
-        active: activeAssets,
-        maintenance: maintenanceAssets,
-        inactive: inactiveAssets,
-        byCategory: assetsByCategory,
-        byStatus: Object.fromEntries(
-          assetStats.map((s) => [s.status, s.count])
-        ),
-        gatePasses: { out: gatePassOut, pending: gatePassPending },
-      },
-      complaints: {
-        total: totalComplaints,
-        open: openComplaints,
-        inProgress: inProgressComplaints,
-        resolved: resolvedComplaints,
-        closed: closedComplaints,
-        avgResolutionDays: avgResolution.avgDays,
-        recentComplaints,
-        byStatus: Object.fromEntries(
-          complaintStats.map((s) => [s.status, s.count])
-        ),
-      },
-      tasks: {
-        total: totalTasks,
-        pending: pendingTasks,
-        unassigned: unassignedTasks,
-        inProgress: inProgressTasks,
-        completed: completedTasks,
-        cancelled: cancelledTasks,
-        overdue: overdueCount.count,
-        eisenhower: Object.fromEntries(
-          eisenhowerStats.map((s) => [s.matrix ?? "unclassified", s.count])
-        ),
-        recentTasks,
-        byStatus: Object.fromEntries(
-          taskStats.map((s) => [s.status, s.count])
-        ),
-      },
-      powerReadings: {
-        totalKwh: powerAgg.totalKwh,
-        avgDaily:
-          powerAgg.readingCount > 0
-            ? Math.round(powerAgg.totalKwh / Math.max(1, powerAgg.readingCount))
-            : 0,
-        activeMeters: meterCount.count,
-        byType: Object.fromEntries(
-          powerByType.map((p) => [
-            p.meterType,
-            { totalUnits: p.totalUnits, meterCount: p.meterCount },
-          ])
-        ),
-        recentReadings: recentPowerReadings,
-      },
-      waterReadings: {
-        totalLiters: waterAgg.totalLiters,
-        avgDaily:
-          waterAgg.readingCount > 0
-            ? Math.round(
-                waterAgg.totalLiters / Math.max(1, waterAgg.readingCount)
-              )
-            : 0,
-        activeSources: waterAgg.activeSources,
-        recentReadings: recentWaterReadings,
-      },
-      waterQuality: {
-        readings: waterQualityData,
-        hasData: waterQualityData.length > 0,
-      },
-      vendorTickets: {
-        total: totalVendorTickets,
-        open: openVendor,
-        inProgress: inProgressVendor,
-        resolved: resolvedVendor,
-        closed: closedVendor,
-        avgResolutionDays: avgVendorResolution.avgDays,
-        byStatus: Object.fromEntries(
-          vendorStats.map((s) => [s.status, s.count])
-        ),
-      },
+      employees: totalAttendanceRecords > 0 ? realEmployees : DEMO_SUMMARY.employees,
+      attendance: totalAttendanceRecords > 0 ? realAttendance : DEMO_SUMMARY.attendance,
+      assets: totalAssets > 0 ? realAssets : DEMO_SUMMARY.assets,
+      complaints: totalComplaints > 0 ? realComplaints : DEMO_SUMMARY.complaints,
+      tasks: totalTasks > 0 ? realTasks : DEMO_SUMMARY.tasks,
+      powerReadings: powerAgg.totalKwh > 0 ? realPower : DEMO_SUMMARY.powerReadings,
+      waterReadings: waterAgg.totalLiters > 0 ? realWater : DEMO_SUMMARY.waterReadings,
+      waterQuality: waterQualityData.length > 0 ? realWaterQuality : DEMO_SUMMARY.waterQuality,
+      vendorTickets: totalVendorTickets > 0 ? realVendor : DEMO_SUMMARY.vendorTickets,
       alerts: {
         total: totalAlerts,
         critical: alertStats.find((s) => s.severity === "critical")?.count ?? 0,
