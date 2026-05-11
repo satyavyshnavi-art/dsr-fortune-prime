@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { ChartCard, StatusBadge } from "@/components/shared";
 import {
   CalendarDays,
@@ -12,15 +12,8 @@ import {
 
 type TabId = "matrix" | "list";
 
-export function TaskStatusWidget() {
+export function TaskStatusWidget({ data }: { data?: any }) {
   const [activeTab, setActiveTab] = useState<TabId>("matrix");
-  const [data, setData] = useState<any>(null);
-  useEffect(() => {
-    fetch("/api/v1/dashboard/summary")
-      .then((r) => r.json())
-      .then((d) => { if (d && !d.error) setData(d); })
-      .catch(() => {});
-  }, []);
 
   const total = data?.tasks?.total ?? 0;
   const completed = data?.tasks?.completed ?? 0;

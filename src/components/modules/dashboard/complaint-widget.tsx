@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {} from "react";
 import { ChartCard } from "@/components/shared";
 import {
   PieChart,
@@ -11,14 +11,7 @@ import {
 } from "recharts";
 import { MessageSquare, Clock, CheckCircle } from "lucide-react";
 
-export function ComplaintWidget() {
-  const [data, setData] = useState<any>(null);
-  useEffect(() => {
-    fetch("/api/v1/dashboard/summary")
-      .then((r) => r.json())
-      .then((d) => { if (d && !d.error) setData(d); })
-      .catch(() => {});
-  }, []);
+export function ComplaintWidget({ data }: { data?: any }) {
 
   const open = data?.complaints?.open ?? 0;
   const inProgress = data?.complaints?.inProgress ?? 0;

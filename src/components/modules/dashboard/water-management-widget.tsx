@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {} from "react";
 import { ChartCard } from "@/components/shared";
 import {
   BarChart,
@@ -14,14 +14,7 @@ import {
 
 const tabs = ["Water Level", "Water Consumption"];
 
-export function WaterManagementWidget() {
-  const [data, setData] = useState<any>(null);
-  useEffect(() => {
-    fetch("/api/v1/dashboard/summary")
-      .then((r) => r.json())
-      .then((d) => { if (d && !d.error) setData(d); })
-      .catch(() => {});
-  }, []);
+export function WaterManagementWidget({ data }: { data?: any }) {
 
   const recentReadings = data?.waterReadings?.recentReadings ?? [];
 

@@ -215,23 +215,23 @@ export default function DashboardPage() {
 
           {/* Row 2: Attendance, Hygiene, Power */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-            <AttendanceWidget />
+            <AttendanceWidget data={dashboardData} />
             <HygieneWidget />
-            <PowerWidget />
+            <PowerWidget data={dashboardData} />
           </div>
 
           {/* Row 3: Water Management, Asset Summary, Water Quality */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-            <WaterManagementWidget />
-            <AssetSummaryWidget />
-            <WaterQualityWidget />
+            <WaterManagementWidget data={dashboardData} />
+            <AssetSummaryWidget data={dashboardData} />
+            <WaterQualityWidget data={dashboardData} />
           </div>
 
           {/* Row 4: Complaint, Task Status, Vendor Tickets */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-            <ComplaintWidget />
-            <TaskStatusWidget />
-            <VendorTicketsWidget />
+            <ComplaintWidget data={dashboardData} />
+            <TaskStatusWidget data={dashboardData} />
+            <VendorTicketsWidget data={dashboardData} />
           </div>
         </div>
       </div>

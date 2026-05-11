@@ -1,18 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {} from "react";
 import { ChartCard } from "@/components/shared";
 import { EmptyState } from "@/components/shared";
 import { Droplets } from "lucide-react";
 
-export function WaterQualityWidget() {
-  const [data, setData] = useState<any>(null);
-  useEffect(() => {
-    fetch("/api/v1/dashboard/summary")
-      .then((r) => r.json())
-      .then((d) => { if (d && !d.error) setData(d); })
-      .catch(() => {});
-  }, []);
+export function WaterQualityWidget({ data }: { data?: any }) {
 
   const hasData = data?.waterQuality?.hasData ?? false;
   const readings = data?.waterQuality?.readings ?? [];

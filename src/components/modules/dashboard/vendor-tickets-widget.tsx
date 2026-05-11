@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {} from "react";
 import { ChartCard } from "@/components/shared";
 import {
   PieChart,
@@ -11,14 +11,7 @@ import {
 } from "recharts";
 import { Ticket, CheckCircle2, TrendingUp } from "lucide-react";
 
-export function VendorTicketsWidget() {
-  const [data, setData] = useState<any>(null);
-  useEffect(() => {
-    fetch("/api/v1/dashboard/summary")
-      .then((r) => r.json())
-      .then((d) => { if (d && !d.error) setData(d); })
-      .catch(() => {});
-  }, []);
+export function VendorTicketsWidget({ data }: { data?: any }) {
 
   const total = data?.vendorTickets?.total ?? 0;
   const open = data?.vendorTickets?.open ?? 0;

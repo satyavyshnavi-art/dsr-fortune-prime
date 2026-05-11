@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {} from "react";
 import { ChartCard, StatusBadge } from "@/components/shared";
 
 const assetBreakdown = [
@@ -9,14 +9,7 @@ const assetBreakdown = [
   { name: "Inactive", color: "#ef4444" },
 ];
 
-export function AssetSummaryWidget() {
-  const [data, setData] = useState<any>(null);
-  useEffect(() => {
-    fetch("/api/v1/dashboard/summary")
-      .then((r) => r.json())
-      .then((d) => { if (d && !d.error) setData(d); })
-      .catch(() => {});
-  }, []);
+export function AssetSummaryWidget({ data }: { data?: any }) {
 
   const total = data?.assets?.total ?? 0;
   const active = data?.assets?.active ?? 0;
