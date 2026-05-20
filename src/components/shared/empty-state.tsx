@@ -21,7 +21,7 @@ export function EmptyState({
   return (
     <div className={cn("flex flex-col items-center justify-center py-10 text-center", className)}>
       <div className="rounded-full bg-slate-100 p-3 mb-3">
-        <Icon className="h-6 w-6 text-slate-400" />
+        <Icon className="h-6 w-6 text-slate-400" aria-hidden="true" />
       </div>
       <h3 className="text-[13px] font-semibold text-slate-700">{title}</h3>
       {description && (

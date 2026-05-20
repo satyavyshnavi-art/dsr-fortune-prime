@@ -24,6 +24,12 @@ import {
   ComplaintWidget,
   TaskStatusWidget,
   VendorTicketsWidget,
+  TaskCompletionChart,
+  AttendanceOverview,
+  AlertSummary,
+  ApprovalPipeline,
+  InventoryAlerts,
+  RecentActivity,
 } from "@/components/modules/dashboard";
 
 function formatDateLabel(dateStr: string): string {
@@ -143,7 +149,7 @@ export default function DashboardPage() {
           <div className="flex items-center justify-end gap-3">
             {showApplied && (
               <div className="flex items-center gap-1.5 text-[12px] text-green-600 font-medium animate-in fade-in slide-in-from-right-2 duration-200">
-                <CheckCircle2 className="h-3.5 w-3.5" />
+                <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
                 Updated for {formatDateLabel(appliedRange.start)} – {formatDateLabel(appliedRange.end)}
               </div>
             )}
@@ -153,18 +159,20 @@ export default function DashboardPage() {
                 hasUnappliedChanges ? "border-[#10b981]/40 ring-1 ring-[#10b981]/10" : "border-slate-200"
               }`}
             >
-              <Calendar className="h-4 w-4 text-[#10b981] mr-2 shrink-0" />
+              <Calendar className="h-4 w-4 text-[#10b981] mr-2 shrink-0" aria-hidden="true" />
               <input
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
+                aria-label="Start date"
                 className="bg-transparent text-[13px] text-slate-700 font-medium focus:outline-none cursor-pointer border-none p-0 m-0 h-full"
               />
-              <span className="text-[14px] text-slate-400 mx-2 select-none">→</span>
+              <span className="text-[14px] text-slate-400 mx-2 select-none" aria-hidden="true">→</span>
               <input
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
+                aria-label="End date"
                 className="bg-transparent text-[13px] text-slate-700 font-medium focus:outline-none cursor-pointer border-none p-0 m-0 h-full"
               />
             </div>
@@ -183,7 +191,7 @@ export default function DashboardPage() {
               {isLoading ? (
                 <span className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
-                <Search className="h-4 w-4" />
+                <Search className="h-4 w-4" aria-hidden="true" />
               )}
               {isLoading ? "Loading..." : "Go"}
             </button>
@@ -213,7 +221,21 @@ export default function DashboardPage() {
             ))}
           </div>
 
-          {/* Row 2: Attendance, Hygiene, Power */}
+          {/* Row 2: Charts — Task Completion, Attendance Pie, Alert Summary */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+            <TaskCompletionChart data={dashboardData} />
+            <AttendanceOverview data={dashboardData} />
+            <AlertSummary data={dashboardData} />
+          </div>
+
+          {/* Row 3: Approval Pipeline, Inventory Alerts, Recent Activity */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+            <ApprovalPipeline data={dashboardData} />
+            <InventoryAlerts data={dashboardData} />
+            <RecentActivity data={dashboardData} />
+          </div>
+
+          {/* Row 4: Attendance, Hygiene, Power */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
             <AttendanceWidget data={dashboardData} />
             <HygieneWidget />

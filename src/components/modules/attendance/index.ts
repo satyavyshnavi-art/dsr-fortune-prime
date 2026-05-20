@@ -7,3 +7,4 @@ export { ShiftView } from "./shift-view";
 export { CalendarView } from "./calendar-view";
 export { BillingView } from "./billing-view";
 export { TimesheetView } from "./timesheet-view";
+export { CheckInOut } from "./check-in-out";

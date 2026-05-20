@@ -13,10 +13,12 @@ import {
   CalendarView,
   BillingView,
   TimesheetView,
+  CheckInOut,
 } from "@/components/modules/attendance";
 
 const TABS = [
   { value: "employees", label: "Employees" },
+  { value: "check-in-out", label: "Check In/Out" },
   { value: "entry", label: "Entry" },
   { value: "attendance", label: "Attendance" },
   { value: "qr-scanner", label: "QR Scanner" },
@@ -29,6 +31,7 @@ const TABS = [
 
 const TAB_CONTENT: Record<string, React.ComponentType> = {
   employees: EmployeeTable,
+  "check-in-out": CheckInOut,
   entry: ManualEntry,
   attendance: AttendanceTab,
   "qr-scanner": QRScanner,

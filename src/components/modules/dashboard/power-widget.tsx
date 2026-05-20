@@ -95,7 +95,7 @@ export function PowerWidget({ data }: { data?: any }) {
             <p className="text-[10px] text-slate-400 mb-0.5">
               Power Distribution
             </p>
-            <div className="h-[75px]">
+            <div className="h-[75px]" role="img" aria-label="Donut chart showing power distribution by location">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie

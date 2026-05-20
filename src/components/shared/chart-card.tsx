@@ -13,7 +13,7 @@ interface ChartCardProps {
 
 export function ChartCard({ title, subtitle, children, actions, className }: ChartCardProps) {
   return (
-    <Card className={cn("shadow-none border-slate-200", className)}>
+    <Card className={cn("shadow-none border-slate-200", className)} role="region" aria-label={title}>
       <CardHeader className="flex flex-row items-center justify-between px-4 py-2.5 pb-1">
         <div>
           <CardTitle className="text-[13px] font-semibold text-slate-700">{title}</CardTitle>

@@ -13,7 +13,7 @@ export function PageHeader({ title, description, actions, className }: PageHeade
   return (
     <div className={cn("flex items-center justify-between", className)}>
       <div>
-        <h2 className="text-[15px] font-semibold text-slate-800">{title}</h2>
+        <h1 className="text-[15px] font-semibold text-slate-800">{title}</h1>
         {description && (
           <p className="text-[11px] text-slate-400 mt-0.5">{description}</p>
         )}

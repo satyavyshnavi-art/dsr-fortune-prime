@@ -2,6 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { breakdownRecords } from "@/db/schema";
 import { eq, and, desc } from "drizzle-orm";
+import { z } from "zod";
+import { sanitizeInput } from "@/lib/sanitize";
+
+const createBreakdownSchema = z.object({
+  assetId: z.string().uuid(),
+  reportedDate: z.string(),
+  description: z.string().max(5000).transform(sanitizeInput).optional(),
+  serviceProvider: z.string().max(255).optional(),
+  cost: z.string().optional(),
+  status: z.enum(["open", "in_progress", "resolved", "closed"]).optional(),
+  completedDate: z.string().optional(),
+});
 
 export async function GET(request: NextRequest) {
   try {
@@ -34,7 +46,16 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const result = await db.insert(breakdownRecords).values(body).returning();
+    const parsed = createBreakdownSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: { code: "VALIDATION_ERROR", message: parsed.error.issues[0].message } },
+        { status: 400 }
+      );
+    }
+
+    const result = await db.insert(breakdownRecords).values(parsed.data).returning();
     return NextResponse.json(result[0], { status: 201 });
   } catch (error) {
     console.error("POST /api/v1/breakdown error:", error);

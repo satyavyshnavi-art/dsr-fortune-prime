@@ -2,6 +2,22 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { tasks } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { z } from "zod";
+import { sanitizeInput } from "@/lib/sanitize";
+
+const updateTaskSchema = z.object({
+  title: z.string().min(1).max(255).transform(sanitizeInput).optional(),
+  description: z.string().max(5000).transform(sanitizeInput).optional(),
+  department: z.string().max(100).optional(),
+  responsibility: z.string().max(50).optional(),
+  priority: z.enum(["low", "medium", "high", "critical"]).optional(),
+  source: z.string().max(100).optional(),
+  eisenhowerMatrix: z.string().max(50).optional(),
+  dueDate: z.string().optional(),
+  status: z.enum(["pending", "unassigned", "in_progress", "completed", "cancelled"]).optional(),
+  assignedTo: z.string().max(255).optional(),
+  attachments: z.any().optional(),
+});
 
 export async function GET(
   _request: NextRequest,
@@ -27,7 +43,16 @@ export async function PUT(
   try {
     const { id } = await params;
     const body = await request.json();
-    const result = await db.update(tasks).set(body).where(eq(tasks.id, id)).returning();
+    const parsed = updateTaskSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: { code: "VALIDATION_ERROR", message: parsed.error.issues[0].message } },
+        { status: 400 }
+      );
+    }
+
+    const result = await db.update(tasks).set(parsed.data).where(eq(tasks.id, id)).returning();
     if (result.length === 0) {
       return NextResponse.json({ error: "Task not found" }, { status: 404 });
     }

@@ -48,7 +48,7 @@ export function TopBar({ title, subtitle }: TopBarProps) {
 
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-1 text-[11px] text-slate-400">
-          <MapPin className="h-3 w-3" />
+          <MapPin className="h-3 w-3" aria-hidden="true" />
           <span className="font-medium text-[#10b981]">{FACILITY_LOCATION.name}</span>
           <span className="text-slate-400">
             {FACILITY_LOCATION.area}, {FACILITY_LOCATION.city}, {FACILITY_LOCATION.state} {FACILITY_LOCATION.pin}
@@ -72,7 +72,7 @@ export function TopBar({ title, subtitle }: TopBarProps) {
                     {role}
                   </span>
                 </div>
-                <ChevronDown className="h-3 w-3 text-slate-400" />
+                <ChevronDown className="h-3 w-3 text-slate-400" aria-hidden="true" />
               </button>
             }
           />

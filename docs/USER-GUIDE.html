@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>DSR Fortune Prime — User Guide</title>
+<style>
+  @page { size: A4; margin: 22mm 26mm 26mm 26mm; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Georgia', 'Palatino', serif; color: #2d2d2d; background: #fff; line-height: 1.7; font-size: 13.5px; }
+
+  /* Cover — deep emerald green */
+  .cover { background: linear-gradient(160deg, #064e3b 0%, #065f46 40%, #047857 100%); color: #fff; padding: 70px 55px 55px; min-height: 100vh; display: flex; flex-direction: column; justify-content: space-between; page-break-after: always; }
+  .cover .badge { display: inline-block; border: 1.5px solid rgba(255,255,255,0.4); color: rgba(255,255,255,0.8); font-family: -apple-system, sans-serif; font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; padding: 5px 14px; border-radius: 3px; margin-bottom: 36px; }
+  .cover h1 { font-family: -apple-system, BlinkMacSystemFont, sans-serif; font-size: 46px; font-weight: 800; line-height: 1.1; margin-bottom: 18px; max-width: 480px; }
+  .cover .desc { font-size: 16px; color: rgba(255,255,255,0.7); line-height: 1.65; max-width: 500px; font-style: italic; }
+  .cover .meta { display: flex; gap: 70px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 22px; margin-top: auto; font-family: -apple-system, sans-serif; }
+  .cover .meta-item .label { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-bottom: 3px; }
+  .cover .meta-item .value { font-size: 14px; font-weight: 600; }
+
+  /* Section badges — colored pill labels */
+  .badge-section { display: inline-block; font-family: -apple-system, sans-serif; font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 3px 10px; border-radius: 3px; margin-bottom: 6px; }
+  .badge-section.emerald { background: #ecfdf5; color: #065f46; }
+  .badge-section.teal { background: #f0fdfa; color: #115e59; }
+  .badge-section.indigo { background: #eef2ff; color: #3730a3; }
+  .badge-section.rose { background: #fff1f2; color: #9f1239; }
+  .badge-section.amber { background: #fffbeb; color: #92400e; }
+  .badge-section.slate { background: #f1f5f9; color: #334155; }
+
+  /* Headings */
+  h2 { font-family: -apple-system, BlinkMacSystemFont, sans-serif; font-size: 24px; font-weight: 800; color: #1a1a2e; margin-bottom: 6px; line-height: 1.2; }
+  h3 { font-family: -apple-system, BlinkMacSystemFont, sans-serif; font-size: 15px; font-weight: 700; color: #065f46; margin: 14px 0 4px; }
+
+  /* Body */
+  .section { margin: 0 0 14px; }
+  .section p { margin-bottom: 6px; font-size: 13px; }
+  .section ul, .section ol { padding-left: 18px; margin-bottom: 6px; }
+  .section li { margin-bottom: 3px; font-size: 12.5px; }
+  .section li strong { color: #1a1a2e; }
+
+  /* Feature cards — emerald accent */
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0; }
+  .card { border: 1px solid #d1fae5; background: #f0fdf4; border-left: 3px solid #10b981; border-radius: 5px; padding: 10px 12px; font-family: -apple-system, sans-serif; }
+  .card .icon { font-size: 16px; margin-bottom: 3px; }
+  .card strong { display: block; font-size: 12.5px; font-weight: 700; color: #064e3b; margin-bottom: 2px; }
+  .card span { font-size: 11px; color: #6b7280; line-height: 1.4; }
+
+  /* Dark box — dark emerald for credentials */
+  .dark-box { background: #064e3b; border-radius: 6px; padding: 16px 20px; margin: 10px 0; color: #fff; font-family: -apple-system, sans-serif; }
+  .dark-box h4 { color: #6ee7b7; font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .dark-box .code-line { background: rgba(255,255,255,0.08); border-radius: 4px; padding: 6px 12px; font-family: 'SF Mono', Menlo, monospace; font-size: 12px; margin-bottom: 8px; color: #d1fae5; }
+  .dark-box table { width: 100%; border-collapse: collapse; margin-top: 4px; }
+  .dark-box th { text-align: left; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.4); padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.12); }
+  .dark-box td { padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 12.5px; }
+  .dark-box td.role { color: #6ee7b7; font-weight: 600; }
+  .dark-box td code { font-family: 'SF Mono', Menlo, monospace; font-size: 11.5px; }
+
+  /* Callouts — left border accent */
+  .callout { border-left: 3px solid #10b981; background: #ecfdf5; border-radius: 0 5px 5px 0; padding: 9px 14px; margin: 8px 0; font-size: 12px; color: #065f46; font-family: -apple-system, sans-serif; }
+  .callout strong { color: #064e3b; }
+  .callout.amber { border-left-color: #f59e0b; background: #fffbeb; color: #92400e; }
+  .callout.amber strong { color: #78350f; }
+  .callout.indigo { border-left-color: #6366f1; background: #eef2ff; color: #3730a3; }
+
+  /* Screenshots */
+  .screenshot { margin: 10px 0; }
+  .screenshot img { width: 100%; display: block; border: 1px solid #e5e7eb; border-radius: 4px; }
+  .screenshot .caption { font-size: 10px; font-style: italic; color: #9ca3af; margin-top: 4px; text-align: center; font-family: -apple-system, sans-serif; }
+
+  /* Tables */
+  .info-table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 11.5px; font-family: -apple-system, sans-serif; }
+  .info-table th { text-align: left; padding: 6px 10px; background: #f0fdf4; border: 1px solid #d1fae5; font-weight: 700; font-size: 9.5px; color: #065f46; text-transform: uppercase; letter-spacing: 0.8px; }
+  .info-table td { padding: 6px 10px; border: 1px solid #e5e7eb; color: #374151; }
+
+  /* Steps */
+  .steps { counter-reset: step; margin: 8px 0; padding: 0; list-style: none; font-family: -apple-system, sans-serif; }
+  .steps li { counter-increment: step; padding: 3px 0 3px 34px; position: relative; font-size: 12.5px; color: #374151; margin-bottom: 2px; }
+  .steps li::before { content: counter(step); position: absolute; left: 0; top: 2px; width: 22px; height: 22px; background: #10b981; color: #fff; border-radius: 50%; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+
+  /* Dividers */
+  hr { border: none; border-top: 1px solid #e5e7eb; margin: 14px 0; }
+  /* no forced page breaks — let content flow naturally */
+
+  /* Footer */
+  .footer { text-align: center; padding: 14px 0; font-size: 9.5px; color: #9ca3af; border-top: 1px solid #e5e7eb; margin-top: 14px; font-family: -apple-system, sans-serif; }
+
+  /* Each major section on its own page */
+  .page { page-break-before: always; }
+
+  @media print {
+    .cover { break-after: page; }
+    .page { break-before: page; }
+    h2 { break-after: avoid; }
+    h3 { break-after: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ COVER ═══════════ -->
+<div class="cover">
+  <div>
+    <div class="badge">User Guide &middot; Facility Management</div>
+    <h1>DSR Fortune Prime</h1>
+    <p class="desc">A comprehensive facility management portal covering attendance, assets, utilities, complaints, and daily operations &mdash; built for Indian residential complexes.</p>
+  </div>
+  <div class="meta">
+    <div class="meta-item"><div class="label">Date</div><div class="value">May 1, 2026</div></div>
+    <div class="meta-item"><div class="label">Facility</div><div class="value">DSR Fortune Prime</div></div>
+    <div class="meta-item"><div class="label">Status</div><div class="value">Production Live</div></div>
+  </div>
+</div>
+
+<!-- ═══════════ EXECUTIVE SUMMARY ═══════════ -->
+<div class="section page">
+  <div class="badge-section emerald">Executive Summary</div>
+  <h2>What this portal does</h2>
+  <p>DSR Fortune Prime is a web-based facility management platform covering 10 operational modules. It runs entirely in the browser &mdash; no software installation required. The portal is live and ready for your team to use today.</p>
+
+  <div class="cards">
+    <div class="card"><div class="icon">🌐</div><strong>Live on the internet</strong><span>Accessible at dsr-fortune-prime.vercel.app from any browser. No VPN or special software needed.</span></div>
+    <div class="card"><div class="icon">👤</div><strong>Login works</strong><span>Two demo accounts ready &mdash; Facility Manager and Super Admin. Credentials inside this document.</span></div>
+    <div class="card"><div class="icon">📊</div><strong>10 modules operational</strong><span>Dashboard, Daily Updates, Attendance, Assets, Facility Config, Alerts, Reports, AI Agent, User Management, Biometric.</span></div>
+    <div class="card"><div class="icon">🗄️</div><strong>Database connected</strong><span>Production PostgreSQL database on Neon with 40+ tables, seeded with demo data for all modules.</span></div>
+    <div class="card"><div class="icon">🔔</div><strong>Smart alerts</strong><span>Auto-generated alerts from real facility data &mdash; attendance, asset audits, water quality, expiring contracts.</span></div>
+    <div class="card"><div class="icon">📋</div><strong>Full audit trail</strong><span>Every user action &mdash; login, create, edit, delete, role change &mdash; is recorded with timestamp and IP.</span></div>
+  </div>
+
+  <div class="callout"><strong>Bottom line:</strong> the portal is fully functional with working login, profile management, data entry, alerts, reports, and user administration. Every module loads, every API responds, verified by 34 automated tests.</div>
+</div>
+
+<!-- ═══════════ DEMO ACCESS ═══════════ -->
+<div class="section page">
+  <div class="badge-section indigo">Demo Access</div>
+  <h2>Try it yourself &mdash; 2 demo accounts</h2>
+  <p>The portal is live and accepting logins right now. Each role below has its own demo account.</p>
+
+  <div class="dark-box">
+    <h4>Web address (share with your team)</h4>
+    <div class="code-line">https://dsr-fortune-prime.vercel.app</div>
+    <h4>Demo accounts</h4>
+    <table>
+      <tr><th>Role</th><th>Email</th><th>Password</th></tr>
+      <tr><td class="role">Facility Manager</td><td><code>demo@dsrfortuneprime.com</code></td><td><code>demo123</code></td></tr>
+      <tr><td class="role">Super Admin</td><td><code>admin@dsrfortuneprime.com</code></td><td><code>admin123</code></td></tr>
+    </table>
+  </div>
+
+  <div class="callout amber"><strong>Note for reviewers:</strong> this is a demo environment with sample data. The login page has quick-fill buttons &mdash; click any demo account to auto-fill credentials, then click Sign In.</div>
+</div>
+
+<!-- ═══════════ LOGIN ═══════════ -->
+<div class="section page">
+  <div class="badge-section teal">Screen Walkthrough</div>
+  <h2>Login &amp; Authentication</h2>
+  <p>The login page validates credentials before granting access. Wrong email or password shows an error &mdash; the form stays until valid credentials are entered.</p>
+
+  <div class="screenshot">
+    <img src="screenshots/01-login-page.png" alt="Login">
+    <div class="caption">Login page with email/password fields and demo account quick-fill buttons at the bottom.</div>
+  </div>
+
+  <ol class="steps">
+    <li>Open <strong>https://dsr-fortune-prime.vercel.app</strong> in your browser.</li>
+    <li>Enter your <strong>Email</strong> and <strong>Password</strong> (or click a demo account to auto-fill).</li>
+    <li>Click the green <strong>"Sign In"</strong> button.</li>
+    <li>On success, you are redirected to the <strong>Dashboard</strong>.</li>
+  </ol>
+
+  <div class="screenshot">
+    <img src="screenshots/02-login-error.png" alt="Login Error">
+    <div class="caption">Error state &mdash; "Invalid email or password" displayed for incorrect credentials.</div>
+  </div>
+</div>
+
+<!-- ═══════════ DASHBOARD ═══════════ -->
+<div class="section page">
+  <div class="badge-section emerald">Dashboard</div>
+  <h2>Your command center</h2>
+  <p>After login, you land on the Dashboard &mdash; a real-time overview across 9 management widgets, 6 KPI summary cards, and a configurable date range picker.</p>
+
+  <div class="screenshot">
+    <img src="screenshots/03-dashboard.png" alt="Dashboard">
+    <div class="caption">Dashboard showing KPI cards, date range picker, and 9 management widgets: Attendance, Hygiene, Power, Water, Assets, Complaints, Tasks, Vendor Tickets.</div>
+  </div>
+
+  <div class="cards">
+    <div class="card"><strong>KPI Summary Cards</strong><span>Six cards: Employees, Water Consumption, Hygiene, Power, Complaints, Tasks &mdash; each showing the headline metric.</span></div>
+    <div class="card"><strong>Date Range Picker</strong><span>Select start/end date and click "Go" to filter all dashboard data. Default: last 30 days.</span></div>
+    <div class="card"><strong>Attendance Widget</strong><span>Overall score, present/absent/late counts, status breakdown table.</span></div>
+    <div class="card"><strong>Power Management</strong><span>EB/DG/Solar breakdown with meter-wise consumption and distribution donut chart.</span></div>
+    <div class="card"><strong>Water Management</strong><span>Tank levels (percentage bars) and daily consumption tracking.</span></div>
+    <div class="card"><strong>Complaint &amp; Task Widgets</strong><span>Open/In Progress/Resolved counts, resolution rates, Eisenhower matrix task classification.</span></div>
+  </div>
+</div>
+
+<!-- ═══════════ NAVIGATION ═══════════ -->
+<div class="section page">
+  <div class="badge-section teal">Navigation</div>
+  <h2>Sidebar &amp; profile</h2>
+  <p>The dark green sidebar provides navigation to all 10 modules. Your user profile and Sign Out button are at the bottom. Click your name in the top-right for the profile dropdown.</p>
+
+  <div class="screenshot">
+    <img src="screenshots/20-sidebar-with-user.png" alt="Sidebar">
+    <div class="caption">Full sidebar with navigation links, logged-in user info (Demo User / Facility Manager), and Sign Out.</div>
+  </div>
+
+  <div class="screenshot">
+    <img src="screenshots/05-profile-dropdown.png" alt="Profile Dropdown">
+    <div class="caption">Profile dropdown &mdash; user name, email, role, My Profile link, and Sign Out.</div>
+  </div>
+</div>
+
+<!-- ═══════════ MY PROFILE ═══════════ -->
+<div class="section page">
+  <div class="badge-section indigo">My Profile</div>
+  <h2>Personal information &amp; settings</h2>
+  <p>The profile page shows your account details: editable Personal Information, Change Password, and read-only Facility Information.</p>
+
+  <div class="screenshot">
+    <img src="screenshots/18-profile.png" alt="Profile Page">
+    <div class="caption">My Profile &mdash; edit display name, email, phone; change password; view facility details (DSR Fortune Prime, Residential, Bangalore).</div>
+  </div>
+
+  <ul>
+    <li><strong>Personal Information</strong> &mdash; Edit display name, email, phone. Role is read-only. Click "Save Changes" to update.</li>
+    <li><strong>Change Password</strong> &mdash; Enter current password, new password (min 6 chars), confirm. Click "Update Password".</li>
+    <li><strong>Facility Information</strong> &mdash; Read-only: facility name, type, city, client.</li>
+    <li><strong>Sign Out</strong> &mdash; Available from profile header, sidebar, or profile dropdown (3 locations).</li>
+  </ul>
+</div>
+
+<!-- ═══════════ ALL MODULES ═══════════ -->
+<div class="section page">
+  <div class="badge-section rose">All 10 Modules</div>
+  <h2>Every screen mapped</h2>
+  <p>Below is a walkthrough of each module with screenshots captured from the live production portal via automated browser testing.</p>
+
+  <h3>1. Daily Updates</h3>
+  <p>Primary data entry for facility staff. 8 tabs: Update (power/water readings), Hygiene, Power, Water, Complaints, Tasks, Projects, Vendor tickets. Enter current meter readings and click "Save Power" or "Save Water".</p>
+  <div class="screenshot">
+    <img src="screenshots/06-daily-updates.png" alt="Daily Updates">
+    <div class="caption">Update tab &mdash; Power Readings (EB &amp; DG meters) and Water Readings entry forms.</div>
+  </div>
+</div>
+
+<div class="section page">
+  <h3>2. Attendance &amp; Staffing</h3>
+  <p>Workforce management with 9 tabs: Employees, Manual Entry, Attendance, QR Scanner, Staff &amp; Shift, Shift View, Calendar View, Billing, Timesheet. Supports Excel/PDF export and bulk upload.</p>
+  <div class="screenshot">
+    <img src="screenshots/07-attendance.png" alt="Attendance">
+    <div class="caption">Employee list &mdash; name, ID, mobile, email, designation, QR code status, edit/delete actions.</div>
+  </div>
+</div>
+
+<div class="section page">
+  <h3>3. Asset Management</h3>
+  <p>Track every physical asset across 9 categories. 8 tabs: Categories, Checklists, Dashboard, AMC Contracts, Breakdown/RCA, Gate Pass, 52-Week PPM, Asset Audit (QR-based scanning).</p>
+  <div class="screenshot">
+    <img src="screenshots/08-asset-management.png" alt="Assets">
+    <div class="caption">Asset Categories &mdash; 9 categories (Earthing Pits, HVAC, Fire Safety, etc.) with View/Add/Upload per category.</div>
+  </div>
+</div>
+
+<div class="section page">
+  <h3>4. Facility Configuration</h3>
+  <p>Set up facility details, power meters, water infrastructure, water quality parameters, hygiene templates, shifts, and service providers. 4 tabs: Facility Config, Daily Update, Employee, Service Provider.</p>
+  <div class="screenshot">
+    <img src="screenshots/09-facility-config.png" alt="Facility Config">
+    <div class="caption">Facility Configuration with tabs for facility details, daily update config, employee settings, and service providers.</div>
+  </div>
+</div>
+
+<div class="section page">
+  <h3>5. Alerts &amp; Monitoring</h3>
+  <p>Auto-generated alerts from facility data. Click "Refresh &amp; Generate" to scan attendance, asset audits, water quality, tasks, and AMC contracts. Severity-coded: Critical (red), High (orange), Medium (yellow), Low (blue). Actions: Acknowledge, Dismiss, Resolve.</p>
+  <div class="screenshot">
+    <img src="screenshots/10-alerts-list.png" alt="Alerts">
+    <div class="caption">Alerts page &mdash; auto-generated alerts grouped by category with severity badges and action buttons.</div>
+  </div>
+</div>
+
+<div class="section page">
+  <h3>6. Alert Configuration</h3>
+  <p>Configure categories, attendance/maintenance thresholds, MLSS water quality parameters, audit deadline reminders, and notification channels (Email, SMS, WhatsApp, Push) with per-role toggles.</p>
+  <div class="screenshot">
+    <img src="screenshots/11-alerts-configuration.png" alt="Alert Config">
+    <div class="caption">Configuration tab &mdash; master toggle, category toggles, thresholds, MLSS parameters, notification channels.</div>
+  </div>
+</div>
+
+<div class="section page">
+  <h3>7. Reports &amp; KPIs</h3>
+  <p>KPI Traffic Light Dashboard with 18 metrics across 6 categories (Attendance, Operations, Utilities, Maintenance, Quality, Safety). Green = on target, Red = below. Includes Analytics tab and downloadable PDF reports.</p>
+  <div class="screenshot">
+    <img src="screenshots/12-reports.png" alt="Reports">
+    <div class="caption">KPI Traffic Light Dashboard &mdash; 18 KPIs with values vs targets, plus 6 category progress bars.</div>
+  </div>
+</div>
+
+<div class="section page">
+  <h3>8. AI Agent</h3>
+  <p>Conversational AI assistant powered by Google Gemini. Ask questions like "How many complaints are open?", "Which assets have overdue maintenance?", "Generate a water consumption summary for April."</p>
+  <div class="screenshot">
+    <img src="screenshots/13-ai-agent.png" alt="AI Agent">
+    <div class="caption">AI Agent chat interface &mdash; type questions, receive AI-powered facility insights.</div>
+  </div>
+</div>
+
+<div class="section page">
+  <h3>9. User Management</h3>
+  <p>Full CRUD: Create, Edit, Change Role, Activate/Deactivate, Delete users. Searchable table with role/status filters. Click any role name to change it. All actions are logged in the audit trail.</p>
+  <div class="screenshot">
+    <img src="screenshots/14-user-management.png" alt="Users">
+    <div class="caption">User list &mdash; name, phone, email, role (clickable), status, creation date, three-dot action menu.</div>
+  </div>
+</div>
+
+<div class="section page">
+  <h3>10. Roles &amp; Permissions</h3>
+  <p>Permission matrix: 11 roles x 9 permissions. Green checkmark = granted, gray X = denied. Admin role is locked. Click any cell to toggle. Purple badges show user counts per role.</p>
+  <div class="screenshot">
+    <img src="screenshots/15-roles-permissions.png" alt="Roles">
+    <div class="caption">Role-permission matrix &mdash; Admin, Client, Facility Manager, Guest, Manager, Supervisor, and more.</div>
+  </div>
+</div>
+
+<div class="section page">
+  <h3>11. Audit Log</h3>
+  <p>Chronological log of all user actions: logins, user creation, edits, role changes, deletions. Color-coded action badges. Searchable and paginated (10 per page).</p>
+  <div class="screenshot">
+    <img src="screenshots/16-audit-log.png" alt="Audit Log">
+    <div class="caption">Audit log &mdash; timestamp, user, action badge, details, and IP address for each event.</div>
+  </div>
+</div>
+
+<div class="section page">
+  <h3>12. Biometric Devices</h3>
+  <p>Register ZKTeco / eSSL biometric terminals, map device users to employees, review unmapped punches. 3 tabs: Devices, Enrollments, Unmapped Queue.</p>
+  <div class="screenshot">
+    <img src="screenshots/17-biometric-devices.png" alt="Biometric">
+    <div class="caption">Biometric Devices &mdash; device registration with Refresh and "+ Add Device" buttons.</div>
+  </div>
+</div>
+
+<!-- ═══════════ QUICK REFERENCE ═══════════ -->
+<div class="section page">
+  <div class="badge-section slate">Quick Reference</div>
+  <h2>Module URLs &amp; roles</h2>
+
+  <table class="info-table">
+    <tr><th>Module</th><th>Path</th><th>Description</th></tr>
+    <tr><td>Dashboard</td><td>/dashboard</td><td>KPI overview, 9 management widgets</td></tr>
+    <tr><td>Daily Updates</td><td>/daily-updates</td><td>Power, water, hygiene readings</td></tr>
+    <tr><td>Attendance</td><td>/attendance</td><td>Employees, shifts, QR scanner, billing</td></tr>
+    <tr><td>Asset Management</td><td>/asset-management</td><td>Categories, AMC, PPM, audit</td></tr>
+    <tr><td>Facility Config</td><td>/facility-config</td><td>Meters, water infra, templates</td></tr>
+    <tr><td>Alerts</td><td>/alerts</td><td>Auto-generated alerts + configuration</td></tr>
+    <tr><td>Reports</td><td>/reports</td><td>KPI dashboard, analytics, PDF reports</td></tr>
+    <tr><td>AI Agent</td><td>/ai-agent</td><td>Gemini-powered chat assistant</td></tr>
+    <tr><td>User Management</td><td>/user-management</td><td>Users, roles, audit log</td></tr>
+    <tr><td>Biometric</td><td>/biometric-devices</td><td>Device registration, enrollments</td></tr>
+    <tr><td>My Profile</td><td>/profile</td><td>Personal info, password, facility</td></tr>
+  </table>
+
+  <h3>Sign out locations</h3>
+  <ul>
+    <li>Top-right profile dropdown &rarr; "Sign Out"</li>
+    <li>Sidebar bottom &rarr; "Sign Out" button</li>
+    <li>Profile page &rarr; Red "Sign Out" button</li>
+  </ul>
+
+  <div class="callout indigo"><strong>Verified:</strong> 34 automated Playwright tests confirm all pages load, all APIs respond with 200, user CRUD works end-to-end, and no React crashes occur on any page.</div>
+</div>
+
+<div class="footer">
+  <strong>DSR Fortune Prime</strong> &mdash; Facility Management Portal &mdash; User Guide v1.0<br>
+  Screenshots captured via Playwright automated browser testing &bull; May 2026
+</div>
+
+</body>
+</html>

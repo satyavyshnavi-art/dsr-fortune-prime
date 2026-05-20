@@ -47,6 +47,8 @@ export function KPICard({
         colorMap[color],
         className
       )}
+      role="region"
+      aria-label={`${title}: ${value}`}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
@@ -58,7 +60,7 @@ export function KPICard({
         </div>
         {Icon && (
           <div className={cn("rounded-md p-1.5 shrink-0", iconColorMap[color])}>
-            <Icon className="h-3.5 w-3.5" />
+            <Icon className="h-3.5 w-3.5" aria-hidden="true" />
           </div>
         )}
       </div>

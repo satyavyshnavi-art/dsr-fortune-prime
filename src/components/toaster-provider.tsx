@@ -3,5 +3,9 @@
 import { Toaster } from "sonner";
 
 export function ToasterProvider() {
-  return <Toaster richColors position="top-right" />;
+  return (
+    <div aria-live="polite" aria-atomic="true">
+      <Toaster richColors position="top-right" />
+    </div>
+  );
 }

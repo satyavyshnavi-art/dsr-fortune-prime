@@ -9,17 +9,29 @@ import {
   LineChart,
   FileText,
   RefreshCw,
+  Hammer,
+  LayoutGrid,
+  History,
+  Clock,
 } from "lucide-react";
 import { KPITrafficLight } from "@/components/modules/reports/kpi-traffic-light";
 import { AnalyticsTab } from "@/components/modules/reports/analytics-tab";
 import { ReportsTab } from "@/components/modules/reports/reports-tab";
+import { ReportBuilder } from "@/components/modules/reports/report-builder";
+import { ReportGallery } from "@/components/modules/reports/report-gallery";
+import { ReportHistory } from "@/components/modules/reports/report-history";
+import { ScheduleManager } from "@/components/modules/reports/schedule-manager";
 
-type TabId = "dashboard" | "analytics" | "reports";
+type TabId = "dashboard" | "analytics" | "reports" | "builder" | "gallery" | "history" | "schedules";
 
 const tabs = [
   { id: "dashboard" as TabId, label: "Dashboard", icon: BarChart3 },
   { id: "analytics" as TabId, label: "Analytics", icon: LineChart },
   { id: "reports" as TabId, label: "Reports", icon: FileText },
+  { id: "builder" as TabId, label: "Builder", icon: Hammer },
+  { id: "gallery" as TabId, label: "Gallery", icon: LayoutGrid },
+  { id: "history" as TabId, label: "History", icon: History },
+  { id: "schedules" as TabId, label: "Schedules", icon: Clock },
 ];
 
 export default function ReportsPage() {
@@ -77,6 +89,10 @@ export default function ReportsPage() {
         )}
         {activeTab === "analytics" && <AnalyticsTab />}
         {activeTab === "reports" && <ReportsTab />}
+        {activeTab === "builder" && <ReportBuilder />}
+        {activeTab === "gallery" && <ReportGallery />}
+        {activeTab === "history" && <ReportHistory />}
+        {activeTab === "schedules" && <ScheduleManager />}
       </div>
     </div>
   );

@@ -1,0 +1,20 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/escalation",
+      "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/cron/auto-tasks",
+      "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/cron/approval-alerts",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/scheduled-reports",
+      "schedule": "0 */6 * * *"
+    }
+  ]
+}

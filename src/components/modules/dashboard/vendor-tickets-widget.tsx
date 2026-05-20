@@ -45,7 +45,7 @@ export function VendorTicketsWidget({ data }: { data?: any }) {
     >
       <div className="space-y-2.5">
         {/* Donut Chart */}
-        <div className="h-[130px]">
+        <div className="h-[130px]" role="img" aria-label="Donut chart showing vendor ticket status distribution">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie

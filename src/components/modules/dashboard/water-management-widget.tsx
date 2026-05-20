@@ -76,7 +76,7 @@ export function WaterManagementWidget({ data }: { data?: any }) {
         </div>
 
         {/* Bar Chart */}
-        <div className="h-[140px]">
+        <div className="h-[140px]" role="img" aria-label="Bar chart showing water level and consumption over time">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={displayData} barCategoryGap="20%" barGap={2}>
               <CartesianGrid

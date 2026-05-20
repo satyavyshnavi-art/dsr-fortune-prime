@@ -39,7 +39,7 @@ export function ComplaintWidget({ data }: { data?: any }) {
     <ChartCard title="Complaint Management">
       <div className="space-y-2.5">
         {/* Donut Chart */}
-        <div className="h-[130px]">
+        <div className="h-[130px]" role="img" aria-label="Donut chart showing complaint status distribution">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
