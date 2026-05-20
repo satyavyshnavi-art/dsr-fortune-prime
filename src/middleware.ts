@@ -53,14 +53,8 @@ export function middleware(request: NextRequest) {
     return applySecurityHeaders(NextResponse.next());
   }
 
-  // Check for Auth0 session cookie on protected routes
-  if (!hasSessionCookie(request)) {
-    const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = "/login";
-    loginUrl.searchParams.set("returnTo", pathname);
-    return applySecurityHeaders(NextResponse.redirect(loginUrl));
-  }
-
+  // Apply security headers to all routes
+  // Auth is handled client-side via Auth0 SDK — no server-side redirect
   return applySecurityHeaders(NextResponse.next());
 }
 
