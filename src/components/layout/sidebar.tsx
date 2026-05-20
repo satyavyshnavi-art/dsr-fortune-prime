@@ -22,6 +22,7 @@ import {
   CheckSquare,
   Briefcase,
   ClipboardList,
+  ListTodo,
   type LucideIcon,
 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
@@ -30,6 +31,7 @@ import { Menu, X } from "lucide-react";
 
 const navItems: { label: string; href: string; Icon: LucideIcon }[] = [
   { label: "Dashboard", href: "/dashboard", Icon: LayoutDashboard },
+  { label: "Task Management", href: "/tasks", Icon: ListTodo },
   { label: "Daily Update", href: "/daily-updates", Icon: CalendarDays },
   { label: "Attendance", href: "/attendance", Icon: UserCheck },
   { label: "Asset Management", href: "/asset-management", Icon: Package },
