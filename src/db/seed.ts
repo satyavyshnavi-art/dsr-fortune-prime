@@ -12,9 +12,10 @@ import { eq, and, SQL } from "drizzle-orm";
 import type { PgTable } from "drizzle-orm/pg-core";
 import * as schema from "./schema";
 
-const connectionString =
-  process.env.DATABASE_URL ??
-  "postgresql://neondb_owner:npg_u3DNyhlO5iKQ@ep-odd-pond-a155vlkp.ap-southeast-1.aws.neon.tech/spotworks?sslmode=require";
+const connectionString = process.env.DATABASE_URL;
+if (!connectionString) {
+  throw new Error("DATABASE_URL environment variable is required. Set it in .env or pass it directly.");
+}
 
 const client = postgres(connectionString);
 const db = drizzle(client, { schema });
