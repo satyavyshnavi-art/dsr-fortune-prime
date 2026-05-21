@@ -6,9 +6,40 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -27,29 +58,26 @@ import {
   Paperclip,
   Camera,
   Search,
-  X,
   Loader2,
+  MoreHorizontal,
 } from "lucide-react";
 import { tasksData, type Task } from "./mock-data";
 
-// Map DB status (snake_case) to display status (Title Case)
 const statusDisplayMap: Record<string, Task["status"]> = {
   pending: "Pending",
   unassigned: "Unassigned",
   in_progress: "In Progress",
   completed: "Completed",
-  cancelled: "Completed", // map cancelled to Completed for UI
+  cancelled: "Completed",
 };
 
-// Map display status back to DB status
 const statusDbMap: Record<string, string> = {
-  "Pending": "pending",
-  "Unassigned": "unassigned",
+  Pending: "pending",
+  Unassigned: "unassigned",
   "In Progress": "in_progress",
-  "Completed": "completed",
+  Completed: "completed",
 };
 
-// Map DB priority to display priority
 const priorityDisplayMap: Record<string, Task["priority"]> = {
   low: "Low",
   medium: "Medium",
@@ -57,18 +85,15 @@ const priorityDisplayMap: Record<string, Task["priority"]> = {
   critical: "Critical",
 };
 
-// Map display priority back to DB
 const priorityDbMap: Record<string, string> = {
-  "Low": "low",
-  "Medium": "medium",
-  "High": "high",
-  "Critical": "critical",
+  Low: "low",
+  Medium: "medium",
+  High: "high",
+  Critical: "critical",
 };
 
-// Extend Task type locally to carry DB id
 type TaskWithDbId = Task & { _dbId?: string };
 
-// Convert a DB task record to the component's Task shape
 function mapDbTask(row: Record<string, unknown>): TaskWithDbId {
   return {
     id: (row.id as string) ?? `task-${Date.now()}`,
@@ -76,19 +101,39 @@ function mapDbTask(row: Record<string, unknown>): TaskWithDbId {
     status: statusDisplayMap[(row.status as string) ?? "pending"] ?? "Pending",
     assignedTo: (row.assignedTo as string) ?? "Unassigned",
     dueDate: row.dueDate
-      ? new Date(row.dueDate as string).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "2-digit" })
-      : "\u2014",
+      ? new Date(row.dueDate as string).toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "2-digit",
+        })
+      : "—",
     priority: priorityDisplayMap[(row.priority as string) ?? "low"] ?? "Low",
     _dbId: (row.id as string) ?? undefined,
   };
 }
 
 const EMPLOYEES = [
-  "Demo User", "Kumar A", "Govindaraju reddy", "Naveen Kumar", "Venkatesh N",
-  "Nataraj P", "Alok kumar malik", "Sanjeevini G", "Sudhir Kumar",
-  "Bhagyalaxmi D", "Bhagirathi Dev", "Tatkal Anand MD", "Janmejay M",
-  "Prakash reddy", "Prasanti reddy", "Bhim C", "Dhive G",
+  "Demo User",
+  "Kumar A",
+  "Govindaraju reddy",
+  "Naveen Kumar",
+  "Venkatesh N",
+  "Nataraj P",
+  "Alok kumar malik",
+  "Sanjeevini G",
+  "Sudhir Kumar",
+  "Bhagyalaxmi D",
+  "Bhagirathi Dev",
+  "Tatkal Anand MD",
+  "Janmejay M",
+  "Prakash reddy",
+  "Prasanti reddy",
+  "Bhim C",
+  "Dhive G",
 ];
+
+const STATUS_FILTERS = ["all", "Pending", "Unassigned", "In Progress", "Completed"] as const;
+const PRIORITY_FILTERS = ["all", "Low", "Medium", "High", "Critical"] as const;
 
 export function TasksTab() {
   const [activeView, setActiveView] = useState<"list" | "add">("list");
@@ -98,25 +143,64 @@ export function TasksTab() {
   const [bulkUploadOpen, setBulkUploadOpen] = useState(false);
   const pageSize = 10;
 
-  // Action dialog states
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [priorityFilter, setPriorityFilter] = useState<string>("all");
+
   const [assignOpen, setAssignOpen] = useState(false);
   const [viewOpen, setViewOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<TaskWithDbId | null>(null);
   const [assignSearch, setAssignSearch] = useState("");
-  const [editForm, setEditForm] = useState({ title: "", status: "", priority: "", dueDate: "" });
+  const [editForm, setEditForm] = useState({
+    title: "",
+    status: "",
+    priority: "",
+    dueDate: "",
+  });
 
-  const totalTasks = tasks.length;
-  const paginatedTasks = tasks.slice((currentPage - 1) * pageSize, currentPage * pageSize);
-  const totalPages = Math.ceil(totalTasks / pageSize);
+  const filteredTasks = useMemo(() => {
+    let result = tasks;
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      result = result.filter((t) => t.title.toLowerCase().includes(q));
+    }
+    if (statusFilter !== "all") {
+      result = result.filter((t) => t.status === statusFilter);
+    }
+    if (priorityFilter !== "all") {
+      result = result.filter((t) => t.priority === priorityFilter);
+    }
+    return result;
+  }, [tasks, search, statusFilter, priorityFilter]);
+
+  const totalTasks = filteredTasks.length;
+  const totalPages = Math.max(1, Math.ceil(totalTasks / pageSize));
+  const safePage = Math.min(currentPage, totalPages);
+  const pageStart = (safePage - 1) * pageSize;
+  const paginatedTasks = filteredTasks.slice(pageStart, pageStart + pageSize);
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setCurrentPage(1);
+  };
+  const handleStatusFilterChange = (value: string) => {
+    setStatusFilter(value);
+    setCurrentPage(1);
+  };
+  const handlePriorityFilterChange = (value: string) => {
+    setPriorityFilter(value);
+    setCurrentPage(1);
+  };
 
   const filteredEmployees = useMemo(() => {
     if (!assignSearch) return EMPLOYEES;
-    return EMPLOYEES.filter((e) => e.toLowerCase().includes(assignSearch.toLowerCase()));
+    return EMPLOYEES.filter((e) =>
+      e.toLowerCase().includes(assignSearch.toLowerCase())
+    );
   }, [assignSearch]);
 
-  // Fetch tasks from API
   const fetchTasks = useCallback(async () => {
     try {
       const res = await fetch("/api/v1/tasks");
@@ -125,9 +209,8 @@ export function TasksTab() {
       if (Array.isArray(data) && data.length > 0) {
         setTasks(data.map(mapDbTask));
       }
-      // If empty array, keep mock data as fallback
     } catch {
-      // Keep mock data on error
+      // keep mock data
     } finally {
       setLoading(false);
     }
@@ -137,20 +220,25 @@ export function TasksTab() {
     fetchTasks();
   }, [fetchTasks]);
 
-  // Helper to get the identifier for API calls
   const getTaskId = (t: TaskWithDbId) => t._dbId ?? t.id;
 
-  // Action handlers
-  const openAssign = (t: TaskWithDbId) => { setSelectedTask(t); setAssignSearch(""); setAssignOpen(true); };
+  const openAssign = (t: TaskWithDbId) => {
+    setSelectedTask(t);
+    setAssignSearch("");
+    setAssignOpen(true);
+  };
 
   const handleAssign = async (employee: string) => {
     if (!selectedTask) return;
     const id = getTaskId(selectedTask);
-
-    // Optimistic update
-    setTasks((prev) => prev.map((t) => (t._dbId ?? t.id) === (selectedTask._dbId ?? selectedTask.id) ? { ...t, assignedTo: employee, status: "In Progress" as const } : t));
+    setTasks((prev) =>
+      prev.map((t) =>
+        (t._dbId ?? t.id) === (selectedTask._dbId ?? selectedTask.id)
+          ? { ...t, assignedTo: employee, status: "In Progress" as const }
+          : t
+      )
+    );
     setAssignOpen(false);
-
     try {
       const res = await fetch(`/api/v1/tasks/${id}`, {
         method: "PUT",
@@ -164,17 +252,31 @@ export function TasksTab() {
     }
   };
 
-  const openView = (t: TaskWithDbId) => { setSelectedTask(t); setViewOpen(true); };
+  const openView = (t: TaskWithDbId) => {
+    setSelectedTask(t);
+    setViewOpen(true);
+  };
 
   const openEditDialog = (t: TaskWithDbId) => {
     setSelectedTask(t);
-    setEditForm({ title: t.title, status: t.status, priority: t.priority, dueDate: t.dueDate });
+    setEditForm({
+      title: t.title,
+      status: t.status,
+      priority: t.priority,
+      dueDate: t.dueDate,
+    });
     setEditOpen(true);
   };
 
   const [newTask, setNewTask] = useState({
-    title: "", description: "", department: "", responsibility: "Individual",
-    priority: "Low", source: "Routine Maintenance", eisenhowerMatrix: "Urgent & Important", dueDate: "",
+    title: "",
+    description: "",
+    department: "",
+    responsibility: "Individual",
+    priority: "Low",
+    source: "Routine Maintenance",
+    eisenhowerMatrix: "Urgent & Important",
+    dueDate: "",
   });
   const [addErrors, setAddErrors] = useState<Record<string, boolean>>({});
   const [editErrors, setEditErrors] = useState<Record<string, boolean>>({});
@@ -189,11 +291,20 @@ export function TasksTab() {
     if (Object.keys(errs).length > 0) return;
 
     const id = getTaskId(selectedTask);
-
-    // Optimistic update
-    setTasks((prev) => prev.map((t) => (t._dbId ?? t.id) === (selectedTask._dbId ?? selectedTask.id) ? { ...t, title: editForm.title, status: editForm.status as Task["status"], priority: editForm.priority as Task["priority"], dueDate: editForm.dueDate } : t));
+    setTasks((prev) =>
+      prev.map((t) =>
+        (t._dbId ?? t.id) === (selectedTask._dbId ?? selectedTask.id)
+          ? {
+              ...t,
+              title: editForm.title,
+              status: editForm.status as Task["status"],
+              priority: editForm.priority as Task["priority"],
+              dueDate: editForm.dueDate,
+            }
+          : t
+      )
+    );
     setEditOpen(false);
-
     try {
       const res = await fetch(`/api/v1/tasks/${id}`, {
         method: "PUT",
@@ -219,10 +330,12 @@ export function TasksTab() {
       priority: priorityDbMap[t.priority] ?? "low",
       assignedTo: t.assignedTo,
     };
-
-    // Optimistic local copy
-    const localCopy: TaskWithDbId = { ...t, id: `task-copy-${Date.now()}`, _dbId: undefined, title: `${t.title} (Copy)` };
-
+    const localCopy: TaskWithDbId = {
+      ...t,
+      id: `task-copy-${Date.now()}`,
+      _dbId: undefined,
+      title: `${t.title} (Copy)`,
+    };
     try {
       const res = await fetch("/api/v1/tasks", {
         method: "POST",
@@ -239,16 +352,21 @@ export function TasksTab() {
     }
   };
 
-  const openDeleteDialog = (t: TaskWithDbId) => { setSelectedTask(t); setDeleteOpen(true); };
+  const openDeleteDialog = (t: TaskWithDbId) => {
+    setSelectedTask(t);
+    setDeleteOpen(true);
+  };
 
   const handleDelete = async () => {
     if (!selectedTask) return;
     const id = getTaskId(selectedTask);
-
-    // Optimistic update
-    setTasks((prev) => prev.filter((t) => (t._dbId ?? t.id) !== (selectedTask._dbId ?? selectedTask.id)));
+    setTasks((prev) =>
+      prev.filter(
+        (t) =>
+          (t._dbId ?? t.id) !== (selectedTask._dbId ?? selectedTask.id)
+      )
+    );
     setDeleteOpen(false);
-
     try {
       const res = await fetch(`/api/v1/tasks/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("API error");
@@ -258,7 +376,10 @@ export function TasksTab() {
     }
   };
 
-  const handleFileUpload = (accept: string, onSelect?: (name: string) => void) => {
+  const handleFileUpload = (
+    accept: string,
+    onSelect?: (name: string) => void
+  ) => {
     const input = document.createElement("input");
     input.type = "file";
     input.accept = accept;
@@ -301,173 +422,689 @@ export function TasksTab() {
       setTasks((prev) => [mapDbTask(created), ...prev]);
       toast.success("Task created successfully");
     } catch {
-      // Fallback: add to local state only
       setTasks((prev) => [
-        { id: `task-${Date.now()}`, title: newTask.title, status: "Pending" as const, assignedTo: "Unassigned", dueDate: newTask.dueDate || "\u2014", priority: newTask.priority as Task["priority"] },
+        {
+          id: `task-${Date.now()}`,
+          title: newTask.title,
+          status: "Pending" as const,
+          assignedTo: "Unassigned",
+          dueDate: newTask.dueDate || "—",
+          priority: newTask.priority as Task["priority"],
+        },
         ...prev,
       ]);
       toast.success("Task created (offline)");
     }
 
-    setNewTask({ title: "", description: "", department: "", responsibility: "Individual", priority: "Low", source: "Routine Maintenance", eisenhowerMatrix: "Urgent & Important", dueDate: "" });
+    setNewTask({
+      title: "",
+      description: "",
+      department: "",
+      responsibility: "Individual",
+      priority: "Low",
+      source: "Routine Maintenance",
+      eisenhowerMatrix: "Urgent & Important",
+      dueDate: "",
+    });
     setAddErrors({});
     setAttachmentName(null);
     setActiveView("list");
   };
 
+  const priorityVariant = (
+    p: Task["priority"]
+  ): "danger" | "warning" | "purple" | "neutral" => {
+    if (p === "Critical") return "danger";
+    if (p === "High") return "warning";
+    if (p === "Medium") return "purple";
+    return "neutral";
+  };
+
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-[15px] font-semibold text-slate-900">Tasks</h3>
-        <Button onClick={() => setBulkUploadOpen(true)} size="sm" className="bg-green-600 hover:bg-green-700 text-white h-8 text-[12px] px-4 rounded-lg">
-          <Upload className="h-3.5 w-3.5 mr-1.5" /> Bulk Upload
+    <div className="space-y-5">
+      {/* Header */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h3 className="text-[16px] font-semibold text-slate-900 leading-tight">
+            Tasks
+          </h3>
+          <p className="text-[12px] text-slate-500 mt-0.5">
+            Create, assign, and track tasks across the facility
+          </p>
+        </div>
+        <Button
+          onClick={() => setBulkUploadOpen(true)}
+          className="h-9 text-[12px] gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg"
+        >
+          <Upload className="h-3.5 w-3.5" />
+          Bulk Upload
         </Button>
       </div>
 
-      {/* Sub-nav */}
-      <div className="flex items-center gap-3 border-b border-slate-200 pb-0">
-        <button onClick={() => setActiveView("list")} className={`flex items-center gap-1.5 px-1 py-1.5 text-[12px] font-medium border-b-2 transition-colors ${activeView === "list" ? "border-blue-600 text-blue-600" : "border-transparent text-slate-500 hover:text-slate-700"}`}>
-          <ListTodo className="h-3.5 w-3.5" /> View Tasks
-        </button>
-        <button onClick={() => setActiveView("add")} className={`flex items-center gap-1.5 px-1 py-1.5 text-[12px] font-medium border-b-2 transition-colors ${activeView === "add" ? "border-blue-600 text-blue-600" : "border-transparent text-slate-500 hover:text-slate-700"}`}>
-          <Plus className="h-3.5 w-3.5" /> Add New Task
-        </button>
-      </div>
+      <Tabs
+        value={activeView}
+        onValueChange={(v) => setActiveView((v as "list" | "add") ?? "list")}
+      >
+        <TabsList className="bg-slate-100/70 p-1 rounded-lg">
+          <TabsTrigger
+            value="list"
+            className="text-[12px] gap-1.5 data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md px-3"
+          >
+            <ListTodo className="h-3.5 w-3.5" />
+            View Tasks
+          </TabsTrigger>
+          <TabsTrigger
+            value="add"
+            className="text-[12px] gap-1.5 data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md px-3"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            Add New Task
+          </TabsTrigger>
+        </TabsList>
 
-      {activeView === "list" ? (
-        <>
-          {/* Loading state */}
-          {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
-              <span className="ml-2 text-[13px] text-slate-500">Loading tasks...</span>
+        {/* LIST VIEW */}
+        <TabsContent value="list" className="mt-4 space-y-3">
+          {/* Filter bar */}
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative flex-1 min-w-[200px] max-w-sm">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
+              <Input
+                placeholder="Search tasks..."
+                value={search}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                className="pl-9 h-9 text-[12px] rounded-lg"
+              />
             </div>
-          ) : (
-            <>
-              <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
-                <table className="w-full table-fixed">
-                  <colgroup>
-                    <col style={{ width: "30%" }} /><col style={{ width: "10%" }} /><col style={{ width: "16%" }} /><col style={{ width: "12%" }} /><col style={{ width: "10%" }} /><col style={{ width: "22%" }} />
-                  </colgroup>
-                  <thead>
-                    <tr className="border-b border-slate-100">
-                      <th className="text-left py-3 px-3 text-[11px] font-medium text-slate-400">TASK TITLE</th>
-                      <th className="text-left py-3 px-3 text-[11px] font-medium text-slate-400">STATUS</th>
-                      <th className="text-left py-3 px-3 text-[11px] font-medium text-slate-400">ASSIGNED TO</th>
-                      <th className="text-left py-3 px-3 text-[11px] font-medium text-slate-400">DUE DATE</th>
-                      <th className="text-left py-3 px-3 text-[11px] font-medium text-slate-400">PRIORITY</th>
-                      <th className="text-center py-3 px-3 text-[11px] font-medium text-slate-400">ACTIONS</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-50">
-                    {paginatedTasks.map((task) => (
-                      <tr key={task._dbId ?? task.id} className="hover:bg-slate-50/40">
-                        <td className="py-3.5 px-3 text-[13px] text-slate-800 truncate">{task.title}</td>
-                        <td className="py-3.5 px-3"><StatusBadge status={task.status} /></td>
-                        <td className="py-3.5 px-3 text-[13px] text-slate-400">{task.assignedTo}</td>
-                        <td className="py-3.5 px-3 text-[13px] text-slate-400">{task.dueDate}</td>
-                        <td className="py-3.5 px-3"><StatusBadge status={task.priority} variant={task.priority === "High" ? "danger" : task.priority === "Medium" ? "purple" : "neutral"} /></td>
-                        <td className="py-3.5 px-3">
-                          <div className="flex items-center justify-center gap-1">
-                            <button onClick={() => openAssign(task)} className="h-7 w-7 rounded-md flex items-center justify-center text-slate-500 hover:bg-blue-50 hover:text-blue-600 transition-colors" title="Assign">
-                              <UserPlus className="h-3.5 w-3.5" />
-                            </button>
-                            <button onClick={() => openView(task)} className="h-7 w-7 rounded-md flex items-center justify-center text-blue-600 hover:bg-blue-50 transition-colors" title="View">
-                              <Eye className="h-3.5 w-3.5" />
-                            </button>
-                            <button onClick={() => handleDuplicate(task)} className="h-7 w-7 rounded-md flex items-center justify-center text-slate-500 hover:bg-slate-100 transition-colors" title="Duplicate">
-                              <Copy className="h-3.5 w-3.5" />
-                            </button>
-                            <button onClick={() => openEditDialog(task)} className="h-7 w-7 rounded-md flex items-center justify-center text-amber-600 hover:bg-amber-50 transition-colors" title="Edit">
-                              <Pencil className="h-3.5 w-3.5" />
-                            </button>
-                            <button onClick={() => openDeleteDialog(task)} className="h-7 w-7 rounded-md flex items-center justify-center text-red-500 hover:bg-red-50 transition-colors" title="Delete">
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+            <Select
+              value={statusFilter}
+              onValueChange={(v) => handleStatusFilterChange(v ?? "all")}
+            >
+              <SelectTrigger className="h-9 w-[140px] text-[12px] rounded-lg">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                {STATUS_FILTERS.map((s) => (
+                  <SelectItem key={s} value={s} className="text-[12px]">
+                    {s === "all" ? "All Status" : s}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              value={priorityFilter}
+              onValueChange={(v) => handlePriorityFilterChange(v ?? "all")}
+            >
+              <SelectTrigger className="h-9 w-[140px] text-[12px] rounded-lg">
+                <SelectValue placeholder="Priority" />
+              </SelectTrigger>
+              <SelectContent>
+                {PRIORITY_FILTERS.map((p) => (
+                  <SelectItem key={p} value={p} className="text-[12px]">
+                    {p === "all" ? "All Priority" : p}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-              <div className="flex items-center justify-between">
-                <p className="text-[12px] text-slate-400">Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, totalTasks)} of {totalTasks} tasks</p>
-                <div className="flex items-center gap-1">
-                  <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setCurrentPage((p) => p - 1)} className="h-7 text-[11px]"><ChevronLeft className="h-3 w-3 mr-0.5" /> Previous</Button>
-                  {Array.from({ length: Math.min(totalPages, 3) }, (_, i) => i + 1).map((page) => (
-                    <Button key={page} variant={page === currentPage ? "default" : "outline"} size="sm" onClick={() => setCurrentPage(page)} className="h-7 w-7 text-[11px]">{page}</Button>
-                  ))}
-                  {totalPages > 3 && <span className="text-[11px] text-slate-400">...</span>}
-                  <Button variant="outline" size="sm" disabled={currentPage >= totalPages} onClick={() => setCurrentPage((p) => p + 1)} className="h-7 text-[11px]">Next <ChevronRight className="h-3 w-3 ml-0.5" /></Button>
+          {/* Table */}
+          {loading ? (
+            <Card className="rounded-xl">
+              <CardContent className="py-12 flex items-center justify-center">
+                <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+                <span className="ml-2 text-[13px] text-slate-500">
+                  Loading tasks...
+                </span>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="rounded-xl overflow-hidden p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="text-[11px] font-medium text-slate-500 uppercase tracking-wide">
+                      Task Title
+                    </TableHead>
+                    <TableHead className="text-[11px] font-medium text-slate-500 uppercase tracking-wide w-[120px]">
+                      Status
+                    </TableHead>
+                    <TableHead className="text-[11px] font-medium text-slate-500 uppercase tracking-wide w-[180px]">
+                      Assigned To
+                    </TableHead>
+                    <TableHead className="text-[11px] font-medium text-slate-500 uppercase tracking-wide w-[120px]">
+                      Due Date
+                    </TableHead>
+                    <TableHead className="text-[11px] font-medium text-slate-500 uppercase tracking-wide w-[110px]">
+                      Priority
+                    </TableHead>
+                    <TableHead className="text-[11px] font-medium text-slate-500 uppercase tracking-wide w-[80px] text-right">
+                      Actions
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paginatedTasks.length === 0 ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={6}
+                        className="py-10 text-center text-[12px] text-slate-400"
+                      >
+                        No tasks match your filters.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    paginatedTasks.map((task) => (
+                      <TableRow
+                        key={task._dbId ?? task.id}
+                        className="hover:bg-slate-50/60"
+                      >
+                        <TableCell className="text-[13px] text-slate-800 font-medium max-w-[420px]">
+                          <span className="line-clamp-2">{task.title}</span>
+                        </TableCell>
+                        <TableCell>
+                          <StatusBadge status={task.status} />
+                        </TableCell>
+                        <TableCell className="text-[12px] text-slate-600">
+                          {task.assignedTo === "Unassigned" ? (
+                            <span className="text-slate-400 italic">
+                              Unassigned
+                            </span>
+                          ) : (
+                            task.assignedTo
+                          )}
+                        </TableCell>
+                        <TableCell className="text-[12px] text-slate-600">
+                          {task.dueDate}
+                        </TableCell>
+                        <TableCell>
+                          <StatusBadge
+                            status={task.priority}
+                            variant={priorityVariant(task.priority)}
+                          />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+                              aria-label="Open actions"
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                              align="end"
+                              className="w-40"
+                            >
+                              <DropdownMenuItem
+                                className="text-[12px] gap-2"
+                                onClick={() => openView(task)}
+                              >
+                                <Eye className="h-3.5 w-3.5 text-blue-500" />
+                                View
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="text-[12px] gap-2"
+                                onClick={() => openAssign(task)}
+                              >
+                                <UserPlus className="h-3.5 w-3.5" />
+                                Assign
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="text-[12px] gap-2"
+                                onClick={() => openEditDialog(task)}
+                              >
+                                <Pencil className="h-3.5 w-3.5 text-amber-600" />
+                                Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="text-[12px] gap-2"
+                                onClick={() => handleDuplicate(task)}
+                              >
+                                <Copy className="h-3.5 w-3.5" />
+                                Duplicate
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                className="text-[12px] gap-2 text-red-600 focus:text-red-600"
+                                onClick={() => openDeleteDialog(task)}
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </Card>
+          )}
+
+          {/* Pagination */}
+          {!loading && totalTasks > 0 && (
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <p className="text-[12px] text-slate-500">
+                Showing{" "}
+                <span className="font-medium text-slate-700">
+                  {pageStart + 1}
+                </span>{" "}
+                to{" "}
+                <span className="font-medium text-slate-700">
+                  {Math.min(pageStart + pageSize, totalTasks)}
+                </span>{" "}
+                of{" "}
+                <span className="font-medium text-slate-700">{totalTasks}</span>{" "}
+                tasks
+              </p>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage((p) => p - 1)}
+                  className="h-8 text-[11px] gap-1 rounded-lg"
+                >
+                  <ChevronLeft className="h-3.5 w-3.5" />
+                  Previous
+                </Button>
+                {Array.from(
+                  { length: Math.min(totalPages, 5) },
+                  (_, i) => i + 1
+                ).map((page) => (
+                  <Button
+                    key={page}
+                    variant={page === currentPage ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setCurrentPage(page)}
+                    className="h-8 w-8 text-[11px] rounded-lg"
+                  >
+                    {page}
+                  </Button>
+                ))}
+                {totalPages > 5 && (
+                  <span className="text-[11px] text-slate-400 px-1">...</span>
+                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={currentPage >= totalPages}
+                  onClick={() => setCurrentPage((p) => p + 1)}
+                  className="h-8 text-[11px] gap-1 rounded-lg"
+                >
+                  Next
+                  <ChevronRight className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </div>
+          )}
+        </TabsContent>
+
+        {/* ADD VIEW */}
+        <TabsContent value="add" className="mt-4">
+          <Card className="rounded-xl">
+            <CardContent className="p-5">
+              <h4 className="text-[14px] font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                <ListTodo className="h-4 w-4 text-blue-600" />
+                Add New Task
+              </h4>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label className="text-[12px] text-slate-600">
+                      Task Title <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      value={newTask.title}
+                      onChange={(e) => {
+                        setNewTask({ ...newTask, title: e.target.value });
+                        setAddErrors((prev) => ({ ...prev, title: false }));
+                      }}
+                      className={`h-9 text-[13px] rounded-lg ${
+                        addErrors.title
+                          ? "border-red-400 ring-1 ring-red-200"
+                          : ""
+                      }`}
+                      placeholder="e.g. Inspect fire panel"
+                    />
+                    {addErrors.title && (
+                      <p className="text-[10px] text-red-500">
+                        Title is required
+                      </p>
+                    )}
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-[12px] text-slate-600">
+                      Due Date
+                    </Label>
+                    <Input
+                      type="date"
+                      value={newTask.dueDate}
+                      onChange={(e) =>
+                        setNewTask({ ...newTask, dueDate: e.target.value })
+                      }
+                      className="h-9 text-[13px] rounded-lg"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-[12px] text-slate-600">
+                    Description
+                  </Label>
+                  <Textarea
+                    value={newTask.description}
+                    onChange={(e) =>
+                      setNewTask({ ...newTask, description: e.target.value })
+                    }
+                    rows={3}
+                    placeholder="Add any helpful detail..."
+                    className="text-[13px] rounded-lg"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="space-y-1.5">
+                    <Label className="text-[12px] text-slate-600">
+                      Department
+                    </Label>
+                    <Select
+                      value={newTask.department}
+                      onValueChange={(v) =>
+                        setNewTask({ ...newTask, department: v ?? "" })
+                      }
+                    >
+                      <SelectTrigger className="h-9 text-[13px] rounded-lg">
+                        <SelectValue placeholder="Select..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[
+                          "Operations",
+                          "Maintenance",
+                          "Housekeeping",
+                          "Security",
+                          "Electrical",
+                        ].map((d) => (
+                          <SelectItem
+                            key={d}
+                            value={d}
+                            className="text-[12px]"
+                          >
+                            {d}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label className="text-[12px] text-slate-600">
+                      Priority
+                    </Label>
+                    <Select
+                      value={newTask.priority}
+                      onValueChange={(v) =>
+                        setNewTask({ ...newTask, priority: v ?? "Low" })
+                      }
+                    >
+                      <SelectTrigger className="h-9 text-[13px] rounded-lg">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {["Low", "Medium", "High", "Critical"].map((p) => (
+                          <SelectItem
+                            key={p}
+                            value={p}
+                            className="text-[12px]"
+                          >
+                            {p}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label className="text-[12px] text-slate-600">Source</Label>
+                    <Select
+                      value={newTask.source}
+                      onValueChange={(v) =>
+                        setNewTask({
+                          ...newTask,
+                          source: v ?? "Routine Maintenance",
+                        })
+                      }
+                    >
+                      <SelectTrigger className="h-9 text-[13px] rounded-lg">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[
+                          "Routine Maintenance",
+                          "Complaint",
+                          "Inspection",
+                          "Audit Finding",
+                        ].map((s) => (
+                          <SelectItem
+                            key={s}
+                            value={s}
+                            className="text-[12px]"
+                          >
+                            {s}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label className="text-[12px] text-slate-600">
+                      Responsibility
+                    </Label>
+                    <Select
+                      value={newTask.responsibility}
+                      onValueChange={(v) =>
+                        setNewTask({
+                          ...newTask,
+                          responsibility: v ?? "Individual",
+                        })
+                      }
+                    >
+                      <SelectTrigger className="h-9 text-[13px] rounded-lg">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {["Individual", "Team", "Department"].map((r) => (
+                          <SelectItem
+                            key={r}
+                            value={r}
+                            className="text-[12px]"
+                          >
+                            {r}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label className="text-[12px] text-slate-600">
+                      Eisenhower Matrix
+                    </Label>
+                    <Select
+                      value={newTask.eisenhowerMatrix}
+                      onValueChange={(v) =>
+                        setNewTask({
+                          ...newTask,
+                          eisenhowerMatrix: v ?? "Urgent & Important",
+                        })
+                      }
+                    >
+                      <SelectTrigger className="h-9 text-[13px] rounded-lg">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[
+                          "Urgent & Important",
+                          "Not Urgent & Important",
+                          "Urgent & Not Important",
+                          "Not Urgent & Not Important",
+                        ].map((e) => (
+                          <SelectItem
+                            key={e}
+                            value={e}
+                            className="text-[12px]"
+                          >
+                            {e}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-[12px] text-slate-600">
+                    Attachments
+                  </Label>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 text-[12px] rounded-lg gap-1.5"
+                      onClick={() =>
+                        handleFileUpload(
+                          ".jpg,.jpeg,.png,.pdf,.doc,.docx",
+                          setAttachmentName
+                        )
+                      }
+                    >
+                      <Paperclip className="h-3.5 w-3.5" />
+                      Choose files
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 text-[12px] rounded-lg gap-1.5"
+                      onClick={() =>
+                        handleFileUpload("image/*", setAttachmentName)
+                      }
+                    >
+                      <Camera className="h-3.5 w-3.5" />
+                      Take Photo
+                    </Button>
+                    {attachmentName && (
+                      <span className="text-[12px] text-slate-500 px-1">
+                        {attachmentName}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                  <Button
+                    variant="outline"
+                    onClick={() => setActiveView("list")}
+                    className="h-9 text-[13px] rounded-lg"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleAddTask}
+                    className="h-9 text-[13px] rounded-lg bg-blue-600 hover:bg-blue-700 text-white gap-1.5"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    Create Task
+                  </Button>
                 </div>
               </div>
-            </>
-          )}
-        </>
-      ) : (
-        <div className="rounded-xl border border-slate-200 bg-white p-5">
-          <h4 className="text-[14px] font-semibold text-slate-900 mb-4 flex items-center gap-2"><ListTodo className="h-4 w-4" /> Add New Task</h4>
-          <div className="space-y-3">
-            <div className="grid grid-cols-2 gap-3">
-              <div><Label className="text-[12px] text-slate-600 mb-1.5 block">Task Title *</Label><Input value={newTask.title} onChange={(e) => { setNewTask({ ...newTask, title: e.target.value }); setAddErrors((prev) => ({ ...prev, title: false })); }} className={`h-9 text-[13px] rounded-lg ${addErrors.title ? 'border-red-400 ring-1 ring-red-200' : 'border-slate-200'}`} />{addErrors.title && <p className="text-[10px] text-red-500 mt-0.5">Title is required</p>}</div>
-              <div><Label className="text-[12px] text-slate-600 mb-1.5 block">Due Date</Label><Input type="date" value={newTask.dueDate} onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })} className="h-9 text-[13px] rounded-lg" /></div>
-            </div>
-            <div><Label className="text-[12px] text-slate-600 mb-1.5 block">Description</Label><textarea value={newTask.description} onChange={(e) => setNewTask({ ...newTask, description: e.target.value })} rows={3} className="flex w-full rounded-lg border border-input bg-transparent px-3 py-2 text-[13px]" /></div>
-            <div className="grid grid-cols-3 gap-3">
-              <div><Label className="text-[12px] text-slate-600 mb-1.5 block">Department</Label><select value={newTask.department} onChange={(e) => setNewTask({ ...newTask, department: e.target.value })} className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 text-[13px]"><option value="">Select</option><option>Operations</option><option>Maintenance</option><option>Housekeeping</option><option>Security</option><option>Electrical</option></select></div>
-              <div><Label className="text-[12px] text-slate-600 mb-1.5 block">Priority</Label><select value={newTask.priority} onChange={(e) => setNewTask({ ...newTask, priority: e.target.value })} className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 text-[13px]"><option>Low</option><option>Medium</option><option>High</option><option>Critical</option></select></div>
-              <div><Label className="text-[12px] text-slate-600 mb-1.5 block">Source</Label><select value={newTask.source} onChange={(e) => setNewTask({ ...newTask, source: e.target.value })} className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 text-[13px]"><option>Routine Maintenance</option><option>Complaint</option><option>Inspection</option><option>Audit Finding</option></select></div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div><Label className="text-[12px] text-slate-600 mb-1.5 block">Responsibility</Label><select value={newTask.responsibility} onChange={(e) => setNewTask({ ...newTask, responsibility: e.target.value })} className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 text-[13px]"><option>Individual</option><option>Team</option><option>Department</option></select></div>
-              <div><Label className="text-[12px] text-slate-600 mb-1.5 block">Eisenhower Matrix</Label><select value={newTask.eisenhowerMatrix} onChange={(e) => setNewTask({ ...newTask, eisenhowerMatrix: e.target.value })} className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 text-[13px]"><option>Urgent & Important</option><option>Not Urgent & Important</option><option>Urgent & Not Important</option><option>Not Urgent & Not Important</option></select></div>
-            </div>
-            <div><Label className="text-[12px] text-slate-600 mb-1.5 block">Attachments</Label><div className="flex items-center gap-2"><Button variant="outline" size="sm" className="h-8 text-[12px] rounded-lg" onClick={() => handleFileUpload(".jpg,.jpeg,.png,.pdf,.doc,.docx", setAttachmentName)}><Paperclip className="h-3.5 w-3.5 mr-1" /> Choose files</Button><Button variant="outline" size="sm" className="h-8 text-[12px] rounded-lg" onClick={() => handleFileUpload("image/*", setAttachmentName)}><Camera className="h-3.5 w-3.5 mr-1" /> Take Photo</Button>{attachmentName && <span className="text-[12px] text-slate-500">{attachmentName}</span>}</div></div>
-            <Button onClick={handleAddTask} className="w-full bg-blue-600 hover:bg-blue-700 text-white h-9 text-[13px] rounded-lg"><Plus className="h-3.5 w-3.5 mr-1.5" /> Create Task</Button>
-          </div>
-        </div>
-      )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
       {/* ===== ASSIGN DIALOG ===== */}
       <Dialog open={assignOpen} onOpenChange={setAssignOpen}>
-        <DialogContent className="sm:max-w-[400px] p-0 overflow-hidden" showCloseButton={false}>
-          <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
-            <DialogTitle className="text-[15px]">Assign Task</DialogTitle>
-            <button onClick={() => setAssignOpen(false)} className="h-7 w-7 rounded-full border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-50"><X className="h-4 w-4" /></button>
-          </div>
+        <DialogContent
+          className="sm:max-w-[420px] p-0 overflow-hidden"
+          showCloseButton
+        >
+          <DialogHeader className="px-4 py-3 border-b border-slate-100">
+            <DialogTitle className="text-[14px]">Assign Task</DialogTitle>
+          </DialogHeader>
           <div className="px-4 pt-3 pb-2">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
-              <Input placeholder="Search employees..." value={assignSearch} onChange={(e) => setAssignSearch(e.target.value)} className="pl-9 h-9 text-[13px] rounded-lg" autoFocus />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
+              <Input
+                placeholder="Search employees..."
+                value={assignSearch}
+                onChange={(e) => setAssignSearch(e.target.value)}
+                className="pl-9 h-9 text-[13px] rounded-lg"
+                autoFocus
+              />
             </div>
           </div>
-          <div className="max-h-[300px] overflow-y-auto px-2 pb-3">
-            {filteredEmployees.map((emp, idx) => (
-              <button key={idx} onClick={() => handleAssign(emp)} className="w-full text-left px-3 py-2 text-[13px] text-slate-700 hover:bg-blue-50 hover:text-blue-700 rounded-md transition-colors flex items-center gap-2">
-                <div className="h-6 w-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-[10px] font-semibold shrink-0">{emp[0]}</div>
+          <div className="max-h-[320px] overflow-y-auto px-2 pb-3 space-y-0.5">
+            {filteredEmployees.map((emp) => (
+              <button
+                key={emp}
+                onClick={() => handleAssign(emp)}
+                className="w-full text-left px-3 py-2 text-[13px] text-slate-700 hover:bg-blue-50 hover:text-blue-700 rounded-md transition-colors flex items-center gap-2"
+              >
+                <div className="h-7 w-7 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-[11px] font-semibold shrink-0">
+                  {emp[0]}
+                </div>
                 {emp}
               </button>
             ))}
-            {filteredEmployees.length === 0 && <p className="text-center text-[12px] text-slate-400 py-4">No employees found</p>}
+            {filteredEmployees.length === 0 && (
+              <p className="text-center text-[12px] text-slate-400 py-6">
+                No employees found
+              </p>
+            )}
           </div>
         </DialogContent>
       </Dialog>
 
       {/* ===== VIEW DIALOG ===== */}
       <Dialog open={viewOpen} onOpenChange={setViewOpen}>
-        <DialogContent className="sm:max-w-[450px]">
-          <DialogHeader><DialogTitle className="text-[15px]">Task Details</DialogTitle></DialogHeader>
+        <DialogContent className="sm:max-w-[480px]">
+          <DialogHeader>
+            <DialogTitle className="text-[14px]">Task Details</DialogTitle>
+          </DialogHeader>
           {selectedTask && (
-            <div className="space-y-3 pt-2">
-              <div className="bg-slate-50 rounded-lg p-3 space-y-2">
-                <div className="flex justify-between"><span className="text-[11px] text-slate-400">Status</span><StatusBadge status={selectedTask.status} /></div>
-                <div className="flex justify-between"><span className="text-[11px] text-slate-400">Priority</span><StatusBadge status={selectedTask.priority} /></div>
-                <div className="flex justify-between"><span className="text-[11px] text-slate-400">Assigned To</span><span className="text-[13px] text-slate-700">{selectedTask.assignedTo}</span></div>
-                <div className="flex justify-between"><span className="text-[11px] text-slate-400">Due Date</span><span className="text-[13px] text-slate-700">{selectedTask.dueDate}</span></div>
+            <div className="space-y-3 pt-1">
+              <div className="rounded-lg border border-slate-100 bg-slate-50/60 p-3 space-y-2">
+                <Row label="Status">
+                  <StatusBadge status={selectedTask.status} />
+                </Row>
+                <Row label="Priority">
+                  <StatusBadge
+                    status={selectedTask.priority}
+                    variant={priorityVariant(selectedTask.priority)}
+                  />
+                </Row>
+                <Row label="Assigned To">
+                  <span className="text-[13px] text-slate-700">
+                    {selectedTask.assignedTo}
+                  </span>
+                </Row>
+                <Row label="Due Date">
+                  <span className="text-[13px] text-slate-700">
+                    {selectedTask.dueDate}
+                  </span>
+                </Row>
               </div>
-              <div><p className="text-[11px] text-slate-400 mb-1">Title</p><p className="text-[13px] text-slate-800">{selectedTask.title}</p></div>
+              <div>
+                <p className="text-[11px] text-slate-400 uppercase tracking-wide mb-1">
+                  Title
+                </p>
+                <p className="text-[13px] text-slate-800">
+                  {selectedTask.title}
+                </p>
+              </div>
             </div>
           )}
         </DialogContent>
@@ -475,55 +1112,229 @@ export function TasksTab() {
 
       {/* ===== EDIT DIALOG ===== */}
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent className="sm:max-w-[450px]">
-          <DialogHeader><DialogTitle className="text-[15px]">Edit Task</DialogTitle></DialogHeader>
-          <div className="space-y-3 pt-2">
-            <div><Label className="text-[12px] text-slate-600 mb-1.5 block">Title *</Label><Input value={editForm.title} onChange={(e) => { setEditForm({ ...editForm, title: e.target.value }); setEditErrors((prev) => ({ ...prev, title: false })); }} className={`h-9 text-[13px] rounded-lg ${editErrors.title ? 'border-red-400 ring-1 ring-red-200' : 'border-slate-200'}`} />{editErrors.title && <p className="text-[10px] text-red-500 mt-0.5">Title is required</p>}</div>
-            <div className="grid grid-cols-2 gap-3">
-              <div><Label className="text-[12px] text-slate-600 mb-1.5 block">Status</Label><select value={editForm.status} onChange={(e) => setEditForm({ ...editForm, status: e.target.value })} className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 text-[13px]"><option>Pending</option><option>In Progress</option><option>Completed</option></select></div>
-              <div><Label className="text-[12px] text-slate-600 mb-1.5 block">Priority</Label><select value={editForm.priority} onChange={(e) => setEditForm({ ...editForm, priority: e.target.value })} className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 text-[13px]"><option>Low</option><option>Medium</option><option>High</option><option>Critical</option></select></div>
+        <DialogContent className="sm:max-w-[480px]">
+          <DialogHeader>
+            <DialogTitle className="text-[14px]">Edit Task</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 pt-1">
+            <div className="space-y-1.5">
+              <Label className="text-[12px] text-slate-600">
+                Title <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                value={editForm.title}
+                onChange={(e) => {
+                  setEditForm({ ...editForm, title: e.target.value });
+                  setEditErrors((prev) => ({ ...prev, title: false }));
+                }}
+                className={`h-9 text-[13px] rounded-lg ${
+                  editErrors.title
+                    ? "border-red-400 ring-1 ring-red-200"
+                    : ""
+                }`}
+              />
+              {editErrors.title && (
+                <p className="text-[10px] text-red-500">Title is required</p>
+              )}
             </div>
-            <div><Label className="text-[12px] text-slate-600 mb-1.5 block">Due Date</Label><Input type="date" value={editForm.dueDate} onChange={(e) => setEditForm({ ...editForm, dueDate: e.target.value })} className="h-9 text-[13px] rounded-lg" /></div>
-            <div className="flex justify-end gap-2 pt-1">
-              <Button variant="outline" onClick={() => { setEditOpen(false); setEditErrors({}); }} className="h-9 text-[13px] rounded-lg">Cancel</Button>
-              <Button onClick={handleEdit} className="h-9 text-[13px] rounded-lg bg-blue-600 hover:bg-blue-700 text-white">Update Task</Button>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-[12px] text-slate-600">Status</Label>
+                <Select
+                  value={editForm.status}
+                  onValueChange={(v) =>
+                    setEditForm({ ...editForm, status: v ?? "" })
+                  }
+                >
+                  <SelectTrigger className="h-9 text-[13px] rounded-lg">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {["Pending", "In Progress", "Completed"].map((s) => (
+                      <SelectItem key={s} value={s} className="text-[12px]">
+                        {s}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-[12px] text-slate-600">Priority</Label>
+                <Select
+                  value={editForm.priority}
+                  onValueChange={(v) =>
+                    setEditForm({ ...editForm, priority: v ?? "" })
+                  }
+                >
+                  <SelectTrigger className="h-9 text-[13px] rounded-lg">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {["Low", "Medium", "High", "Critical"].map((p) => (
+                      <SelectItem key={p} value={p} className="text-[12px]">
+                        {p}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-[12px] text-slate-600">Due Date</Label>
+              <Input
+                type="date"
+                value={editForm.dueDate}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, dueDate: e.target.value })
+                }
+                className="h-9 text-[13px] rounded-lg"
+              />
             </div>
           </div>
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setEditOpen(false);
+                setEditErrors({});
+              }}
+              className="h-9 text-[13px] rounded-lg"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleEdit}
+              className="h-9 text-[13px] rounded-lg bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              Update Task
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* ===== DELETE DIALOG ===== */}
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-        <DialogContent className="sm:max-w-[380px]">
-          <DialogHeader><DialogTitle className="text-[15px]">Delete Task</DialogTitle></DialogHeader>
-          <div className="space-y-3 pt-2">
-            <p className="text-[13px] text-slate-600">Are you sure you want to delete <span className="font-semibold">&ldquo;{selectedTask?.title}&rdquo;</span>? This action cannot be undone.</p>
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setDeleteOpen(false)} className="h-9 text-[13px] rounded-lg">Cancel</Button>
-              <Button onClick={handleDelete} className="h-9 text-[13px] rounded-lg bg-red-600 hover:bg-red-700 text-white">Delete</Button>
-            </div>
-          </div>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle className="text-[14px]">Delete Task</DialogTitle>
+          </DialogHeader>
+          <p className="text-[13px] text-slate-600">
+            Are you sure you want to delete{" "}
+            <span className="font-semibold text-slate-800">
+              &ldquo;{selectedTask?.title}&rdquo;
+            </span>
+            ? This action cannot be undone.
+          </p>
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setDeleteOpen(false)}
+              className="h-9 text-[13px] rounded-lg"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleDelete}
+              className="h-9 text-[13px] rounded-lg bg-red-600 hover:bg-red-700 text-white"
+            >
+              Delete
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* ===== BULK UPLOAD DIALOG ===== */}
       <Dialog open={bulkUploadOpen} onOpenChange={setBulkUploadOpen}>
         <DialogContent className="sm:max-w-md">
-          <DialogHeader><DialogTitle className="text-[15px]">Bulk Upload Tasks</DialogTitle></DialogHeader>
+          <DialogHeader>
+            <DialogTitle className="text-[14px]">Bulk Upload Tasks</DialogTitle>
+          </DialogHeader>
           <div className="space-y-3">
             <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
-              <p className="text-[12px] font-medium text-blue-800">Excel Format Required</p>
-              <p className="text-[11px] text-blue-600 mt-0.5">Columns: Task Title, Description, Due Date, Department, Priority, Responsibility, Source</p>
-              <Button variant="link" size="sm" className="text-blue-700 text-[11px] h-6 px-0 mt-1" onClick={() => toast.success("Downloading template...")}><Download className="h-3 w-3 mr-1" /> Download Template</Button>
+              <p className="text-[12px] font-medium text-blue-800">
+                Excel Format Required
+              </p>
+              <p className="text-[11px] text-blue-600 mt-0.5">
+                Columns: Task Title, Description, Due Date, Department,
+                Priority, Responsibility, Source
+              </p>
+              <Button
+                variant="link"
+                size="sm"
+                className="text-blue-700 text-[11px] h-6 px-0 mt-1 gap-1"
+                onClick={() => toast.success("Downloading template...")}
+              >
+                <Download className="h-3 w-3" />
+                Download Template
+              </Button>
             </div>
-            <div><Label className="text-[12px] text-slate-600 mb-1.5 block">Select Excel File</Label><div className="flex items-center gap-2"><Button variant="outline" size="sm" className="h-8 text-[12px] rounded-lg" onClick={() => handleFileUpload(".xlsx,.xls,.csv", setBulkFileName)}>Choose file</Button><span className="text-[12px] text-slate-400">{bulkFileName || "No file chosen"}</span></div></div>
-            <div className="flex justify-end gap-2 pt-1">
-              <Button variant="outline" onClick={() => { setBulkUploadOpen(false); setBulkFileName(null); }} className="h-9 text-[13px] rounded-lg">Cancel</Button>
-              <Button onClick={() => { if (!bulkFileName) { toast.error("Please select a file first"); return; } toast.success("Tasks uploaded successfully"); setBulkUploadOpen(false); setBulkFileName(null); }} className="bg-green-600 hover:bg-green-700 text-white h-9 text-[13px] rounded-lg"><Upload className="h-3.5 w-3.5 mr-1.5" /> Upload Tasks</Button>
+            <div className="space-y-1.5">
+              <Label className="text-[12px] text-slate-600">
+                Select Excel File
+              </Label>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-[12px] rounded-lg"
+                  onClick={() =>
+                    handleFileUpload(".xlsx,.xls,.csv", setBulkFileName)
+                  }
+                >
+                  Choose file
+                </Button>
+                <span className="text-[12px] text-slate-500">
+                  {bulkFileName || "No file chosen"}
+                </span>
+              </div>
             </div>
           </div>
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setBulkUploadOpen(false);
+                setBulkFileName(null);
+              }}
+              className="h-9 text-[13px] rounded-lg"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                if (!bulkFileName) {
+                  toast.error("Please select a file first");
+                  return;
+                }
+                toast.success("Tasks uploaded successfully");
+                setBulkUploadOpen(false);
+                setBulkFileName(null);
+              }}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white h-9 text-[13px] rounded-lg gap-1.5"
+            >
+              <Upload className="h-3.5 w-3.5" />
+              Upload Tasks
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+function Row({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-[11px] text-slate-400 uppercase tracking-wide">
+        {label}
+      </span>
+      {children}
     </div>
   );
 }
