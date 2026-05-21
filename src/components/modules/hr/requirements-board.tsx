@@ -17,18 +17,21 @@ import { MOCK_REQUIREMENTS, DEPARTMENTS } from "./mock-data";
 
 export function RequirementsBoard() {
   const {
-    data: apiReqs,
+    data: apiResponse,
     loading,
     error: apiError,
-  } = useApi<any[]>({
+  } = useApi<any>({
     url: "/api/v1/hr/requirements",
     initialData: [],
   });
 
   const requirements: JobRequirement[] = useMemo(() => {
-    if (apiError || !apiReqs || apiReqs.length === 0) {
-      return apiError ? MOCK_REQUIREMENTS : (apiReqs ?? []).length === 0 ? MOCK_REQUIREMENTS : [];
-    }
+    const apiReqs: any[] = Array.isArray(apiResponse)
+      ? apiResponse
+      : Array.isArray(apiResponse?.data)
+      ? apiResponse.data
+      : [];
+    if (apiError || apiReqs.length === 0) return MOCK_REQUIREMENTS;
     return apiReqs.map((r: any) => ({
       id: r.id,
       title: r.title ?? "",
@@ -38,7 +41,7 @@ export function RequirementsBoard() {
       status: r.status ?? "open",
       postedAt: r.postedAt ?? "",
     }));
-  }, [apiReqs, apiError]);
+  }, [apiResponse, apiError]);
 
   const [deptFilter, setDeptFilter] = useState("all");
 

@@ -10,18 +10,22 @@ import { MOCK_GOALS, EVAL_LEVEL_LABELS } from "./mock-data";
 
 export function GoalsTab() {
   const {
-    data: apiGoals,
+    data: apiResponse,
     loading,
     error: apiError,
-  } = useApi<any[]>({
+  } = useApi<any>({
     url: "/api/v1/hr/goals",
     initialData: [],
   });
 
   const goals: EmployeeGoal[] = useMemo(() => {
-    if (apiError || !apiGoals || apiGoals.length === 0) {
-      return apiError ? MOCK_GOALS : (apiGoals ?? []).length === 0 ? MOCK_GOALS : [];
-    }
+    // API returns either a raw array (legacy) or { data: [], meta: {} } envelope.
+    const apiGoals: any[] = Array.isArray(apiResponse)
+      ? apiResponse
+      : Array.isArray(apiResponse?.data)
+      ? apiResponse.data
+      : [];
+    if (apiError || apiGoals.length === 0) return MOCK_GOALS;
     return apiGoals.map((r: any) => ({
       id: r.id,
       employeeId: r.employeeId ?? "",
@@ -32,7 +36,7 @@ export function GoalsTab() {
       status: r.status ?? "in_progress",
       evaluations: r.evaluations ?? [],
     }));
-  }, [apiGoals, apiError]);
+  }, [apiResponse, apiError]);
 
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 

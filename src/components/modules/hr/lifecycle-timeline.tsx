@@ -26,22 +26,21 @@ const eventConfig: Record<
 
 export function LifecycleTimeline() {
   const {
-    data: apiEvents,
+    data: apiResponse,
     loading,
     error: apiError,
-  } = useApi<any[]>({
+  } = useApi<any>({
     url: "/api/v1/hr/lifecycle",
     initialData: [],
   });
 
   const events: LifecycleEvent[] = useMemo(() => {
-    if (apiError || !apiEvents || apiEvents.length === 0) {
-      return apiError
-        ? MOCK_LIFECYCLE_EVENTS
-        : (apiEvents ?? []).length === 0
-        ? MOCK_LIFECYCLE_EVENTS
-        : [];
-    }
+    const apiEvents: any[] = Array.isArray(apiResponse)
+      ? apiResponse
+      : Array.isArray(apiResponse?.data)
+      ? apiResponse.data
+      : [];
+    if (apiError || apiEvents.length === 0) return MOCK_LIFECYCLE_EVENTS;
     return apiEvents.map((r: any) => ({
       id: r.id,
       employeeId: r.employeeId ?? "",
@@ -51,7 +50,7 @@ export function LifecycleTimeline() {
       date: r.date ?? "",
       description: r.description ?? "",
     }));
-  }, [apiEvents, apiError]);
+  }, [apiResponse, apiError]);
 
   // Group by employee
   const grouped = useMemo(() => {

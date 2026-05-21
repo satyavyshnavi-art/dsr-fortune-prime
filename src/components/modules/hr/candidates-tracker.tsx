@@ -18,18 +18,21 @@ const statusVariantMap: Record<string, "info" | "warning" | "purple" | "success"
 
 export function CandidatesTracker() {
   const {
-    data: apiCandidates,
+    data: apiResponse,
     loading,
     error: apiError,
-  } = useApi<any[]>({
+  } = useApi<any>({
     url: "/api/v1/hr/candidates",
     initialData: [],
   });
 
   const candidates: Candidate[] = useMemo(() => {
-    if (apiError || !apiCandidates || apiCandidates.length === 0) {
-      return apiError ? MOCK_CANDIDATES : (apiCandidates ?? []).length === 0 ? MOCK_CANDIDATES : [];
-    }
+    const apiCandidates: any[] = Array.isArray(apiResponse)
+      ? apiResponse
+      : Array.isArray(apiResponse?.data)
+      ? apiResponse.data
+      : [];
+    if (apiError || apiCandidates.length === 0) return MOCK_CANDIDATES;
     return apiCandidates.map((r: any) => ({
       id: r.id,
       name: r.name ?? "",
@@ -43,7 +46,7 @@ export function CandidatesTracker() {
       interviewScore: r.interviewScore ?? null,
       recommendation: r.recommendation ?? null,
     }));
-  }, [apiCandidates, apiError]);
+  }, [apiResponse, apiError]);
 
   const columns: ColumnDef<Candidate>[] = [
     {
