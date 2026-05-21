@@ -139,7 +139,7 @@ export function InventoryList({ onAddTransaction, onViewDetail }: InventoryListP
             className="h-7 w-7"
             onClick={() => onAddTransaction(row.original)}
           >
-            <Plus className="h-3 w-3 text-green-500" />
+            <Plus className="h-3 w-3 text-emerald-500" />
           </Button>
         </div>
       ),

@@ -557,14 +557,14 @@ export function AttendanceTab() {
           <Button
             onClick={handleAssignWeekOff}
             disabled={!selectedEmployee || weekOffDays.size === 0}
-            className="w-full h-8 text-[11px] bg-green-600 hover:bg-green-700 text-white gap-1 disabled:opacity-50"
+            className="w-full h-8 text-[11px] bg-teal-600 hover:bg-teal-700 text-white gap-1 disabled:opacity-50"
           >
             <Plus className="h-3 w-3" />
             Assign Weekoff
           </Button>
 
           {weekOffSaved && (
-            <div className="flex items-center gap-1 text-[11px] text-green-600 font-medium">
+            <div className="flex items-center gap-1 text-[11px] text-teal-600 font-medium">
               <Check className="h-3 w-3" />
               Week off saved successfully
             </div>
@@ -677,7 +677,7 @@ export function AttendanceTab() {
                   <Badge
                     className={`text-[10px] px-1.5 py-0 h-[18px] ${
                       leave.status === "Approved"
-                        ? "bg-green-100 text-green-700 border-green-200"
+                        ? "bg-emerald-100 text-teal-700 border-emerald-200"
                         : leave.status === "Rejected"
                           ? "bg-red-100 text-red-700 border-red-200"
                           : "bg-yellow-100 text-yellow-700 border-yellow-200"
@@ -699,11 +699,11 @@ export function AttendanceTab() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-6 w-6 hover:bg-green-50"
+                        className="h-6 w-6 hover:bg-emerald-50"
                         onClick={() => handleApproveLeave(leave.id)}
                         title="Approve"
                       >
-                        <Check className="h-3 w-3 text-green-600" />
+                        <Check className="h-3 w-3 text-teal-600" />
                       </Button>
                       <Button
                         variant="ghost"
@@ -970,7 +970,7 @@ export function AttendanceTab() {
                                   OFF
                                 </span>
                               ) : (
-                                <span className="text-[9px] bg-green-100 text-green-700 px-1 py-0.5 rounded font-medium">
+                                <span className="text-[9px] bg-emerald-100 text-teal-700 px-1 py-0.5 rounded font-medium">
                                   {a.shiftName}
                                 </span>
                               )}

@@ -937,7 +937,7 @@ function EmployeeQRCode({ employee }: { employee: Employee }) {
         <Button
           size="sm"
           onClick={handleCopy}
-          className="h-7 text-[11px] px-4 bg-green-600 hover:bg-green-700 text-white"
+          className="h-7 text-[11px] px-4 bg-teal-600 hover:bg-teal-700 text-white"
         >
           {copied ? (
             <>

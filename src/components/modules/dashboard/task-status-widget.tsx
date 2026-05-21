@@ -196,7 +196,7 @@ export function TaskStatusWidget({ data }: { data?: any }) {
             <p className="text-[9px] text-slate-400">Total Tasks</p>
           </div>
           <div className="text-center">
-            <div className="flex items-center justify-center gap-0.5 text-green-600">
+            <div className="flex items-center justify-center gap-0.5 text-teal-600">
               <CheckCircle2 className="h-2.5 w-2.5" />
               <span className="text-[12px] font-bold">{completed}</span>
             </div>

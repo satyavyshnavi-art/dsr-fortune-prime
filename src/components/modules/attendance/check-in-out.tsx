@@ -307,7 +307,7 @@ export function CheckInOut() {
               <Badge
                 className={`text-[10px] px-1.5 py-0 h-[18px] ${
                   status.isCheckedIn
-                    ? "bg-green-100 text-green-700 border-green-200"
+                    ? "bg-emerald-100 text-teal-700 border-emerald-200"
                     : "bg-slate-100 text-slate-600 border-slate-200"
                 }`}
               >
@@ -370,7 +370,7 @@ export function CheckInOut() {
                 <Button
                   onClick={handleCheckIn}
                   disabled={loading || geoLoading}
-                  className="w-full h-9 text-[12px] bg-green-600 hover:bg-green-700 text-white gap-1.5"
+                  className="w-full h-9 text-[12px] bg-teal-600 hover:bg-teal-700 text-white gap-1.5"
                 >
                   <LogIn className="h-3.5 w-3.5" />
                   {geoLoading ? "Capturing Location..." : loading ? "Checking In..." : "Check In"}

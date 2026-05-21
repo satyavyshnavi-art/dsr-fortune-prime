@@ -18,14 +18,14 @@ import { toast } from "sonner";
 type ViewType = "week" | "month" | "day" | "year";
 
 const statusColors: Record<string, string> = {
-  completed: "bg-green-500 text-white",
+  completed: "bg-emerald-500 text-white",
   overdue: "bg-red-500 text-white",
   in_progress: "bg-yellow-400 text-slate-900",
   scheduled: "bg-blue-500 text-white",
 };
 
 const statusDotColors: Record<string, string> = {
-  completed: "bg-green-500",
+  completed: "bg-emerald-500",
   overdue: "bg-red-500",
   in_progress: "bg-yellow-400",
   scheduled: "bg-blue-500",
@@ -189,7 +189,7 @@ export function PPMSchedule() {
 
           <Button
             size="sm"
-            className="h-7 text-[11px] px-2.5 bg-green-600 hover:bg-green-700 text-white"
+            className="h-7 text-[11px] px-2.5 bg-teal-600 hover:bg-teal-700 text-white"
             onClick={() => {
               setNewAsset("");
               setNewCategory("");
@@ -219,7 +219,7 @@ export function PPMSchedule() {
           Total Tasks: <span className="font-bold text-blue-600">{totalTasks}</span>
         </span>
         <span className="text-slate-400">
-          Completed: <span className="font-bold text-green-600">{completedTasks}</span>
+          Completed: <span className="font-bold text-teal-600">{completedTasks}</span>
         </span>
         <span className="text-slate-400">
           Overdue: <span className="font-bold text-red-600">{overdueTasks}</span>
@@ -344,7 +344,7 @@ export function PPMSchedule() {
               </Button>
               <Button
                 onClick={handleAddPPM}
-                className="h-9 text-[13px] rounded-lg bg-green-600 hover:bg-green-700 text-white"
+                className="h-9 text-[13px] rounded-lg bg-teal-600 hover:bg-teal-700 text-white"
               >
                 <Plus className="h-3.5 w-3.5 mr-1.5" />
                 Add Task

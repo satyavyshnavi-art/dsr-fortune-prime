@@ -366,7 +366,7 @@ export function VendorTab() {
                 <FileText className="h-3 w-3 mr-1" />
                 Choose Files
               </Button>
-              {uploadedFileName && <p className="text-[11px] text-green-600 mt-1.5 font-medium">{uploadedFileName}</p>}
+              {uploadedFileName && <p className="text-[11px] text-teal-600 mt-1.5 font-medium">{uploadedFileName}</p>}
             </div>
           </div>
 
@@ -386,7 +386,7 @@ export function VendorTab() {
           <div className="flex items-center gap-2">
             <Button
               onClick={handleCreateTicket}
-              className="bg-green-600 hover:bg-green-700 text-white h-7 text-[11px]"
+              className="bg-teal-600 hover:bg-teal-700 text-white h-7 text-[11px]"
             >
               <Plus className="h-3 w-3 mr-1" />
               Create Ticket
@@ -507,7 +507,7 @@ export function VendorTab() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="h-6 text-[10px] px-2 text-green-600 hover:bg-green-50 hover:text-green-700"
+                      className="h-6 text-[10px] px-2 text-teal-600 hover:bg-emerald-50 hover:text-teal-700"
                       onClick={() => openResolve(ticket)}
                     >
                       <CheckCircle className="h-2.5 w-2.5 mr-0.5" />
@@ -648,7 +648,7 @@ export function VendorTab() {
               </Button>
               <Button
                 onClick={handleResolve}
-                className="h-9 text-[13px] rounded-lg bg-green-600 hover:bg-green-700 text-white"
+                className="h-9 text-[13px] rounded-lg bg-teal-600 hover:bg-teal-700 text-white"
               >
                 <CheckCircle className="h-3.5 w-3.5 mr-1.5" />
                 Mark as Resolved

@@ -311,7 +311,7 @@ export function ManualEntry() {
             variant="outline"
             className={`h-6 text-[10px] px-2 font-medium border transition-colors ${
               s === "P"
-                ? "hover:bg-green-50 hover:text-green-700 hover:border-green-300"
+                ? "hover:bg-emerald-50 hover:text-teal-700 hover:border-emerald-300"
                 : s === "A"
                   ? "hover:bg-red-50 hover:text-red-700 hover:border-red-300"
                   : s === "HD"

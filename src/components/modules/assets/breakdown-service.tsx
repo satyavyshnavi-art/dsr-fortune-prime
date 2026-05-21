@@ -487,7 +487,7 @@ export function BreakdownService() {
               onClick={() => setActiveSubTab("view")}
               className={`flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${
                 activeSubTab === "view"
-                  ? "bg-green-50 text-green-700 border border-green-200"
+                  ? "bg-emerald-50 text-teal-700 border border-emerald-200"
                   : "text-slate-400 hover:text-slate-600"
               }`}
             >
@@ -500,9 +500,9 @@ export function BreakdownService() {
             <div className="space-y-3">
               {/* Success message */}
               {incidentSubmitted && (
-                <div className="flex items-center gap-2 p-2.5 bg-green-50 border border-green-200 rounded-lg">
-                  <CheckCircle2 className="h-4 w-4 text-green-600" />
-                  <p className="text-[12px] text-green-700 font-medium">Incident report submitted successfully!</p>
+                <div className="flex items-center gap-2 p-2.5 bg-emerald-50 border border-emerald-200 rounded-lg">
+                  <CheckCircle2 className="h-4 w-4 text-teal-600" />
+                  <p className="text-[12px] text-teal-700 font-medium">Incident report submitted successfully!</p>
                 </div>
               )}
 
@@ -676,9 +676,9 @@ export function BreakdownService() {
                           </div>
                         )}
                         {report.preventiveAction && (
-                          <div className="bg-green-50 rounded p-1.5">
-                            <p className="text-[10px] font-medium text-green-700">Preventive Action</p>
-                            <p className="text-[10px] text-green-600">{report.preventiveAction}</p>
+                          <div className="bg-emerald-50 rounded p-1.5">
+                            <p className="text-[10px] font-medium text-teal-700">Preventive Action</p>
+                            <p className="text-[10px] text-teal-600">{report.preventiveAction}</p>
                           </div>
                         )}
                       </div>

@@ -214,7 +214,7 @@ export function AssetDashboard() {
                     </div>
                     <div className="w-full h-2.5 rounded-full overflow-hidden flex bg-slate-100">
                       <div
-                        className="bg-green-500 h-full"
+                        className="bg-emerald-500 h-full"
                         style={{
                           width: `${(cat.active / total) * 100}%`,
                         }}
@@ -237,7 +237,7 @@ export function AssetDashboard() {
               })}
               <div className="flex items-center gap-4 text-[10px] text-slate-400 pt-1 border-t border-slate-100">
                 <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 rounded-full bg-green-500" />
+                  <div className="w-2 h-2 rounded-full bg-emerald-500" />
                   Active
                 </div>
                 <div className="flex items-center gap-1">
@@ -268,8 +268,8 @@ export function AssetDashboard() {
             </div>
             {criticalChecks.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-6 text-center">
-                <div className="rounded-full bg-green-50 p-2.5 mb-2">
-                  <CheckCircle2 className="h-5 w-5 text-green-500" />
+                <div className="rounded-full bg-emerald-50 p-2.5 mb-2">
+                  <CheckCircle2 className="h-5 w-5 text-emerald-500" />
                 </div>
                 <p className="text-[12px] font-medium text-slate-600">
                   All Checks Up to Date
@@ -330,7 +330,7 @@ export function AssetDashboard() {
                   <div
                     className={`mt-0.5 rounded-full p-1 shrink-0 ${
                       obs.type === "positive"
-                        ? "bg-green-100 text-green-600"
+                        ? "bg-emerald-100 text-teal-600"
                         : "bg-blue-100 text-blue-600"
                     }`}
                   >
@@ -426,7 +426,7 @@ export function AssetDashboard() {
                 </p>
                 <div className="w-full h-3 rounded-full overflow-hidden flex bg-slate-100">
                   <div
-                    className="bg-green-500 h-full"
+                    className="bg-emerald-500 h-full"
                     style={{ width: `${(ppmCompleted / (ppmPlanned || 1)) * 100}%` }}
                   />
                   <div
@@ -440,7 +440,7 @@ export function AssetDashboard() {
                 </div>
                 <div className="flex items-center gap-3 text-[10px] text-slate-400 mt-1">
                   <div className="flex items-center gap-1">
-                    <div className="w-2 h-2 rounded-full bg-green-500" />
+                    <div className="w-2 h-2 rounded-full bg-emerald-500" />
                     Done ({ppmCompleted})
                   </div>
                   <div className="flex items-center gap-1">
@@ -527,7 +527,7 @@ export function AssetDashboard() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               {selectedObservation?.type === "positive" ? (
-                <CheckCircle2 className="h-4 w-4 text-green-600" />
+                <CheckCircle2 className="h-4 w-4 text-teal-600" />
               ) : (
                 <TrendingUp className="h-4 w-4 text-blue-600" />
               )}

@@ -104,7 +104,7 @@ export function TransactionModal({ open, onOpenChange, item }: TransactionModalP
               <SelectContent>
                 <SelectItem value="IN" className="text-[12px]">
                   <span className="flex items-center gap-1.5">
-                    <ArrowDownToLine className="h-3 w-3 text-green-500" /> Stock In
+                    <ArrowDownToLine className="h-3 w-3 text-emerald-500" /> Stock In
                   </span>
                 </SelectItem>
                 <SelectItem value="OUT" className="text-[12px]">

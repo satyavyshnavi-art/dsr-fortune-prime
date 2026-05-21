@@ -147,7 +147,7 @@ export function RequestDetail({ open, onOpenChange, request }: RequestDetailProp
                     <Button
                       className={`h-7 text-[11px] px-3 text-white ${
                         actionType === "approve"
-                          ? "bg-green-600 hover:bg-green-700"
+                          ? "bg-teal-600 hover:bg-teal-700"
                           : "bg-red-600 hover:bg-red-700"
                       }`}
                       onClick={handleAction}
@@ -159,7 +159,7 @@ export function RequestDetail({ open, onOpenChange, request }: RequestDetailProp
               ) : (
                 <div className="flex items-center gap-2">
                   <Button
-                    className="h-8 text-[12px] px-4 gap-1.5 bg-green-600 hover:bg-green-700 text-white flex-1"
+                    className="h-8 text-[12px] px-4 gap-1.5 bg-teal-600 hover:bg-teal-700 text-white flex-1"
                     onClick={() => setActionType("approve")}
                   >
                     <CheckCircle2 className="h-3.5 w-3.5" />
@@ -184,7 +184,7 @@ export function RequestDetail({ open, onOpenChange, request }: RequestDetailProp
 
 function StepItem({ step, isLast }: { step: ApprovalStep; isLast: boolean }) {
   const iconMap = {
-    approved: <CheckCircle2 className="h-4 w-4 text-green-500" />,
+    approved: <CheckCircle2 className="h-4 w-4 text-emerald-500" />,
     rejected: <XCircle className="h-4 w-4 text-red-500" />,
     pending: <Clock className="h-4 w-4 text-amber-500" />,
     waiting: <CircleDot className="h-4 w-4 text-slate-300" />,
@@ -192,7 +192,7 @@ function StepItem({ step, isLast }: { step: ApprovalStep; isLast: boolean }) {
 
   const lineColor =
     step.status === "approved"
-      ? "bg-green-200"
+      ? "bg-emerald-200"
       : step.status === "rejected"
       ? "bg-red-200"
       : "bg-slate-200";

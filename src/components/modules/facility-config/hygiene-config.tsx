@@ -196,7 +196,7 @@ function FrequencyBadge({ freq }: { freq: string }) {
   const colors = {
     Daily: "bg-red-100 text-red-700",
     Weekly: "bg-yellow-100 text-yellow-700",
-    Monthly: "bg-green-100 text-green-700",
+    Monthly: "bg-emerald-100 text-teal-700",
   };
   return (
     <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${colors[freq as keyof typeof colors] || "bg-slate-100 text-slate-600"}`}>
@@ -252,7 +252,7 @@ function GardeningSection() {
             <Download className="h-3 w-3 mr-1" />
             Sample Template
           </Button>
-          <Button className="h-7 text-[11px] px-2.5 bg-green-600 hover:bg-green-700 text-white" onClick={() => {
+          <Button className="h-7 text-[11px] px-2.5 bg-teal-600 hover:bg-teal-700 text-white" onClick={() => {
             const input = document.createElement("input");
             input.type = "file";
             input.accept = ".xlsx,.xls,.csv";
@@ -788,14 +788,14 @@ export function HygieneConfig() {
                     {/* Action buttons */}
                     <div className="flex gap-3">
                       <Button
-                        className="flex-1 h-10 text-[13px] bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium"
+                        className="flex-1 h-10 text-[13px] bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-medium"
                         onClick={() => toast.success("QR code downloaded")}
                       >
                         <Download className="h-4 w-4 mr-2" />
                         Download QR (PNG)
                       </Button>
                       <Button
-                        className="flex-1 h-10 text-[13px] bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium"
+                        className="flex-1 h-10 text-[13px] bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-medium"
                         onClick={() => {
                           const w = window.open("", "_blank");
                           if (w) {
@@ -829,7 +829,7 @@ export function HygieneConfig() {
                             <p className="text-[13px] text-slate-700 flex-1 leading-snug">
                               {task}
                             </p>
-                            <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
+                            <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
                           </div>
                         ))}
                       </div>

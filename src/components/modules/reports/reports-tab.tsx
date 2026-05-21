@@ -29,7 +29,7 @@ const iconColorMap: Record<ReportTemplate["icon"], string> = {
   droplet: "text-cyan-500",
   zap: "text-amber-500",
   alert: "text-red-500",
-  leaf: "text-green-500",
+  leaf: "text-emerald-500",
 };
 
 function ReportCard({ report }: { report: ReportTemplate }) {

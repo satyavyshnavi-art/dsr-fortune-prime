@@ -17,7 +17,7 @@ const eventConfig: Record<
   EventType,
   { icon: React.ElementType; color: string; lineColor: string; variant: "success" | "info" | "purple" | "warning" | "danger" }
 > = {
-  joining: { icon: UserPlus, color: "text-green-500", lineColor: "bg-green-200", variant: "success" },
+  joining: { icon: UserPlus, color: "text-emerald-500", lineColor: "bg-emerald-200", variant: "success" },
   confirmation: { icon: CheckCircle2, color: "text-blue-500", lineColor: "bg-blue-200", variant: "info" },
   promotion: { icon: TrendingUp, color: "text-purple-500", lineColor: "bg-purple-200", variant: "purple" },
   warning: { icon: AlertTriangle, color: "text-amber-500", lineColor: "bg-amber-200", variant: "warning" },

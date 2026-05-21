@@ -91,33 +91,87 @@ export const radius = {
 // ──────────────────────────────────────────────────────────────────────────────
 // ACTION COLORS — three semantic slots (NOT raw color variants)
 // ──────────────────────────────────────────────────────────────────────────────
+//
+// Primary is teal-600 — not blue, not green. Green is banned across the app
+// (no more bg-green-* save buttons). Reference: 2026-05-21 design direction.
 
 export const action = {
   /** Create, save, submit, primary affordance */
-  primary: "bg-blue-600 hover:bg-blue-700 text-white",
+  primary: "bg-teal-600 hover:bg-teal-700 text-white",
   /** Delete, cancel-with-data-loss, irreversible negative */
-  destructive: "bg-red-600 hover:bg-red-700 text-white",
+  destructive: "bg-rose-600 hover:bg-rose-700 text-white",
   /** Secondary actions, neutral confirmations */
   subtle: "bg-slate-100 hover:bg-slate-200 text-slate-700",
 } as const;
 
 // ──────────────────────────────────────────────────────────────────────────────
+// ACCENT TILES — pastel surfaces for KPI icons, highlight cards, callouts
+// ──────────────────────────────────────────────────────────────────────────────
+//
+// Each accent has matched tile (icon container), pill (status chip), and
+// gradient (large highlight card) variants. Cycle through them in KPI rows
+// so each tile has a distinct color (matches the reference dashboard).
+
+export const accent = {
+  mint: {
+    tile: "bg-emerald-100 text-emerald-600",
+    pill: "bg-emerald-100 text-emerald-700",
+    gradient: "bg-gradient-to-br from-emerald-50 to-emerald-100/40",
+    progress: "bg-emerald-500",
+  },
+  peach: {
+    tile: "bg-amber-100 text-amber-600",
+    pill: "bg-amber-100 text-amber-700",
+    gradient: "bg-gradient-to-br from-amber-50 to-amber-100/40",
+    progress: "bg-amber-400",
+  },
+  coral: {
+    tile: "bg-rose-100 text-rose-500",
+    pill: "bg-rose-100 text-rose-700",
+    gradient: "bg-gradient-to-br from-rose-50 to-rose-100/40",
+    progress: "bg-rose-500",
+  },
+  lavender: {
+    tile: "bg-violet-100 text-violet-600",
+    pill: "bg-violet-100 text-violet-700",
+    gradient: "bg-gradient-to-br from-violet-50 to-violet-100/40",
+    progress: "bg-violet-500",
+  },
+  sky: {
+    tile: "bg-sky-100 text-sky-600",
+    pill: "bg-sky-100 text-sky-700",
+    gradient: "bg-gradient-to-br from-sky-50 to-sky-100/40",
+    progress: "bg-sky-500",
+  },
+  teal: {
+    tile: "bg-teal-100 text-teal-600",
+    pill: "bg-teal-100 text-teal-700",
+    gradient: "bg-gradient-to-br from-teal-50 to-teal-100/40",
+    progress: "bg-teal-500",
+  },
+} as const;
+
+export type AccentToken = keyof typeof accent;
+
+// ──────────────────────────────────────────────────────────────────────────────
 // STATUS COLORS — for badges only, NOT buttons
 // ──────────────────────────────────────────────────────────────────────────────
 
+// Softer pill style: no border, lighter background. Matches the reference's
+// `4.2%` / `Alert` / `Active` chips at the top-right of each KPI card.
 export const status = {
   /** Completed, resolved, healthy */
-  success: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  success: "bg-emerald-100 text-emerald-700",
   /** Overdue, pending review, attention needed */
-  warning: "bg-amber-50 text-amber-700 border-amber-200",
+  warning: "bg-amber-100 text-amber-700",
   /** In progress, scheduled, neutral-positive */
-  info: "bg-blue-50 text-blue-700 border-blue-200",
+  info: "bg-sky-100 text-sky-700",
   /** Escalated, breached, critical */
-  danger: "bg-red-50 text-red-700 border-red-200",
+  danger: "bg-rose-100 text-rose-700",
   /** Closed, archived, inactive */
-  neutral: "bg-slate-100 text-slate-600 border-slate-200",
+  neutral: "bg-slate-100 text-slate-600",
   /** Medium priority, in-between states */
-  purple: "bg-purple-50 text-purple-700 border-purple-200",
+  purple: "bg-violet-100 text-violet-700",
 } as const;
 
 // ──────────────────────────────────────────────────────────────────────────────

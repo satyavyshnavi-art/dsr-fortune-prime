@@ -259,7 +259,7 @@ export function BillingView() {
             {downloading === "pdf" ? "Downloading..." : "Download PDF"}
           </Button>
           <Button
-            className="h-7 text-[11px] px-2.5 gap-1 bg-green-600 hover:bg-green-700 text-white"
+            className="h-7 text-[11px] px-2.5 gap-1 bg-teal-600 hover:bg-teal-700 text-white"
             disabled={downloading === "csv"}
             onClick={() => handleDownload("csv")}
           >
@@ -290,7 +290,7 @@ export function BillingView() {
           />
         </div>
         <Button
-          className="h-7 text-[11px] px-3 bg-green-600 hover:bg-green-700 text-white font-semibold"
+          className="h-7 text-[11px] px-3 bg-teal-600 hover:bg-teal-700 text-white font-semibold"
           onClick={handleGo}
         >
           GO

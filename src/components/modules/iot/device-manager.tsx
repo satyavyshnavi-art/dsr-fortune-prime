@@ -94,7 +94,7 @@ const columns: ColumnDef<IoTDevice, any>[] = [
       return (
         <div className="flex items-center gap-1.5">
           <span className={`inline-block h-2 w-2 rounded-full shrink-0 ${
-            isOnline ? "bg-green-500" : status === "maintenance" ? "bg-yellow-500" : "bg-red-500"
+            isOnline ? "bg-emerald-500" : status === "maintenance" ? "bg-yellow-500" : "bg-red-500"
           }`} />
           <StatusBadge status={status} />
         </div>
@@ -166,7 +166,7 @@ export function DeviceManager() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1.5 text-[12px] text-slate-600">
-            <Wifi className="h-3.5 w-3.5 text-green-500" />
+            <Wifi className="h-3.5 w-3.5 text-emerald-500" />
             <span className="font-medium">{onlineCount}</span>
             <span className="text-slate-400">online</span>
           </div>

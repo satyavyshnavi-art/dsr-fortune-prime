@@ -151,7 +151,7 @@ export function LogEntryForm({ facilityId }: LogEntryFormProps) {
           {submitting ? "Submitting..." : "Submit Log"}
         </Button>
         {success && (
-          <span className="text-[11px] text-green-600 font-medium">
+          <span className="text-[11px] text-teal-600 font-medium">
             Log submitted successfully
           </span>
         )}

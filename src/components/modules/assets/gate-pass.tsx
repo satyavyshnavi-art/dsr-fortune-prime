@@ -325,7 +325,7 @@ export function GatePassManagement() {
                             onClick={() => handleMarkReturned(gp)}
                             title="Mark Returned"
                           >
-                            <RotateCcw className="h-3 w-3 text-green-600" />
+                            <RotateCcw className="h-3 w-3 text-teal-600" />
                           </Button>
                         )}
                         <Button

@@ -95,7 +95,7 @@ export function CandidatesTracker() {
       cell: ({ row }) => {
         const score = row.original.interviewScore;
         if (score === null) return <span className="text-[12px] text-slate-300">-</span>;
-        const color = score >= 80 ? "text-green-600" : score >= 60 ? "text-amber-600" : "text-red-600";
+        const color = score >= 80 ? "text-teal-600" : score >= 60 ? "text-amber-600" : "text-red-600";
         return <span className={`text-[12px] font-mono ${color}`}>{score}</span>;
       },
     },

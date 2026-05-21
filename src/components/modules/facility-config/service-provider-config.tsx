@@ -296,7 +296,7 @@ export function ServiceProviderConfig() {
                     <td className="py-3 px-3">
                       <div className="flex flex-wrap gap-1">
                         {cats.length > 0 ? cats.map(cat => (
-                          <span key={cat} className="inline-block rounded bg-green-50 text-green-600 text-[10px] font-medium px-1.5 py-0.5">
+                          <span key={cat} className="inline-block rounded bg-emerald-50 text-teal-600 text-[10px] font-medium px-1.5 py-0.5">
                             {cat}
                           </span>
                         )) : <span className="text-[12px] text-slate-400">-</span>}

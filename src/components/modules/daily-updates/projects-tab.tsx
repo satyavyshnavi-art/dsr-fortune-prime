@@ -639,7 +639,7 @@ export function ProjectsTab() {
                   <span className="text-slate-400 font-normal">or drag and drop</span>
                 </p>
                 <p className="text-[10px] text-slate-400 mt-0.5">PNG, JPG, GIF up to 10MB</p>
-                {photoName && <p className="text-[11px] text-green-600 mt-1.5 font-medium">{photoName}</p>}
+                {photoName && <p className="text-[11px] text-teal-600 mt-1.5 font-medium">{photoName}</p>}
               </div>
             </div>
 

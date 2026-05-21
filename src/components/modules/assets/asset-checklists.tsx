@@ -170,7 +170,7 @@ export function AssetChecklists() {
         </div>
 
         <div className="flex items-center gap-1.5">
-          <Button size="sm" className="h-7 text-[11px] px-2.5 bg-green-600 hover:bg-green-700 text-white">
+          <Button size="sm" className="h-7 text-[11px] px-2.5 bg-teal-600 hover:bg-teal-700 text-white">
             <Calendar className="h-3 w-3 mr-1" />
             Calendar View
           </Button>
@@ -215,7 +215,7 @@ export function AssetChecklists() {
                 setErrors({});
                 setAddOpen(true);
               }}
-              className="text-[11px] text-green-600 hover:text-green-700 flex items-center gap-1"
+              className="text-[11px] text-teal-600 hover:text-teal-700 flex items-center gap-1"
             >
               <Plus className="h-3.5 w-3.5" />
               Add your first checklist

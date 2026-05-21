@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { type LucideIcon } from "lucide-react";
+import { accent, type AccentToken } from "@/styles/tokens";
 
 interface KPICardProps {
   title: string;
@@ -10,25 +11,30 @@ interface KPICardProps {
   icon?: LucideIcon;
   trend?: "up" | "down" | "neutral";
   trendValue?: string;
-  color?: "blue" | "green" | "red" | "yellow" | "slate";
+  /**
+   * Visual accent. Legacy values ("blue", "green", "red", "yellow", "slate")
+   * are remapped to the new pastel accents for backward compatibility.
+   */
+  color?: AccentToken | "blue" | "green" | "red" | "yellow" | "slate";
   className?: string;
 }
 
-const colorMap = {
-  blue: "bg-[#ecfdf5]/70 text-[#065f46] border-[#a7f3d0]",
-  green: "bg-[#ecfdf5]/70 text-[#065f46] border-[#a7f3d0]",
-  red: "bg-red-50/70 text-red-700 border-red-100",
-  yellow: "bg-amber-50/70 text-amber-700 border-amber-100",
-  slate: "bg-slate-50/70 text-slate-600 border-slate-100",
+// Map legacy color names to the new accent palette so existing usages keep
+// working without per-file edits. Green collapses to mint per the 2026-05-21
+// direction (no more green saves / no more green KPIs).
+const legacyMap: Record<string, AccentToken> = {
+  blue: "sky",
+  green: "mint",
+  red: "coral",
+  yellow: "peach",
+  slate: "lavender",
 };
 
-const iconColorMap = {
-  blue: "bg-[#d1fae5] text-[#10b981]",
-  green: "bg-[#d1fae5] text-[#10b981]",
-  red: "bg-red-100/80 text-red-500",
-  yellow: "bg-amber-100/80 text-amber-500",
-  slate: "bg-slate-100/80 text-slate-500",
-};
+function resolveAccent(color: KPICardProps["color"]): AccentToken {
+  if (!color) return "mint";
+  if (color in accent) return color as AccentToken;
+  return legacyMap[color] ?? "mint";
+}
 
 export function KPICard({
   title,
@@ -37,49 +43,44 @@ export function KPICard({
   icon: Icon,
   trend,
   trendValue,
-  color = "blue",
+  color,
   className,
 }: KPICardProps) {
+  const a = accent[resolveAccent(color)];
+
   return (
     <div
       className={cn(
-        "rounded-lg border px-3 py-2.5 transition-shadow hover:shadow-sm",
-        colorMap[color],
+        "rounded-2xl border border-slate-100 bg-white p-5 transition-shadow hover:shadow-sm",
         className
       )}
       role="region"
       aria-label={`${title}: ${value}`}
     >
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <p className="text-[10px] font-medium uppercase tracking-wider opacity-60 truncate">
-            {title}
-          </p>
-          <p className="text-lg font-bold leading-tight mt-0.5">{value}</p>
-          {subtitle && <p className="text-[10px] opacity-50 mt-0.5 truncate">{subtitle}</p>}
-        </div>
+      <div className="flex items-start justify-between gap-3 mb-4">
         {Icon && (
-          <div className={cn("rounded-md p-1.5 shrink-0", iconColorMap[color])}>
-            <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+          <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center shrink-0", a.tile)}>
+            <Icon className="h-5 w-5" aria-hidden="true" />
           </div>
         )}
-      </div>
-      {trend && trendValue && (
-        <div className="mt-1.5 flex items-center gap-1 text-[10px]">
+        {trend && trendValue && (
           <span
-            className={
-              trend === "up"
-                ? "text-green-600"
-                : trend === "down"
-                ? "text-red-600"
-                : "text-slate-400"
-            }
+            className={cn(
+              "text-[11px] font-medium px-2 py-0.5 rounded-full",
+              a.pill
+            )}
           >
-            {trend === "up" ? "+" : trend === "down" ? "-" : ""}
+            {trend === "up" ? "↗ " : trend === "down" ? "↘ " : ""}
             {trendValue}
           </span>
-          <span className="opacity-40">vs last period</span>
-        </div>
+        )}
+      </div>
+      <p className="text-[12px] font-medium text-slate-500 mb-1">{title}</p>
+      <p className="text-[26px] font-bold text-slate-900 leading-none mb-2">
+        {value}
+      </p>
+      {subtitle && (
+        <p className="text-[11px] text-slate-400">{subtitle}</p>
       )}
     </div>
   );

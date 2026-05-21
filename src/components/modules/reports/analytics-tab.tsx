@@ -30,7 +30,7 @@ const PIE_COLORS = ["#0d9488", "#3b82f6", "#ef4444"];
 function InsightRow({ insight }: { insight: InsightItem }) {
   const dotColor =
     insight.type === "positive" || insight.type === "improving"
-      ? "bg-green-500"
+      ? "bg-emerald-500"
       : insight.type === "stable"
         ? "bg-blue-500"
         : "bg-yellow-500";
@@ -46,7 +46,7 @@ function InsightRow({ insight }: { insight: InsightItem }) {
 
   const labelColor =
     insight.type === "positive" || insight.type === "improving"
-      ? "text-green-600"
+      ? "text-teal-600"
       : insight.type === "stable"
         ? "text-blue-600"
         : "text-yellow-600";

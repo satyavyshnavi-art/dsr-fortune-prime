@@ -333,7 +333,7 @@ export function PowerTab() {
                 <td className="py-3.5 px-3 text-right text-[13px] text-slate-500">{row.previousReading}</td>
                 <td className="py-3.5 px-3 text-right text-[13px] text-slate-500">{row.currentReading}</td>
                 <td className="py-3.5 px-3 text-right">
-                  <span className="text-[13px] text-green-600 font-medium">{row.unitsConsumed}</span>
+                  <span className="text-[13px] text-teal-600 font-medium">{row.unitsConsumed}</span>
                 </td>
                 <td className="py-3.5 px-3 text-center text-[13px] text-slate-500">{row.mf}</td>
                 <td className="py-3.5 px-3 text-right text-[13px] text-slate-400">{row.recordedAt}</td>
@@ -428,9 +428,9 @@ export function PowerTab() {
               </div>
 
               {/* Live units calculation */}
-              <div className="bg-green-50 border border-green-100 rounded-lg px-4 py-2.5">
+              <div className="bg-emerald-50 border border-emerald-100 rounded-lg px-4 py-2.5">
                 <p className="text-[13px] text-slate-700">
-                  Units Consumed: <span className="font-bold text-green-700">{editUnits} kWh</span>
+                  Units Consumed: <span className="font-bold text-teal-700">{editUnits} kWh</span>
                 </p>
               </div>
 

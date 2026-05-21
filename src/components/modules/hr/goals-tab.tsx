@@ -170,7 +170,7 @@ export function GoalsTab() {
                           <span
                             className={`text-[12px] font-mono ${
                               ev.score >= 80
-                                ? "text-green-600"
+                                ? "text-teal-600"
                                 : ev.score >= 60
                                 ? "text-amber-600"
                                 : "text-red-600"

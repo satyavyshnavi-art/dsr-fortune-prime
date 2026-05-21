@@ -204,7 +204,7 @@ export function TaskList({
             <div className="flex items-center gap-1.5">
               <div className="flex-1 h-1.5 bg-slate-100 rounded-full">
                 <div
-                  className="h-1.5 bg-green-500 rounded-full transition-all"
+                  className="h-1.5 bg-emerald-500 rounded-full transition-all"
                   style={{ width: `${pct}%` }}
                 />
               </div>
@@ -261,7 +261,7 @@ export function TaskList({
                 className="text-[12px] gap-2"
                 onClick={() => onStatusChange?.(row.original.id, "completed")}
               >
-                <ArrowUpCircle className="h-3 w-3 text-green-500" />
+                <ArrowUpCircle className="h-3 w-3 text-emerald-500" />
                 Mark Complete
               </DropdownMenuItem>
               <DropdownMenuSeparator />

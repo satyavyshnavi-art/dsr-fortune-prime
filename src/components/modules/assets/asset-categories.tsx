@@ -365,7 +365,7 @@ export function AssetCategories() {
             <Upload className="h-3 w-3 mr-1" />
             Bulk Upload
           </Button>
-          <Button size="sm" className="h-7 text-[11px] px-2.5 bg-green-600 hover:bg-green-700 text-white">
+          <Button size="sm" className="h-7 text-[11px] px-2.5 bg-teal-600 hover:bg-teal-700 text-white">
             <Plus className="h-3 w-3 mr-1" />
             Add Custom Category
           </Button>
@@ -405,7 +405,7 @@ export function AssetCategories() {
                 {/* Status counts */}
                 <div className="flex items-center gap-2 text-[10px] text-slate-400 mb-2">
                   <span>
-                    <span className="font-medium text-green-600">{cat.activeCount}</span> Active
+                    <span className="font-medium text-teal-600">{cat.activeCount}</span> Active
                   </span>
                   <span>
                     <span className="font-medium text-yellow-600">{cat.maintenanceCount}</span> Maint.
@@ -440,7 +440,7 @@ export function AssetCategories() {
                   </Button>
                   <Button
                     size="sm"
-                    className="flex-1 text-[10px] h-6 px-2 bg-green-600 hover:bg-green-700 text-white"
+                    className="flex-1 text-[10px] h-6 px-2 bg-teal-600 hover:bg-teal-700 text-white"
                     onClick={() => openAddModal(cat.id)}
                   >
                     <Plus className="h-3 w-3 mr-0.5" />
@@ -700,7 +700,7 @@ function QRCodeModal({
         <Button
           size="sm"
           onClick={handleCopyInfo}
-          className="bg-green-600 hover:bg-green-700 text-white px-5"
+          className="bg-teal-600 hover:bg-teal-700 text-white px-5"
         >
           {copied ? (
             <>
@@ -717,7 +717,7 @@ function QRCodeModal({
         <Button
           size="sm"
           onClick={handleDownloadQR}
-          className="bg-green-600 hover:bg-green-700 text-white px-5"
+          className="bg-teal-600 hover:bg-teal-700 text-white px-5"
         >
           <Download className="h-4 w-4 mr-1.5" />
           Download QR

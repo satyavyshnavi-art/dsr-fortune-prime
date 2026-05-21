@@ -21,7 +21,7 @@ const DB_TO_STATUS: Record<string, AttendanceRecord["status"]> = {
 
 const STATUS_CYCLE: Array<AttendanceRecord["status"]> = ["P", "A", "L", "WO", ""];
 const STATUS_COLORS: Record<string, string> = {
-  P: "bg-green-500 text-white",
+  P: "bg-emerald-500 text-white",
   A: "bg-red-500 text-white",
   L: "bg-yellow-400 text-white",
   WO: "bg-slate-300 text-slate-600",
@@ -191,7 +191,7 @@ export function CalendarView() {
             {downloading === "pdf" ? "Downloading..." : "Download PDF"}
           </Button>
           <Button
-            className="h-7 text-[11px] px-2.5 gap-1 bg-green-600 hover:bg-green-700 text-white"
+            className="h-7 text-[11px] px-2.5 gap-1 bg-teal-600 hover:bg-teal-700 text-white"
             disabled={downloading === "csv"}
             onClick={() => handleDownload("csv")}
           >
@@ -204,7 +204,7 @@ export function CalendarView() {
       {/* Legend */}
       <div className="flex items-center gap-3">
         {[
-          { status: "P", label: "Present", color: "bg-green-500" },
+          { status: "P", label: "Present", color: "bg-emerald-500" },
           { status: "A", label: "Absent", color: "bg-red-500" },
           { status: "L", label: "Leave", color: "bg-yellow-400" },
           { status: "WO", label: "Week Off", color: "bg-slate-300" },

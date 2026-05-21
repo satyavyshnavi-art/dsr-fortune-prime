@@ -80,7 +80,7 @@ export function AssetSummaryWidget({ data }: { data?: any }) {
             {total > 0 ? (
               <>
                 <div
-                  className="bg-green-500"
+                  className="bg-emerald-500"
                   style={{ width: `${activePercent}%` }}
                 />
                 <div

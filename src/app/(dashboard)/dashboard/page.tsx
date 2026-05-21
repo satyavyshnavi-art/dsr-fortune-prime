@@ -148,7 +148,7 @@ export default function DashboardPage() {
           {/* Date Range Picker */}
           <div className="flex items-center justify-end gap-3">
             {showApplied && (
-              <div className="flex items-center gap-1.5 text-[12px] text-green-600 font-medium animate-in fade-in slide-in-from-right-2 duration-200">
+              <div className="flex items-center gap-1.5 text-[12px] text-teal-600 font-medium animate-in fade-in slide-in-from-right-2 duration-200">
                 <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
                 Updated for {formatDateLabel(appliedRange.start)} – {formatDateLabel(appliedRange.end)}
               </div>
@@ -156,10 +156,10 @@ export default function DashboardPage() {
 
             <div
               className={`inline-flex items-center bg-white border rounded-full shadow-sm px-4 h-10 transition-colors ${
-                hasUnappliedChanges ? "border-[#10b981]/40 ring-1 ring-[#10b981]/10" : "border-slate-200"
+                hasUnappliedChanges ? "border-teal-400/40 ring-1 ring-teal-400/10" : "border-slate-200"
               }`}
             >
-              <Calendar className="h-4 w-4 text-[#10b981] mr-2 shrink-0" aria-hidden="true" />
+              <Calendar className="h-4 w-4 text-teal-600 mr-2 shrink-0" aria-hidden="true" />
               <input
                 type="date"
                 value={startDate}
@@ -182,10 +182,10 @@ export default function DashboardPage() {
               disabled={isLoading}
               className={`flex items-center gap-1.5 h-10 px-5 rounded-full text-[13px] font-semibold transition-all shadow-sm ${
                 isLoading
-                  ? "bg-[#34d399] text-white cursor-wait"
+                  ? "bg-teal-500 text-white cursor-wait"
                   : hasUnappliedChanges
-                  ? "bg-[#10b981] text-white hover:bg-[#059669] active:bg-[#047857] ring-2 ring-[#10b981]/20"
-                  : "bg-[#10b981] text-white hover:bg-[#059669] active:bg-[#047857]"
+                  ? "bg-teal-600 text-white hover:bg-teal-700 active:bg-teal-800 ring-2 ring-teal-400/20"
+                  : "bg-teal-600 text-white hover:bg-teal-700 active:bg-teal-800"
               }`}
             >
               {isLoading ? (

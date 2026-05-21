@@ -6,7 +6,7 @@ import { kpiData, categorySummaries, type KPIStatus } from "./mock-data";
 function StatusDot({ status }: { status: KPIStatus }) {
   const colorClass =
     status === "green"
-      ? "bg-green-500"
+      ? "bg-emerald-500"
       : status === "red"
         ? "bg-red-500"
         : "bg-blue-500";
@@ -52,7 +52,7 @@ function CategoryBar({
 }) {
   const barColor =
     percentage >= 80
-      ? "bg-green-500"
+      ? "bg-emerald-500"
       : percentage >= 30
         ? "bg-blue-500"
         : percentage > 0

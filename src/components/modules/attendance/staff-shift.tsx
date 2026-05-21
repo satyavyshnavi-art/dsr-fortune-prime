@@ -248,7 +248,7 @@ export function StaffShift() {
             Download PDF
           </Button>
           <Button
-            className="h-7 text-[11px] px-2.5 gap-1 bg-green-600 hover:bg-green-700 text-white"
+            className="h-7 text-[11px] px-2.5 gap-1 bg-teal-600 hover:bg-teal-700 text-white"
             onClick={() => {
               const rows = filteredEmployees.map((emp: Employee) => ({
                 "Role": emp.designation,
@@ -376,7 +376,7 @@ function StaffRow({
           title={hasSmartcard ? "Has smartcard - click to remove" : "No smartcard - click to add"}
         >
           {hasSmartcard ? (
-            <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
+            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
           ) : (
             <span className="text-[11px] text-slate-300">-</span>
           )}
@@ -405,7 +405,7 @@ function StaffRow({
         </Select>
       </td>
       <td className="px-3 py-2 text-center">
-        <CheckCircle2 className="h-3.5 w-3.5 text-green-500 mx-auto" />
+        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 mx-auto" />
       </td>
     </tr>
   );

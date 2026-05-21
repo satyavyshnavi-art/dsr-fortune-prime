@@ -513,7 +513,7 @@ export function RolesPermissions() {
                       <td key={action} className="text-center px-2 py-1.5">
                         <span
                           className={`text-[10px] font-medium ${
-                            count > 0 ? "text-green-600" : "text-slate-300"
+                            count > 0 ? "text-teal-600" : "text-slate-300"
                           }`}
                         >
                           {count}/{roles.length}

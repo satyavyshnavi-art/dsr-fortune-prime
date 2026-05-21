@@ -23,7 +23,7 @@ const RATING_CYCLE: Rating[] = ["", "complete", "incomplete", "not_done"];
 
 const RATING_STYLES: Record<Rating, { bg: string; border: string }> = {
   "":           { bg: "bg-white",     border: "border-slate-300" },
-  complete:     { bg: "bg-green-500", border: "border-green-500" },
+  complete:     { bg: "bg-emerald-500", border: "border-emerald-500" },
   incomplete:   { bg: "bg-blue-500",  border: "border-blue-500" },
   not_done:     { bg: "bg-red-500",   border: "border-red-500" },
 };
@@ -90,7 +90,7 @@ const MODE_CONFIG: Record<ViewMode, {
 };
 
 const LEGEND = [
-  { color: "bg-green-500", icon: "check", label: "Complete" },
+  { color: "bg-emerald-500", icon: "check", label: "Complete" },
   { color: "bg-blue-500", icon: "dash", label: "Incomplete" },
   { color: "bg-red-500", icon: "x", label: "Not Done" },
   { color: "bg-slate-300", icon: "dash", label: "Not Filled" },
@@ -131,7 +131,7 @@ export function HygieneTab() {
           <Calendar className="h-4 w-4 text-blue-600" />
           <h3 className="text-[15px] font-semibold text-slate-900">Daily Hygiene Calendar</h3>
         </div>
-        <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white h-8 text-[12px] px-4 rounded-lg" onClick={() => toast.success("Exporting hygiene report...")}>
+        <Button size="sm" className="bg-teal-600 hover:bg-teal-700 text-white h-8 text-[12px] px-4 rounded-lg" onClick={() => toast.success("Exporting hygiene report...")}>
           <FileText className="h-3.5 w-3.5 mr-1.5" />
           Export Report
         </Button>

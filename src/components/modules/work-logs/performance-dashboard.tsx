@@ -140,7 +140,7 @@ export function PerformanceDashboard() {
                         <td className="px-3 py-2 text-right text-slate-600">
                           {r.tasksAssigned ?? 0}
                         </td>
-                        <td className="px-3 py-2 text-right text-green-600">
+                        <td className="px-3 py-2 text-right text-teal-600">
                           {r.tasksCompleted ?? 0}
                         </td>
                         <td className="px-3 py-2 text-right text-red-600">

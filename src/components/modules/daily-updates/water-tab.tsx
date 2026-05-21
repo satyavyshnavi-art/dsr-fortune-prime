@@ -413,7 +413,7 @@ export function WaterTab() {
                       <td className="py-3.5 px-3 text-right text-[13px] text-slate-500">
                         {parseFloat(r.currentLiters || "0").toLocaleString()}
                       </td>
-                      <td className={`py-3.5 px-3 text-right text-[13px] font-medium ${consumed < 0 ? "text-red-500" : "text-green-600"}`}>
+                      <td className={`py-3.5 px-3 text-right text-[13px] font-medium ${consumed < 0 ? "text-red-500" : "text-teal-600"}`}>
                         {consumed.toLocaleString()} L
                       </td>
                       <td className="py-3.5 px-3 text-right text-[13px] text-slate-500">

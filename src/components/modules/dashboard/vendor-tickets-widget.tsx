@@ -104,7 +104,7 @@ export function VendorTicketsWidget({ data }: { data?: any }) {
             <p className="text-[9px] text-slate-400 mt-0.5">Total Tickets</p>
           </div>
           <div className="text-center">
-            <div className="flex items-center justify-center gap-1 text-green-600">
+            <div className="flex items-center justify-center gap-1 text-teal-600">
               <CheckCircle2 className="h-3 w-3" />
               <span className="text-[13px] font-bold">{resolutionRate}%</span>
             </div>
