@@ -72,8 +72,8 @@ export function TaskForm({ open, onOpenChange, task, facilityId, onSave, onSaved
       setCategory(task.category);
       setFrequency(task.frequency);
       setChecklistItems(
-        task.checklist.length > 0
-          ? task.checklist.map((c) => c.label)
+        (task.checklist ?? []).length > 0
+          ? (task.checklist ?? []).map((c) => c.label)
           : [""]
       );
     } else {

@@ -58,10 +58,19 @@ export default function TaskManagementPage() {
   });
 
   // Single source of truth for tasks across all tabs.
+  // API responses don't include the related arrays (checklist/comments/
+  // escalations live in separate tables); normalize so the UI can rely
+  // on them existing.
   const tasks: Task[] = useMemo(() => {
-    if (apiError) return MOCK_TASKS;
-    if (!apiTasks || apiTasks.length === 0) return MOCK_TASKS;
-    return apiTasks;
+    const source =
+      apiError || !apiTasks || apiTasks.length === 0 ? MOCK_TASKS : apiTasks;
+    return source.map((t) => ({
+      ...t,
+      checklist: t.checklist ?? [],
+      comments: t.comments ?? [],
+      escalations: t.escalations ?? [],
+      attachments: t.attachments ?? [],
+    }));
   }, [apiTasks, apiError]);
 
   // Fetch first facility once for create POSTs that require a facilityId UUID.

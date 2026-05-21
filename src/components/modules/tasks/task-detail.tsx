@@ -69,8 +69,9 @@ export function TaskDetail({
 
   if (!task) return null;
 
-  const checklist = task.checklist;
-  const comments = task.comments;
+  const checklist = task.checklist ?? [];
+  const comments = task.comments ?? [];
+  const escalations = task.escalations ?? [];
   const checkedCount = checklist.filter((c) => c.isChecked).length;
   const totalChecklist = checklist.length;
   const progressPct = totalChecklist > 0 ? Math.round((checkedCount / totalChecklist) * 100) : 0;
@@ -319,7 +320,7 @@ export function TaskDetail({
           </div>
 
           {/* Escalation History */}
-          {task.escalations.length > 0 && (
+          {escalations.length > 0 && (
             <>
               <Separator />
               <div>
@@ -328,7 +329,7 @@ export function TaskDetail({
                   Escalation History
                 </h4>
                 <div className="space-y-2">
-                  {task.escalations.map((esc) => (
+                  {escalations.map((esc) => (
                     <div key={esc.id} className="bg-amber-50/60 border border-amber-100 rounded-lg px-3 py-2">
                       <div className="flex items-center gap-2 mb-1">
                         <Clock className="h-3 w-3 text-amber-500" />
