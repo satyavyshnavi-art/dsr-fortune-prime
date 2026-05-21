@@ -210,7 +210,7 @@ export function TaskForm({ open, onOpenChange, task, facilityId, onSave, onSaved
           {!isEditing && (
             <div className="space-y-1">
               <Label className="text-[11px] text-slate-500">Pre-fill from Template</Label>
-              <Select value={selectedTemplate} onValueChange={handleTemplateSelect}>
+              <Select value={selectedTemplate} onValueChange={(v) => handleTemplateSelect(v ?? "")}>
                 <SelectTrigger className="h-9 text-[13px] rounded-lg">
                   <SelectValue placeholder="Select a template..." />
                 </SelectTrigger>
@@ -263,7 +263,7 @@ export function TaskForm({ open, onOpenChange, task, facilityId, onSave, onSaved
               <Select
                 value={department}
                 onValueChange={(v) => {
-                  setDepartment(v);
+                  setDepartment(v ?? "");
                   if (errors.department) setErrors((prev) => { const n = { ...prev }; delete n.department; return n; });
                 }}
               >
@@ -297,7 +297,7 @@ export function TaskForm({ open, onOpenChange, task, facilityId, onSave, onSaved
             {/* Source */}
             <div className="space-y-1">
               <Label className="text-[11px] text-slate-500">Source</Label>
-              <Select value={source} onValueChange={setSource}>
+              <Select value={source} onValueChange={(v) => setSource(v ?? "")}>
                 <SelectTrigger className="h-9 text-[13px] rounded-lg">
                   <SelectValue placeholder="Select..." />
                 </SelectTrigger>
@@ -329,7 +329,7 @@ export function TaskForm({ open, onOpenChange, task, facilityId, onSave, onSaved
             {/* Assigned To */}
             <div className="space-y-1">
               <Label className="text-[11px] text-slate-500">Assigned To</Label>
-              <Select value={assignedTo} onValueChange={setAssignedTo}>
+              <Select value={assignedTo} onValueChange={(v) => setAssignedTo(v ?? "")}>
                 <SelectTrigger className="h-9 text-[13px] rounded-lg">
                   <SelectValue placeholder="Select employee..." />
                 </SelectTrigger>

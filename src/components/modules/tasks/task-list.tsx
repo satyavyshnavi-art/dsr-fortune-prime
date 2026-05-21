@@ -228,10 +228,11 @@ export function TaskList({
             <Eye className="h-3 w-3 text-blue-500" />
           </Button>
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-7 w-7">
-                <MoreHorizontal className="h-3 w-3 text-slate-400" />
-              </Button>
+            <DropdownMenuTrigger
+              className="inline-flex h-7 w-7 items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+              aria-label="Open actions"
+            >
+              <MoreHorizontal className="h-3 w-3" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-40">
               <DropdownMenuItem
@@ -282,7 +283,7 @@ export function TaskList({
     <div className="space-y-3">
       {/* Filter bar */}
       <div className="flex items-center gap-2 flex-wrap">
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
+        <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v ?? "all")}>
           <SelectTrigger className="h-8 w-[140px] text-[12px] rounded-lg">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
@@ -294,7 +295,7 @@ export function TaskList({
           </SelectContent>
         </Select>
 
-        <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+        <Select value={priorityFilter} onValueChange={(v) => setPriorityFilter(v ?? "all")}>
           <SelectTrigger className="h-8 w-[130px] text-[12px] rounded-lg">
             <SelectValue placeholder="Priority" />
           </SelectTrigger>
@@ -306,7 +307,7 @@ export function TaskList({
           </SelectContent>
         </Select>
 
-        <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
+        <Select value={departmentFilter} onValueChange={(v) => setDepartmentFilter(v ?? "all")}>
           <SelectTrigger className="h-8 w-[150px] text-[12px] rounded-lg">
             <SelectValue placeholder="Department" />
           </SelectTrigger>
