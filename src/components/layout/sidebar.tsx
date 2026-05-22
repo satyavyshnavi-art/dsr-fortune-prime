@@ -100,25 +100,19 @@ export function Sidebar() {
           mobileOpen && "!flex fixed inset-y-0 left-0 z-50 w-[240px]"
         )}
       >
-        {/* Logo — Newsreader wordmark with a touch of green on the leaf tile */}
-        <div className="flex items-center justify-between px-5 py-6 border-b border-[var(--ink)]">
+        {/* Logo */}
+        <div className="flex items-center justify-between px-5 py-5 border-b border-[var(--rule)]">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="flex h-10 w-10 items-center justify-center shrink-0 bg-gradient-to-br from-emerald-400 to-teal-500 shadow-sm">
+            <div className="flex h-10 w-10 items-center justify-center shrink-0 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 shadow-sm">
               <Leaf className="h-5 w-5 text-white" aria-hidden="true" strokeWidth={1.75} />
             </div>
             {!collapsed && (
-              <div className="min-w-0 leading-none">
-                <span
-                  className="text-[22px] font-semibold tracking-tight text-[var(--ink)] block leading-none"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
+              <div className="min-w-0 leading-tight">
+                <span className="text-[15px] font-bold tracking-tight text-[var(--ink)] block leading-tight">
                   DSR Fortune
                 </span>
-                <p
-                  className="text-[10px] uppercase tracking-[0.16em] text-[var(--ink-faint)] mt-2 font-semibold"
-                  style={{ fontFamily: "var(--font-mono)" }}
-                >
-                  Facility &nbsp;/&nbsp; Spec
+                <p className="text-[11px] text-[var(--ink-faint)] mt-0.5 font-medium">
+                  Facility Management
                 </p>
               </div>
             )}
@@ -134,47 +128,35 @@ export function Sidebar() {
           )}
         </div>
 
-        {/* Navigation — numbered, spec-sheet TOC */}
-        <nav aria-label="Main navigation" className="flex-1 overflow-y-auto py-4 px-3 space-y-0">
-          {navItems.map((item, idx) => {
+        {/* Navigation */}
+        <nav aria-label="Main navigation" className="flex-1 overflow-y-auto py-3 px-3 space-y-0.5">
+          {navItems.map((item) => {
             const isActive = pathname.startsWith(item.href);
-            const num = String(idx + 1).padStart(2, "0");
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "group relative flex items-center gap-3 pl-3 pr-2 py-2 text-[13px] font-medium transition-all uppercase tracking-[0.04em]",
+                  "group relative flex items-center gap-3 px-3 py-2 rounded-lg text-[13.5px] font-medium transition-all",
                   isActive
-                    ? "text-[var(--ink)] bg-gradient-to-r from-emerald-50 to-transparent"
+                    ? "text-[var(--ink)] bg-gradient-to-r from-emerald-100/80 to-emerald-50/40"
                     : "text-[var(--ink-muted)] hover:text-[var(--ink)] hover:bg-emerald-50/40"
                 )}
-                style={{ fontFamily: "var(--font-mono)" }}
                 title={collapsed ? item.label : undefined}
               >
                 {isActive && (
                   <span
-                    className="absolute left-0 top-1/2 -translate-y-1/2 h-[60%] w-[2px] bg-gradient-to-b from-emerald-400 to-teal-500"
+                    className="absolute left-0 top-1/2 -translate-y-1/2 h-[60%] w-[2.5px] rounded-r bg-gradient-to-b from-emerald-400 to-teal-500"
                     aria-hidden="true"
                   />
                 )}
-                {!collapsed && (
-                  <span
-                    className={cn(
-                      "text-[11px] shrink-0 w-5",
-                      isActive ? "text-emerald-600" : "text-[var(--ink-faint)]"
-                    )}
-                  >
-                    {num}
-                  </span>
-                )}
                 <item.Icon
                   className={cn(
-                    "h-[15px] w-[15px] shrink-0 transition-colors",
+                    "h-[16px] w-[16px] shrink-0 transition-colors",
                     isActive ? "text-emerald-600" : "text-[var(--ink-faint)] group-hover:text-[var(--ink-muted)]"
                   )}
                   aria-hidden="true"
-                  strokeWidth={1.5}
+                  strokeWidth={1.75}
                 />
                 {!collapsed && <span className="truncate">{item.label}</span>}
               </Link>
@@ -189,24 +171,15 @@ export function Sidebar() {
               "flex items-center gap-3 px-4 py-3",
               collapsed ? "justify-center" : ""
             )}>
-              <div
-                className="flex h-9 w-9 items-center justify-center text-white text-[11px] font-semibold shrink-0 tracking-[0.05em] bg-gradient-to-br from-emerald-400 to-teal-500"
-                style={{ fontFamily: "var(--font-mono)" }}
-              >
+              <div className="flex h-9 w-9 items-center justify-center text-white text-[12px] font-semibold shrink-0 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500">
                 {user.initials}
               </div>
               {!collapsed && (
                 <div className="flex-1 min-w-0">
-                  <p
-                    className="text-[13px] font-semibold text-[var(--ink)] truncate uppercase tracking-[0.04em]"
-                    style={{ fontFamily: "var(--font-mono)" }}
-                  >
+                  <p className="text-[13px] font-semibold text-[var(--ink)] truncate">
                     {user.name}
                   </p>
-                  <p
-                    className="text-[10px] uppercase tracking-[0.14em] text-[var(--ink-faint)] truncate mt-1"
-                    style={{ fontFamily: "var(--font-mono)" }}
-                  >
+                  <p className="text-[11px] text-[var(--ink-faint)] truncate mt-0.5">
                     {user.role}
                   </p>
                 </div>
@@ -217,7 +190,7 @@ export function Sidebar() {
           <button
             onClick={handleLogout}
             className={cn(
-              "flex items-center gap-3 w-full px-4 py-3 text-[var(--ink-faint)] hover:text-[var(--redline)] hover:bg-[var(--redline-soft)]/40 transition-colors text-[12px] uppercase tracking-[0.1em] font-medium",
+              "flex items-center gap-3 w-full px-4 py-2.5 text-[var(--ink-faint)] hover:text-[var(--redline)] hover:bg-[var(--redline-soft)]/40 transition-colors text-[12.5px] font-medium",
               collapsed ? "justify-center" : ""
             )}
           >

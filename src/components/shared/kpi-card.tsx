@@ -36,8 +36,8 @@ const trendStyles: Record<Trend, string> = {
 };
 
 const trendGlyph: Record<Trend, string> = {
-  up: "▲",
-  down: "▼",
+  up: "↑",
+  down: "↓",
   neutral: "—",
 };
 
@@ -53,54 +53,38 @@ export function KPICard({
   return (
     <div
       className={cn(
-        "spec-card bg-[var(--vellum)] border border-[var(--ink)] p-5 pt-7",
+        "bg-[var(--vellum)] border border-[var(--rule)] rounded-lg p-5 transition-colors hover:border-[var(--ink-faint)]/40",
         className
       )}
       role="region"
       aria-label={`${title}: ${value}`}
     >
-      <div className="flex items-start justify-between gap-3 mb-3">
-        <p
-          className="text-[12px] font-semibold uppercase tracking-[0.1em] text-[var(--ink-muted)]"
-          style={{ fontFamily: "var(--font-mono)" }}
-        >
-          {title}
-        </p>
+      <div className="flex items-start justify-between gap-3 mb-4">
+        <p className="text-[12px] font-medium text-[var(--ink-muted)]">{title}</p>
         {Icon && (
-          <Icon
-            className="h-4 w-4 text-[var(--ink)] shrink-0"
-            aria-hidden="true"
-            strokeWidth={1.25}
-          />
+          <div className="h-9 w-9 rounded-lg flex items-center justify-center bg-[var(--mark-soft)] text-[var(--mark)] shrink-0">
+            <Icon className="h-4 w-4" aria-hidden="true" strokeWidth={2} />
+          </div>
         )}
       </div>
 
-      <p
-        className="text-[38px] font-semibold leading-none text-[var(--ink)] tabular-nums"
-        style={{ fontFamily: "var(--font-display)" }}
-      >
+      <p className="text-[28px] font-bold leading-none text-[var(--ink)] tabular-nums">
         {value}
       </p>
 
-      <div className="mt-4 pt-3 border-t border-[var(--rule)] flex items-center justify-between gap-2 min-h-[20px]">
-        {subtitle ? (
-          <span
-            className="text-[11px] uppercase tracking-[0.08em] text-[var(--ink-faint)] truncate"
-            style={{ fontFamily: "var(--font-mono)" }}
-          >
-            {subtitle}
-          </span>
-        ) : <span />}
+      <div className="mt-3 flex items-center gap-2 min-h-[18px]">
         {trend && trendValue && (
           <span
             className={cn(
-              "text-[12px] font-semibold tabular-nums shrink-0",
+              "text-[12px] font-semibold tabular-nums",
               trendStyles[trend]
             )}
-            style={{ fontFamily: "var(--font-mono)" }}
           >
             {trendGlyph[trend]} {trendValue}
           </span>
+        )}
+        {subtitle && (
+          <span className="text-[12px] text-[var(--ink-faint)] truncate">{subtitle}</span>
         )}
       </div>
     </div>

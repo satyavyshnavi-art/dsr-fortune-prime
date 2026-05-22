@@ -10,26 +10,14 @@ interface StatusBadgeProps {
   className?: string;
 }
 
-/**
- * Specification Sheet status tag.
- *
- * Format: GLYPH SP LABEL
- *   ✓ COMPLETED
- *   ▲ OVERDUE
- *   ◆ IN PROGRESS
- *   ◯ PENDING
- *
- * No pill. No background. The glyph carries the meaning; the label is
- * monospace uppercase with track. Reads like a legend in a technical drawing.
- */
-
-const variantStyle: Record<BadgeVariant, { color: string; glyph: string }> = {
-  success:  { color: "text-[var(--seal)]",      glyph: "✓" },
-  warning:  { color: "text-[var(--sodium)]",    glyph: "◐" },
-  danger:   { color: "text-[var(--redline)]",   glyph: "▲" },
-  info:     { color: "text-[var(--mark)]",      glyph: "◆" },
-  neutral:  { color: "text-[var(--ink-muted)]", glyph: "◯" },
-  purple:   { color: "text-[#6b4f8c]",          glyph: "◇" },
+// Soft pill — bg-50 with bg-700 text. No border, no special font.
+const variantStyles: Record<BadgeVariant, string> = {
+  success: "bg-emerald-100 text-emerald-700",
+  warning: "bg-amber-100 text-amber-700",
+  danger: "bg-rose-100 text-rose-700",
+  info: "bg-sky-100 text-sky-700",
+  neutral: "bg-slate-100 text-slate-600",
+  purple: "bg-violet-100 text-violet-700",
 };
 
 const autoVariant: Record<string, BadgeVariant> = {
@@ -60,21 +48,18 @@ const autoVariant: Record<string, BadgeVariant> = {
 
 export function StatusBadge({ status, variant, className }: StatusBadgeProps) {
   const resolvedVariant = variant || autoVariant[status.toLowerCase()] || "neutral";
-  const { color, glyph } = variantStyle[resolvedVariant];
-  const displayLabel = status.replace(/_/g, " ");
+  const displayLabel = status.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
 
   return (
     <span
       className={cn(
-        "inline-flex items-baseline gap-1.5 whitespace-nowrap text-[11px] font-semibold uppercase tracking-[0.08em]",
-        color,
+        "inline-flex items-center text-[11.5px] font-medium px-2 py-0.5 rounded-full whitespace-nowrap",
+        variantStyles[resolvedVariant],
         className
       )}
-      style={{ fontFamily: "var(--font-mono)" }}
       aria-label={`Status: ${displayLabel}`}
     >
-      <span aria-hidden="true">{glyph}</span>
-      <span>{displayLabel}</span>
+      {displayLabel}
     </span>
   );
 }

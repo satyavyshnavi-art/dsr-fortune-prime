@@ -1,25 +1,20 @@
 import type { Metadata } from "next";
-import { Newsreader, JetBrains_Mono } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import { ToasterProvider } from "@/components/toaster-provider";
 import "./globals.css";
 
-// Specification Sheet pairing — two fonts, no third:
-// - Newsreader (display italic) for hero numbers, page titles
-// - JetBrains Mono for EVERYTHING ELSE: body, labels, nav, data, status
-//
-// Mono-everywhere is the signature move. Most dashboards use sans for body;
-// this one reads like a building's technical document because we don't.
-const display = Newsreader({
-  variable: "--font-display",
+// Clean, neat type — Geist Sans for everything; Geist Mono available for
+// tabular numbers when needed. No serif, no italic-as-design.
+const sans = Geist({
+  variable: "--font-sans",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  style: ["normal", "italic"],
+  weight: ["300", "400", "500", "600", "700"],
   display: "swap",
 });
-const mono = JetBrains_Mono({
+const mono = Geist_Mono({
   variable: "--font-mono",
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["400", "500"],
   display: "swap",
 });
 
@@ -36,9 +31,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${display.variable} ${mono.variable} h-full antialiased`}
+      className={`${sans.variable} ${mono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col font-mono bg-[var(--parchment)] text-[var(--ink)]">
+      <body className="min-h-full flex flex-col font-sans bg-[var(--parchment)] text-[var(--ink)]">
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-[var(--mark)] focus:text-white focus:rounded focus:text-sm focus:font-medium"
