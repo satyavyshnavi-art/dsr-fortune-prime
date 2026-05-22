@@ -10,14 +10,31 @@ interface StatusBadgeProps {
   className?: string;
 }
 
-// Softer pill — no border, lighter bg. Matches reference dashboard chips.
-const variantStyles: Record<BadgeVariant, string> = {
-  success: "bg-emerald-100 text-emerald-700",
-  warning: "bg-amber-100 text-amber-700",
-  danger: "bg-rose-100 text-rose-700",
-  info: "bg-sky-100 text-sky-700",
-  neutral: "bg-slate-100 text-slate-600",
-  purple: "bg-violet-100 text-violet-700",
+/**
+ * Editorial status tag: a single colored dot + uppercase Manrope label.
+ * No pill bg, no border — the dot carries the meaning, the label reads as type.
+ *
+ * Reads like a legend entry in a blueprint or an inspection log:
+ *   ●  IN PROGRESS
+ *   ●  COMPLETED
+ *   ●  OVERDUE
+ */
+const variantDot: Record<BadgeVariant, string> = {
+  success: "bg-[var(--seal)]",
+  warning: "bg-[var(--sodium)]",
+  danger: "bg-[var(--redline)]",
+  info: "bg-[var(--mark)]",
+  neutral: "bg-[var(--ink-faint)]",
+  purple: "bg-[#6b4f8c]", // editorial plum — used sparingly
+};
+
+const variantText: Record<BadgeVariant, string> = {
+  success: "text-[var(--seal)]",
+  warning: "text-[var(--sodium)]",
+  danger: "text-[var(--redline)]",
+  info: "text-[var(--mark)]",
+  neutral: "text-[var(--ink-muted)]",
+  purple: "text-[#6b4f8c]",
 };
 
 const autoVariant: Record<string, BadgeVariant> = {
@@ -48,18 +65,28 @@ const autoVariant: Record<string, BadgeVariant> = {
 
 export function StatusBadge({ status, variant, className }: StatusBadgeProps) {
   const resolvedVariant = variant || autoVariant[status.toLowerCase()] || "neutral";
-  const displayLabel = status.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
+  const displayLabel = status.replace(/_/g, " ");
 
   return (
     <span
       className={cn(
-        "inline-flex items-center text-[11px] font-medium px-2 py-0.5 rounded-full whitespace-nowrap",
-        variantStyles[resolvedVariant],
+        "inline-flex items-center gap-1.5 whitespace-nowrap",
         className
       )}
       aria-label={`Status: ${displayLabel}`}
     >
-      {displayLabel}
+      <span
+        className={cn("inline-block h-1.5 w-1.5 rounded-full shrink-0", variantDot[resolvedVariant])}
+        aria-hidden="true"
+      />
+      <span
+        className={cn(
+          "text-[10px] font-medium uppercase tracking-[0.1em]",
+          variantText[resolvedVariant]
+        )}
+      >
+        {displayLabel}
+      </span>
     </span>
   );
 }

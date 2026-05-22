@@ -89,19 +89,50 @@ export const radius = {
 } as const;
 
 // ──────────────────────────────────────────────────────────────────────────────
-// ACTION COLORS — three semantic slots (NOT raw color variants)
+// ACTION COLORS — three semantic slots
 // ──────────────────────────────────────────────────────────────────────────────
 //
-// Primary is teal-600 — not blue, not green. Green is banned across the app
-// (no more bg-green-* save buttons). Reference: 2026-05-21 design direction.
+// EDITORIAL ARCHITECTURAL — DSR Fortune Prime, 2026-05-22.
+// Primary is the single brand accent: blueprint navy (--mark / #1a3a5c).
+// Destructive is burgundy redline. Subtle is parchment/ink. NO TEAL, NO PASTEL.
 
 export const action = {
-  /** Create, save, submit, primary affordance */
-  primary: "bg-teal-600 hover:bg-teal-700 text-white",
-  /** Delete, cancel-with-data-loss, irreversible negative */
-  destructive: "bg-rose-600 hover:bg-rose-700 text-white",
+  /** Create, save, submit, primary affordance — blueprint navy */
+  primary: "bg-[var(--mark)] hover:bg-[#142e48] text-white",
+  /** Delete, cancel-with-data-loss, irreversible negative — burgundy redline */
+  destructive: "bg-[var(--redline)] hover:bg-[#6e1f1f] text-white",
   /** Secondary actions, neutral confirmations */
-  subtle: "bg-slate-100 hover:bg-slate-200 text-slate-700",
+  subtle: "bg-[var(--rule-soft)] hover:bg-[var(--rule)] text-[var(--ink)]",
+} as const;
+
+// ──────────────────────────────────────────────────────────────────────────────
+// EDITORIAL TYPE — three voices
+// ──────────────────────────────────────────────────────────────────────────────
+
+export const type = {
+  /** Cormorant Garamond — for page titles, hero numbers in serif treatment */
+  display: "font-display",
+  /** Manrope — body, labels, navigation (the workhorse) */
+  sans: "font-sans",
+  /** JetBrains Mono — meter readings, IDs, all data */
+  mono: "font-mono",
+} as const;
+
+// ──────────────────────────────────────────────────────────────────────────────
+// INK SCALE — text hierarchy (replaces the slate.* names)
+// ──────────────────────────────────────────────────────────────────────────────
+
+export const ink = {
+  primary: "text-[var(--ink)]",
+  muted: "text-[var(--ink-muted)]",
+  faint: "text-[var(--ink-faint)]",
+} as const;
+
+export const surface = {
+  page: "bg-[var(--parchment)]",
+  card: "bg-[var(--vellum)]",
+  rule: "border-[var(--rule)]",
+  ruleSoft: "border-[var(--rule-soft)]",
 } as const;
 
 // ──────────────────────────────────────────────────────────────────────────────

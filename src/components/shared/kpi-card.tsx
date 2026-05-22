@@ -2,39 +2,48 @@
 
 import { cn } from "@/lib/utils";
 import { type LucideIcon } from "lucide-react";
-import { accent, type AccentToken } from "@/styles/tokens";
+
+/**
+ * Editorial Architectural KPI card.
+ *
+ * No colored icon tile. No pastel accents. Each card is a vellum surface with
+ * a single warm rule above the data — like a column in a balance sheet.
+ *
+ * Structure (top → bottom):
+ *   1. Eyebrow label (uppercase Manrope, tracking, ink-muted)
+ *   2. Hero number (large JetBrains Mono, ink, tabular)
+ *   3. Sub-text (Manrope, ink-faint)
+ *   4. Optional trend chip (text-only, monospace)
+ *
+ * The icon, if provided, sits TOP-RIGHT as a quiet stroked glyph in ink-faint —
+ * never as a colored tile. Color carries meaning only on the trend chip.
+ */
+
+type Trend = "up" | "down" | "neutral";
 
 interface KPICardProps {
   title: string;
   value: string | number;
   subtitle?: string;
   icon?: LucideIcon;
-  trend?: "up" | "down" | "neutral";
+  trend?: Trend;
   trendValue?: string;
-  /**
-   * Visual accent. Legacy values ("blue", "green", "red", "yellow", "slate")
-   * are remapped to the new pastel accents for backward compatibility.
-   */
-  color?: AccentToken | "blue" | "green" | "red" | "yellow" | "slate";
+  /** Kept for backward-compat with old call sites; ignored in editorial layout. */
+  color?: string;
   className?: string;
 }
 
-// Map legacy color names to the new accent palette so existing usages keep
-// working without per-file edits. Green collapses to mint per the 2026-05-21
-// direction (no more green saves / no more green KPIs).
-const legacyMap: Record<string, AccentToken> = {
-  blue: "sky",
-  green: "mint",
-  red: "coral",
-  yellow: "peach",
-  slate: "lavender",
+const trendStyles: Record<Trend, string> = {
+  up: "text-[var(--seal)]",
+  down: "text-[var(--redline)]",
+  neutral: "text-[var(--ink-faint)]",
 };
 
-function resolveAccent(color: KPICardProps["color"]): AccentToken {
-  if (!color) return "mint";
-  if (color in accent) return color as AccentToken;
-  return legacyMap[color] ?? "mint";
-}
+const trendGlyph: Record<Trend, string> = {
+  up: "↑",
+  down: "↓",
+  neutral: "–",
+};
 
 export function KPICard({
   title,
@@ -43,45 +52,51 @@ export function KPICard({
   icon: Icon,
   trend,
   trendValue,
-  color,
   className,
 }: KPICardProps) {
-  const a = accent[resolveAccent(color)];
-
   return (
     <div
       className={cn(
-        "rounded-2xl border border-slate-100 bg-white p-5 transition-shadow hover:shadow-sm",
+        "bg-[var(--vellum)] border border-[var(--rule)] rounded-md p-5 transition-colors hover:border-[var(--ink-faint)]/40",
         className
       )}
       role="region"
       aria-label={`${title}: ${value}`}
     >
       <div className="flex items-start justify-between gap-3 mb-4">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--ink-muted)]">
+          {title}
+        </p>
         {Icon && (
-          <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center shrink-0", a.tile)}>
-            <Icon className="h-5 w-5" aria-hidden="true" />
-          </div>
+          <Icon className="h-4 w-4 text-[var(--ink-faint)] shrink-0" aria-hidden="true" strokeWidth={1.5} />
         )}
+      </div>
+
+      <p
+        className="font-mono text-[30px] font-medium leading-none text-[var(--ink)] tabular-nums"
+        style={{ fontFamily: "var(--font-mono)" }}
+      >
+        {value}
+      </p>
+
+      <div className="mt-3 flex items-center gap-3 min-h-[16px]">
         {trend && trendValue && (
           <span
             className={cn(
-              "text-[11px] font-medium px-2 py-0.5 rounded-full",
-              a.pill
+              "font-mono text-[11px] font-medium tabular-nums",
+              trendStyles[trend]
             )}
+            style={{ fontFamily: "var(--font-mono)" }}
           >
-            {trend === "up" ? "↗ " : trend === "down" ? "↘ " : ""}
-            {trendValue}
+            {trendGlyph[trend]} {trendValue}
+          </span>
+        )}
+        {subtitle && (
+          <span className="text-[11px] text-[var(--ink-faint)] truncate">
+            {subtitle}
           </span>
         )}
       </div>
-      <p className="text-[12px] font-medium text-slate-500 mb-1">{title}</p>
-      <p className="text-[26px] font-bold text-slate-900 leading-none mb-2">
-        {value}
-      </p>
-      {subtitle && (
-        <p className="text-[11px] text-slate-400">{subtitle}</p>
-      )}
     </div>
   );
 }

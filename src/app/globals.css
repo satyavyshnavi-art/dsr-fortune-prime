@@ -7,9 +7,10 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
-  --font-heading: var(--font-sans);
+  --font-sans: var(--font-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-display: var(--font-display), Georgia, "Times New Roman", serif;
+  --font-heading: var(--font-display);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -49,39 +50,58 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  /* Revolutionare — fresh teal-green brand */
-  --primary: #10b981;
+  /* ──────────────────────────────────────────────────────────────────
+   * Editorial Architectural palette — DSR Fortune Prime
+   * Cream parchment surfaces, pure ink type, single blueprint-navy accent.
+   * ────────────────────────────────────────────────────────────────── */
+  --ink: #111111;            /* Primary text — pure ink */
+  --ink-muted: #5b5d5e;      /* Secondary */
+  --ink-faint: #999b9d;      /* Tertiary, placeholders */
+  --rule: #e8e6e2;           /* Borders — warm grey, not cool slate */
+  --rule-soft: #f1efea;      /* Subtle dividers */
+  --parchment: #faf8f4;      /* Page background — warm cream */
+  --vellum: #ffffff;         /* Card surface */
+  --mark: #1a3a5c;           /* Accent — blueprint navy */
+  --mark-soft: #e8eef6;      /* Accent surface */
+  --seal: #2d5a3f;           /* Success — moss green */
+  --seal-soft: #e7efe9;
+  --redline: #8c2929;        /* Destructive — burgundy */
+  --redline-soft: #f3e6e6;
+  --sodium: #b86d1b;         /* Warning — amber lamp */
+  --sodium-soft: #f5ebde;
+
+  --background: var(--parchment);
+  --foreground: var(--ink);
+  --card: var(--vellum);
+  --card-foreground: var(--ink);
+  --popover: var(--vellum);
+  --popover-foreground: var(--ink);
+  --primary: var(--mark);
   --primary-foreground: #ffffff;
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: #ecfdf5;
-  --accent-foreground: #065f46;
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: #10b981;
-  --chart-1: #10b981;
-  --chart-2: #34d399;
-  --chart-3: #059669;
-  --chart-4: #6ee7b7;
-  --chart-5: #047857;
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: #10b981;
+  --secondary: var(--rule-soft);
+  --secondary-foreground: var(--ink);
+  --muted: var(--rule-soft);
+  --muted-foreground: var(--ink-muted);
+  --accent: var(--mark-soft);
+  --accent-foreground: var(--mark);
+  --destructive: var(--redline);
+  --border: var(--rule);
+  --input: var(--rule);
+  --ring: var(--mark);
+  --chart-1: var(--mark);
+  --chart-2: var(--seal);
+  --chart-3: var(--sodium);
+  --chart-4: var(--redline);
+  --chart-5: var(--ink-faint);
+  --radius: 0.375rem;        /* 6 px — sharper, editorial precision */
+  --sidebar: var(--parchment);
+  --sidebar-foreground: var(--ink);
+  --sidebar-primary: var(--mark);
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #ecfdf5;
-  --sidebar-accent-foreground: #065f46;
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: #10b981;
+  --sidebar-accent: var(--mark-soft);
+  --sidebar-accent-foreground: var(--mark);
+  --sidebar-border: var(--rule);
+  --sidebar-ring: var(--mark);
 }
 
 .dark {
@@ -123,16 +143,21 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground text-[13px] leading-snug;
+    @apply text-foreground text-[13px] leading-snug;
+    background-color: var(--parchment);
+    color: var(--ink);
   }
   html {
     @apply font-sans;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    font-feature-settings: "ss01", "cv11";
   }
-  h1 { @apply text-lg font-semibold tracking-tight; }
-  h2 { @apply text-base font-semibold tracking-tight; }
-  h3 { @apply text-sm font-semibold; }
-  h4 { @apply text-[13px] font-medium; }
+  /* Editorial type scale — Cormorant Garamond for headlines */
+  h1 { font-family: var(--font-display); @apply text-[26px] font-medium tracking-tight leading-tight; }
+  h2 { font-family: var(--font-display); @apply text-[20px] font-medium tracking-tight; }
+  h3 { @apply text-[14px] font-semibold tracking-tight; }
+  h4 { @apply text-[12px] font-semibold uppercase tracking-[0.08em]; }
+  /* Tabular numbers everywhere by default */
+  .tabular { font-variant-numeric: tabular-nums; }
 
   /* Make date input calendar picker always visible and clickable */
   input[type="date"]::-webkit-calendar-picker-indicator {
