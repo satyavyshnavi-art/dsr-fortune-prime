@@ -47,7 +47,7 @@ export function AlertSummary({ data }: AlertSummaryProps) {
           return (
             <div
               key={alert.severity}
-              className={`flex items-center justify-between rounded-md border px-3 py-2 ${alert.bgColor}`}
+              className={`flex items-center justify-between rounded-lg border px-3 py-2 ${alert.bgColor}`}
             >
               <div className="flex items-center gap-2">
                 <Icon className={`h-3.5 w-3.5 ${alert.color}`} aria-hidden="true" />

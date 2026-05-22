@@ -341,7 +341,7 @@ export function PowerTab() {
                   <div className="flex items-center justify-center gap-1">
                     <button
                       onClick={() => openEdit(originalIdx)}
-                      className="h-7 w-7 rounded-md flex items-center justify-center text-blue-600 hover:bg-blue-50 transition-colors"
+                      className="h-7 w-7 rounded-md flex items-center justify-center text-violet-600 hover:bg-violet-50 transition-colors"
                     >
                       <Pencil className="h-3.5 w-3.5" />
                     </button>
@@ -375,8 +375,8 @@ export function PowerTab() {
           {editRow && (
             <div className="space-y-4 pt-2">
               {/* Meter info banner */}
-              <div className="bg-blue-50 border border-blue-100 rounded-lg px-4 py-2.5">
-                <p className="text-[12px] text-blue-700">
+              <div className="bg-violet-50 border border-blue-100 rounded-lg px-4 py-2.5">
+                <p className="text-[12px] text-violet-700">
                   Meter: <span className="font-semibold">{editRow.meterId}</span>
                   {" · "}Location: <span className="font-semibold">{editRow.location}</span>
                 </p>
@@ -445,7 +445,7 @@ export function PowerTab() {
                 </Button>
                 <Button
                   onClick={handleUpdate}
-                  className="h-9 text-[13px] px-5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white"
+                  className="h-9 text-[13px] px-5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white"
                 >
                   <Save className="h-3.5 w-3.5 mr-1.5" />
                   Update Reading

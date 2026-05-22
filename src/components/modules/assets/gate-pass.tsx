@@ -242,7 +242,7 @@ export function GatePassManagement() {
             </div>
             <Button
               size="sm"
-              className="h-7 text-[11px] px-2.5 bg-blue-600 hover:bg-blue-700 text-white"
+              className="h-7 text-[11px] px-2.5 bg-violet-600 hover:bg-violet-700 text-white"
               onClick={() => { setErrors({}); setShowCreateModal(true); }}
             >
               <Plus className="h-3 w-3 mr-1" />
@@ -424,7 +424,7 @@ export function GatePassManagement() {
               <Button variant="outline" onClick={() => setShowCreateModal(false)} className="h-9 text-[13px] rounded-lg">
                 Cancel
               </Button>
-              <Button onClick={handleCreate} className="h-9 text-[13px] rounded-lg bg-blue-600 hover:bg-blue-700 text-white">
+              <Button onClick={handleCreate} className="h-9 text-[13px] rounded-lg bg-violet-600 hover:bg-violet-700 text-white">
                 Create Pass
               </Button>
             </div>

@@ -48,7 +48,7 @@ export function PowerWidget({ data }: { data?: any }) {
     <ChartCard
       title="Power Management"
       actions={
-        <span className="text-[10px] font-semibold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">
+        <span className="text-[10px] font-semibold text-violet-600 bg-violet-50 px-1.5 py-0.5 rounded">
           {totalKwh.toFixed(1)} kWh
         </span>
       }
@@ -61,7 +61,7 @@ export function PowerWidget({ data }: { data?: any }) {
               key={tab}
               className={`text-[10px] px-2 py-0.5 rounded transition-colors ${
                 i === 0
-                  ? "bg-blue-600 text-white"
+                  ? "bg-violet-600 text-white"
                   : "bg-slate-100 text-slate-500 hover:bg-slate-200"
               }`}
             >

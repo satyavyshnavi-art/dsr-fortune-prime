@@ -224,8 +224,8 @@ export function QRScanner() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 bg-blue-50 rounded-lg">
-            <QrCode className="h-4 w-4 text-blue-600" />
+          <div className="p-2 bg-violet-50 rounded-lg">
+            <QrCode className="h-4 w-4 text-violet-600" />
           </div>
           <div>
             <h3 className="text-[14px] font-semibold text-slate-900">QR Attendance Scanner</h3>

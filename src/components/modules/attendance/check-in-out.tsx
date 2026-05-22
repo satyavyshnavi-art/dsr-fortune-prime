@@ -431,7 +431,7 @@ export function CheckInOut() {
                   onClick={() => setSelectedShift(shift)}
                   className={`rounded-md border px-3 py-2 text-[12px] font-medium transition-colors ${
                     selectedShift === shift
-                      ? "border-blue-500 bg-blue-50 text-blue-700"
+                      ? "border-violet-500 bg-violet-50 text-violet-700"
                       : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
                   }`}
                 >

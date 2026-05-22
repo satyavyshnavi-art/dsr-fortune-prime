@@ -331,7 +331,7 @@ export function EmployeeTable() {
             Bulk Upload
           </Button>
           <Button
-            className="h-7 text-[11px] px-2.5 gap-1 bg-blue-600 hover:bg-blue-700 text-white"
+            className="h-7 text-[11px] px-2.5 gap-1 bg-violet-600 hover:bg-violet-700 text-white"
             onClick={() => setShowAddDialog(true)}
           >
             <UserPlus className="h-3 w-3" />
@@ -372,7 +372,7 @@ export function EmployeeTable() {
       {loading ? (
         <div className="flex items-center justify-center py-12">
           <div className="flex flex-col items-center gap-2">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-300 border-t-blue-600" />
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-300 border-t-violet-600" />
             <span className="text-[11px] text-slate-400">Loading employees...</span>
           </div>
         </div>
@@ -567,7 +567,7 @@ function AddEmployeeDialog({
               <Label className="text-[11px] text-slate-500">Employee ID</Label>
               <p className="text-[10px] text-slate-400">Auto-generated</p>
             </div>
-            <span className="inline-block bg-blue-50 text-blue-700 font-mono text-[12px] px-2.5 py-1 rounded border border-blue-200">
+            <span className="inline-block bg-violet-50 text-violet-700 font-mono text-[12px] px-2.5 py-1 rounded border border-violet-200">
               {nextEmpId}
             </span>
           </div>
@@ -669,7 +669,7 @@ function AddEmployeeDialog({
               Cancel
             </Button>
             <Button
-              className="h-7 text-[11px] px-3 gap-1 bg-blue-600 hover:bg-blue-700 text-white"
+              className="h-7 text-[11px] px-3 gap-1 bg-violet-600 hover:bg-violet-700 text-white"
               onClick={handleSubmit}
             >
               <UserPlus className="h-3 w-3" />
@@ -838,7 +838,7 @@ function EditEmployeeDialog({
               Cancel
             </Button>
             <Button
-              className="h-7 text-[11px] px-3 gap-1 bg-blue-600 hover:bg-blue-700 text-white"
+              className="h-7 text-[11px] px-3 gap-1 bg-violet-600 hover:bg-violet-700 text-white"
               onClick={handleUpdate}
             >
               <Pencil className="h-3 w-3" />
@@ -954,7 +954,7 @@ function EmployeeQRCode({ employee }: { employee: Employee }) {
         <Button
           size="sm"
           onClick={handleDownload}
-          className="h-7 text-[11px] px-4 bg-blue-600 hover:bg-blue-700 text-white"
+          className="h-7 text-[11px] px-4 bg-violet-600 hover:bg-violet-700 text-white"
         >
           <Download className="h-3 w-3 mr-1" />
           Download QR

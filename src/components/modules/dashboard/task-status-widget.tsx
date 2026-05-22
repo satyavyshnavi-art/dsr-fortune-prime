@@ -66,7 +66,7 @@ export function TaskStatusWidget({ data }: { data?: any }) {
             onClick={() => setActiveTab("matrix")}
             className={`px-2.5 py-1 text-[10px] font-medium border-b-2 transition-colors ${
               activeTab === "matrix"
-                ? "border-blue-500 text-blue-600"
+                ? "border-violet-500 text-violet-600"
                 : "border-transparent text-slate-400 hover:text-slate-600"
             }`}
           >
@@ -76,7 +76,7 @@ export function TaskStatusWidget({ data }: { data?: any }) {
             onClick={() => setActiveTab("list")}
             className={`px-2.5 py-1 text-[10px] font-medium border-b-2 transition-colors ${
               activeTab === "list"
-                ? "border-blue-500 text-blue-600"
+                ? "border-violet-500 text-violet-600"
                 : "border-transparent text-slate-400 hover:text-slate-600"
             }`}
           >

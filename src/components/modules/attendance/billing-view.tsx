@@ -251,7 +251,7 @@ export function BillingView() {
             <Switch checked={showAgreed} onCheckedChange={setShowAgreed} />
           </div>
           <Button
-            className="h-7 text-[11px] px-2.5 gap-1 bg-blue-600 hover:bg-blue-700 text-white"
+            className="h-7 text-[11px] px-2.5 gap-1 bg-violet-600 hover:bg-violet-700 text-white"
             disabled={downloading === "pdf"}
             onClick={() => handleDownload("pdf")}
           >
@@ -353,7 +353,7 @@ export function BillingView() {
                 Absent
               </th>
               {showAgreed && (
-                <th className="px-3 py-2 text-center text-[10px] font-semibold text-blue-600 uppercase tracking-wider">
+                <th className="px-3 py-2 text-center text-[10px] font-semibold text-violet-600 uppercase tracking-wider">
                   Agreement
                 </th>
               )}
@@ -386,7 +386,7 @@ export function BillingView() {
                     <td className="px-3 py-2 text-[12px] text-center text-slate-600">{row.leaveE}</td>
                     <td className="px-3 py-2 text-[12px] text-center text-slate-600">{row.absent}</td>
                     {showAgreed && (
-                      <td className="px-3 py-2 text-[12px] text-center text-blue-600 font-medium">
+                      <td className="px-3 py-2 text-[12px] text-center text-violet-600 font-medium">
                         {row.agreement}
                       </td>
                     )}
@@ -407,7 +407,7 @@ export function BillingView() {
                   <td className="px-3 py-2 text-[12px] text-center text-slate-700">{totals.leaveE}</td>
                   <td className="px-3 py-2 text-[12px] text-center text-slate-700">{totals.absent}</td>
                   {showAgreed && (
-                    <td className="px-3 py-2 text-[12px] text-center text-blue-700 font-bold">
+                    <td className="px-3 py-2 text-[12px] text-center text-violet-700 font-bold">
                       {totals.agreement}
                     </td>
                   )}

@@ -81,7 +81,7 @@ export function InterviewForm({ open, onOpenChange }: InterviewFormProps) {
       <DialogContent className="sm:max-w-[460px] p-5" showCloseButton>
         <DialogHeader className="pb-1">
           <DialogTitle className="text-[14px] font-semibold text-slate-800 flex items-center gap-2">
-            <ClipboardList className="h-4 w-4 text-blue-600" />
+            <ClipboardList className="h-4 w-4 text-violet-600" />
             Record Interview
           </DialogTitle>
         </DialogHeader>
@@ -182,7 +182,7 @@ export function InterviewForm({ open, onOpenChange }: InterviewFormProps) {
             <Button variant="outline" className="h-7 text-[11px] px-3" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button className="h-7 text-[11px] px-3 gap-1 bg-blue-600 hover:bg-blue-700 text-white" onClick={handleSubmit}>
+            <Button className="h-7 text-[11px] px-3 gap-1 bg-violet-600 hover:bg-violet-700 text-white" onClick={handleSubmit}>
               Save Interview
             </Button>
           </div>

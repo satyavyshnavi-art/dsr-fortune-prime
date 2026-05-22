@@ -78,13 +78,13 @@ function mapDbTemplates(rows: Record<string, unknown>[]): HygieneCategory[] {
   }
 
   const iconMap: Record<string, React.ReactNode> = {
-    Housekeeping: <SprayCan className="h-5 w-5 text-blue-600" />,
+    Housekeeping: <SprayCan className="h-5 w-5 text-violet-600" />,
     "Pest Control": <Bug className="h-5 w-5 text-orange-600" />,
   };
 
   return Array.from(categoryMap.entries()).map(([name, sections]) => ({
     name,
-    icon: iconMap[name] ?? <SprayCan className="h-5 w-5 text-blue-600" />,
+    icon: iconMap[name] ?? <SprayCan className="h-5 w-5 text-violet-600" />,
     sections,
   }));
 }
@@ -92,7 +92,7 @@ function mapDbTemplates(rows: Record<string, unknown>[]): HygieneCategory[] {
 const mockHygieneData: HygieneCategory[] = [
   {
     name: "Housekeeping",
-    icon: <SprayCan className="h-5 w-5 text-blue-600" />,
+    icon: <SprayCan className="h-5 w-5 text-violet-600" />,
     sections: [
       {
         title: "Daily Checklist",
@@ -218,7 +218,7 @@ function GardeningSection() {
           <h3 className="text-[14px] font-semibold text-slate-800">Gardening</h3>
         </div>
         <button
-          className="flex items-center gap-1 text-[11px] text-blue-600 hover:text-blue-700 font-medium"
+          className="flex items-center gap-1 text-[11px] text-violet-600 hover:text-violet-700 font-medium"
           onClick={() => toast.success("Downloading QR codes for Gardening...")}
         >
           <Download className="h-3 w-3" />
@@ -330,7 +330,7 @@ function TemplateRow({
         className="flex items-center gap-3 cursor-pointer min-w-0 flex-1"
         onClick={() => onView(template)}
       >
-        <FileText className="h-4 w-4 text-blue-500 shrink-0" />
+        <FileText className="h-4 w-4 text-violet-500 shrink-0" />
         <div className="min-w-0">
           <p className="text-[13px] font-medium text-slate-800 leading-tight truncate">
             {template.name}
@@ -341,18 +341,18 @@ function TemplateRow({
         </div>
       </div>
       <div className="flex items-center gap-1.5 shrink-0 ml-3">
-        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-blue-100 text-blue-700">
+        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-violet-100 text-violet-700">
           v{template.version}
         </span>
         <button
-          className="p-1.5 rounded-md hover:bg-blue-50 text-blue-500 transition-colors"
+          className="p-1.5 rounded-md hover:bg-violet-50 text-violet-500 transition-colors"
           title="View QR code"
           onClick={() => onView(template)}
         >
           <QrCode className="h-3.5 w-3.5" />
         </button>
         <button
-          className="p-1.5 rounded-md hover:bg-blue-50 text-blue-500 transition-colors"
+          className="p-1.5 rounded-md hover:bg-violet-50 text-violet-500 transition-colors"
           title="Download template"
           onClick={() => toast.success(`Downloading ${template.name}...`)}
         >
@@ -415,7 +415,7 @@ function ChecklistSectionCard({
       {/* Action buttons */}
       <div className="flex items-center gap-3 px-4 py-2.5 border-t border-slate-100">
         <button
-          className="inline-flex items-center gap-1 px-3 py-1 text-[11px] text-blue-600 font-medium border border-blue-200 rounded-full hover:bg-blue-50 transition-colors"
+          className="inline-flex items-center gap-1 px-3 py-1 text-[11px] text-violet-600 font-medium border border-violet-200 rounded-full hover:bg-violet-50 transition-colors"
           onClick={() => {
             const input = document.createElement("input");
             input.type = "file";
@@ -428,7 +428,7 @@ function ChecklistSectionCard({
           Add Template
         </button>
         <button
-          className="inline-flex items-center gap-1 px-3 py-1 text-[11px] text-blue-600 font-medium border border-blue-200 rounded-full hover:bg-blue-50 transition-colors"
+          className="inline-flex items-center gap-1 px-3 py-1 text-[11px] text-violet-600 font-medium border border-violet-200 rounded-full hover:bg-violet-50 transition-colors"
           onClick={() => {
             const input = document.createElement("input");
             input.type = "file";
@@ -623,7 +623,7 @@ export function HygieneConfig() {
                 </h3>
               </div>
               <button
-                className="flex items-center gap-1.5 text-[12px] text-blue-600 hover:text-blue-700 font-medium hover:underline"
+                className="flex items-center gap-1.5 text-[12px] text-violet-600 hover:text-violet-700 font-medium hover:underline"
                 onClick={() =>
                   toast.success(
                     `Downloading QR codes for ${category.name}...`
@@ -666,7 +666,7 @@ export function HygieneConfig() {
               <input
                 value={editName}
                 onChange={(e) => setEditName(e.target.value)}
-                className="w-full h-9 rounded-lg border border-slate-200 bg-white px-3 text-[13px] focus:outline-none focus:border-blue-300 focus:ring-1 focus:ring-blue-100"
+                className="w-full h-9 rounded-lg border border-slate-200 bg-white px-3 text-[13px] focus:outline-none focus:border-blue-300 focus:ring-1 focus:ring-violet-100"
               />
             </div>
             <div>
@@ -675,7 +675,7 @@ export function HygieneConfig() {
                 type="number"
                 value={editTasks}
                 onChange={(e) => setEditTasks(e.target.value)}
-                className="w-full h-9 rounded-lg border border-slate-200 bg-white px-3 text-[13px] focus:outline-none focus:border-blue-300 focus:ring-1 focus:ring-blue-100"
+                className="w-full h-9 rounded-lg border border-slate-200 bg-white px-3 text-[13px] focus:outline-none focus:border-blue-300 focus:ring-1 focus:ring-violet-100"
               />
             </div>
             <div>
@@ -699,7 +699,7 @@ export function HygieneConfig() {
             </div>
             <div className="flex justify-end gap-2 pt-1">
               <Button variant="outline" onClick={() => setEditTemplate(null)} className="h-9 text-[13px] rounded-lg">Cancel</Button>
-              <Button onClick={handleSaveEdit} className="h-9 text-[13px] rounded-lg bg-blue-600 hover:bg-blue-700 text-white">
+              <Button onClick={handleSaveEdit} className="h-9 text-[13px] rounded-lg bg-violet-600 hover:bg-violet-700 text-white">
                 Save Changes
               </Button>
             </div>
@@ -728,8 +728,8 @@ export function HygieneConfig() {
                 <>
                   <DialogHeader>
                     <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-blue-50">
-                        <QrCode className="h-5 w-5 text-blue-600" />
+                      <div className="p-2 rounded-lg bg-violet-50">
+                        <QrCode className="h-5 w-5 text-violet-600" />
                       </div>
                       <div>
                         <DialogTitle className="text-[15px] font-bold text-slate-800">

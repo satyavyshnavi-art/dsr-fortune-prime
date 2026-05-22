@@ -10,7 +10,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-const PIE_COLORS = ["#10b981", "#ef4444", "#3b82f6", "#f59e0b"];
+const PIE_COLORS = ["#8b5cf6", "#ef4444", "#3b82f6", "#f59e0b"];
 
 interface AttendanceSlice {
   name: string;
@@ -49,7 +49,7 @@ export function AttendanceOverview({ data }: AttendanceOverviewProps) {
       title="Attendance Overview"
       subtitle="Today's attendance distribution"
     >
-      <div className="h-[200px]" role="img" aria-label="Pie chart showing today's attendance distribution">
+      <div className="h-[190px]" role="img" aria-label="Pie chart showing today's attendance distribution">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -92,7 +92,7 @@ export function AttendanceOverview({ data }: AttendanceOverviewProps) {
           </PieChart>
         </ResponsiveContainer>
       </div>
-      <p className="text-[10px] text-slate-300 text-center mt-1">
+      <p className="text-[10px] text-slate-400 text-center mt-1">
         Total workforce: {total}
       </p>
     </ChartCard>

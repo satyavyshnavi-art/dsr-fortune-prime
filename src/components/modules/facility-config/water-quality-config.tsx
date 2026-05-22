@@ -71,7 +71,7 @@ function ExistingConfigCard({
         <div className="flex items-center gap-1 mt-1.5">
           <button
             onClick={() => onEdit(config)}
-            className="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-blue-600 transition-colors"
+            className="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-violet-600 transition-colors"
           >
             <Pencil className="h-3.5 w-3.5" />
           </button>
@@ -143,7 +143,7 @@ function STPConfigForm({ onSave }: { onSave: (params: Record<string, unknown>) =
           </FormField>
         </div>
         <div className="flex justify-end">
-          <Button className="h-7 text-[11px] bg-blue-600 hover:bg-blue-700 text-white gap-1.5 px-2.5" onClick={() => onSave({ ...form, plantType: "stp" })}>
+          <Button className="h-7 text-[11px] bg-violet-600 hover:bg-violet-700 text-white gap-1.5 px-2.5" onClick={() => onSave({ ...form, plantType: "stp" })}>
             <Save className="h-3.5 w-3.5" />
             Save
           </Button>
@@ -194,7 +194,7 @@ function WTPConfigForm({ onSave }: { onSave: (params: Record<string, unknown>) =
           </FormField>
         </div>
         <div className="flex justify-end">
-          <Button className="h-7 text-[11px] bg-blue-600 hover:bg-blue-700 text-white gap-1.5 px-2.5" onClick={() => onSave({ ...form, plantType: "wtp" })}>
+          <Button className="h-7 text-[11px] bg-violet-600 hover:bg-violet-700 text-white gap-1.5 px-2.5" onClick={() => onSave({ ...form, plantType: "wtp" })}>
             <Save className="h-3.5 w-3.5" />
             Save
           </Button>
@@ -256,7 +256,7 @@ function PoolConfigForm({ onSave }: { onSave: (params: Record<string, unknown>) 
           </FormField>
         </div>
         <div className="flex justify-end">
-          <Button className="h-7 text-[11px] bg-blue-600 hover:bg-blue-700 text-white gap-1.5 px-2.5" onClick={() => onSave({ ...form, plantType: "pool" })}>
+          <Button className="h-7 text-[11px] bg-violet-600 hover:bg-violet-700 text-white gap-1.5 px-2.5" onClick={() => onSave({ ...form, plantType: "pool" })}>
             <Save className="h-3.5 w-3.5" />
             Save
           </Button>
@@ -307,7 +307,7 @@ function ROConfigForm({ onSave }: { onSave: (params: Record<string, unknown>) =>
           </FormField>
         </div>
         <div className="flex justify-end">
-          <Button className="h-7 text-[11px] bg-blue-600 hover:bg-blue-700 text-white gap-1.5 px-2.5" onClick={() => onSave({ ...form, plantType: "ro" })}>
+          <Button className="h-7 text-[11px] bg-violet-600 hover:bg-violet-700 text-white gap-1.5 px-2.5" onClick={() => onSave({ ...form, plantType: "ro" })}>
             <Save className="h-3.5 w-3.5" />
             Save
           </Button>

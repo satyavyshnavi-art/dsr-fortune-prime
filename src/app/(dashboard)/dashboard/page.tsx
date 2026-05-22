@@ -12,7 +12,6 @@ import {
   ListChecks,
   Calendar,
   Search,
-  CheckCircle2,
   LayoutDashboard,
   Download,
 } from "lucide-react";
@@ -41,7 +40,7 @@ function formatDateLabel(dateStr: string): string {
     "Jan", "Feb", "Mar", "Apr", "May", "Jun",
     "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
   ];
-  return `${d.getDate()}-${months[d.getMonth()]}-${String(d.getFullYear()).slice(-2)}`;
+  return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
 }
 
 function getDaysBetween(start: string, end: string): number {
@@ -54,7 +53,6 @@ export default function DashboardPage() {
   const [startDate, setStartDate] = useState("2026-03-31");
   const [endDate, setEndDate] = useState("2026-04-29");
   const [appliedRange, setAppliedRange] = useState({ start: "2026-03-31", end: "2026-04-29" });
-  const [showApplied, setShowApplied] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [dashboardData, setDashboardData] = useState<any>(null);
 
@@ -79,12 +77,9 @@ export default function DashboardPage() {
     setTimeout(() => {
       setAppliedRange({ start: startDate, end: endDate });
       setIsLoading(false);
-      setShowApplied(true);
-      setTimeout(() => setShowApplied(false), 2000);
     }, 400);
   }, [startDate, endDate]);
 
-  // Build KPI cards from real data
   const kpiCards = dashboardData
     ? [
         {
@@ -92,51 +87,45 @@ export default function DashboardPage() {
           value: `${dashboardData.employees.total}`,
           subtitle: `${dashboardData.employees.present} present / ${dashboardData.employees.absent} absent`,
           icon: Users,
-          color: "green" as const,
         },
         {
-          title: "Water Consumption",
+          title: "Water Usage",
           value: `${Math.round(dashboardData.waterReadings.totalLiters / 1000)} KL`,
-          subtitle: `${dashboardData.waterReadings.activeSources} sources`,
+          subtitle: `${dashboardData.waterReadings.activeSources} active sources`,
           icon: Droplets,
-          color: "blue" as const,
         },
         {
-          title: "Hygiene & Satisfaction",
+          title: "Hygiene Score",
           value: "--",
           subtitle: "No data yet",
           icon: SprayCan,
-          color: "yellow" as const,
         },
         {
-          title: "Power Consumption",
+          title: "Power",
           value: `${dashboardData.powerReadings.totalKwh.toFixed(1)} kWh`,
-          subtitle: `${dashboardData.powerReadings.activeMeters} meters`,
+          subtitle: `${dashboardData.powerReadings.activeMeters} meters active`,
           icon: Zap,
-          color: "slate" as const,
         },
         {
           title: "Complaints",
           value: `${dashboardData.complaints.total}`,
           subtitle: `${dashboardData.complaints.open} open / ${dashboardData.complaints.resolved + dashboardData.complaints.closed} resolved`,
           icon: MessageSquare,
-          color: "red" as const,
         },
         {
           title: "Tasks",
           value: `${dashboardData.tasks.total}`,
           subtitle: `${dashboardData.tasks.completed} done / ${dashboardData.tasks.overdue} overdue`,
           icon: ListChecks,
-          color: "blue" as const,
         },
       ]
     : [
-        { title: "Employees", value: "--", subtitle: "Loading...", icon: Users, color: "green" as const },
-        { title: "Water Consumption", value: "--", subtitle: "Loading...", icon: Droplets, color: "blue" as const },
-        { title: "Hygiene & Satisfaction", value: "--", subtitle: "Loading...", icon: SprayCan, color: "yellow" as const },
-        { title: "Power Consumption", value: "--", subtitle: "Loading...", icon: Zap, color: "slate" as const },
-        { title: "Complaints", value: "--", subtitle: "Loading...", icon: MessageSquare, color: "red" as const },
-        { title: "Tasks", value: "--", subtitle: "Loading...", icon: ListChecks, color: "blue" as const },
+        { title: "Employees", value: "--", subtitle: "Loading...", icon: Users },
+        { title: "Water Usage", value: "--", subtitle: "Loading...", icon: Droplets },
+        { title: "Hygiene Score", value: "--", subtitle: "Loading...", icon: SprayCan },
+        { title: "Power", value: "--", subtitle: "Loading...", icon: Zap },
+        { title: "Complaints", value: "--", subtitle: "Loading...", icon: MessageSquare },
+        { title: "Tasks", value: "--", subtitle: "Loading...", icon: ListChecks },
       ];
 
   const days = getDaysBetween(appliedRange.start, appliedRange.end);
@@ -145,98 +134,72 @@ export default function DashboardPage() {
     <div className="flex flex-col h-full">
       <TopBar title="Dashboard" />
 
-      <div className="flex-1 overflow-y-auto bg-slate-50/40">
-        <div className="p-5 space-y-4">
-          {/* Hero banner — Adivo style */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="p-5 space-y-5">
+          {/* Hero banner */}
           <HeroBanner
             icon={LayoutDashboard}
             tone="violet"
-            title="Welcome back, here's what's happening today 👋"
+            title="Facility Overview"
             subtitle={
               <>
-                Showing data for <span className="font-semibold text-white">{formatDateLabel(appliedRange.start)}</span>
-                {" → "}
-                <span className="font-semibold text-white">{formatDateLabel(appliedRange.end)}</span>
-                <span className="ml-2 text-white/70">({days} days)</span>
+                {formatDateLabel(appliedRange.start)} – {formatDateLabel(appliedRange.end)}
+                <span className="ml-1.5 text-white/50">({days} days)</span>
               </>
             }
-            badge={<HeroBadge>All systems operational</HeroBadge>}
+            badge={<HeroBadge>Live</HeroBadge>}
             actions={
-              <>
-                <HeroButton icon={Calendar} variant="ghost">
-                  {formatDateLabel(appliedRange.start)} – {formatDateLabel(appliedRange.end)}
-                </HeroButton>
-                <HeroButton icon={Download} variant="solid">
-                  Download Report
-                </HeroButton>
-              </>
+              <HeroButton icon={Download} variant="solid">
+                Export Report
+              </HeroButton>
             }
           />
 
           {/* Date Range Picker */}
-          <div className="flex items-center justify-end gap-3">
-            {showApplied && (
-              <div className="flex items-center gap-1.5 text-[12px] text-teal-600 font-medium animate-in fade-in slide-in-from-right-2 duration-200">
-                <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
-                Updated for {formatDateLabel(appliedRange.start)} – {formatDateLabel(appliedRange.end)}
-              </div>
-            )}
-
+          <div className="flex items-center justify-end gap-2">
             <div
-              className={`inline-flex items-center bg-white border rounded-full shadow-sm px-4 h-10 transition-colors ${
-                hasUnappliedChanges ? "border-teal-400/40 ring-1 ring-teal-400/10" : "border-slate-200"
+              className={`inline-flex items-center bg-white border rounded-xl px-3.5 h-9 transition-colors ${
+                hasUnappliedChanges ? "border-violet-300 ring-1 ring-violet-100" : "border-slate-200"
               }`}
             >
-              <Calendar className="h-4 w-4 text-teal-600 mr-2 shrink-0" aria-hidden="true" />
+              <Calendar className="h-3.5 w-3.5 text-violet-500 mr-2 shrink-0" aria-hidden="true" />
               <input
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
                 aria-label="Start date"
-                className="bg-transparent text-[13px] text-slate-700 font-medium focus:outline-none cursor-pointer border-none p-0 m-0 h-full"
+                className="bg-transparent text-[12px] text-slate-600 font-medium focus:outline-none cursor-pointer border-none p-0 m-0 h-full"
               />
-              <span className="text-[14px] text-slate-400 mx-2 select-none" aria-hidden="true">→</span>
+              <span className="text-[12px] text-slate-300 mx-2 select-none" aria-hidden="true">–</span>
               <input
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
                 aria-label="End date"
-                className="bg-transparent text-[13px] text-slate-700 font-medium focus:outline-none cursor-pointer border-none p-0 m-0 h-full"
+                className="bg-transparent text-[12px] text-slate-600 font-medium focus:outline-none cursor-pointer border-none p-0 m-0 h-full"
               />
             </div>
 
             <button
               onClick={handleGo}
               disabled={isLoading}
-              className={`flex items-center gap-1.5 h-10 px-5 rounded-full text-[13px] font-semibold transition-all shadow-sm ${
+              className={`flex items-center gap-1.5 h-9 px-4 rounded-xl text-[12px] font-semibold transition-all ${
                 isLoading
-                  ? "bg-teal-500 text-white cursor-wait"
-                  : hasUnappliedChanges
-                  ? "bg-teal-600 text-white hover:bg-teal-700 active:bg-teal-800 ring-2 ring-teal-400/20"
-                  : "bg-teal-600 text-white hover:bg-teal-700 active:bg-teal-800"
+                  ? "bg-violet-400 text-white cursor-wait"
+                  : "bg-violet-600 text-white hover:bg-violet-700 active:bg-violet-800"
               }`}
             >
               {isLoading ? (
-                <span className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <span className="h-3.5 w-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
-                <Search className="h-4 w-4" aria-hidden="true" />
+                <Search className="h-3.5 w-3.5" aria-hidden="true" />
               )}
-              {isLoading ? "Loading..." : "Go"}
+              {isLoading ? "Loading..." : "Apply"}
             </button>
           </div>
 
-          {/* Applied range info bar */}
-          <div className="flex items-center justify-between">
-            <p className="text-[11px] text-slate-400">
-              Showing data for <span className="font-medium text-slate-600">{formatDateLabel(appliedRange.start)}</span>
-              {" → "}
-              <span className="font-medium text-slate-600">{formatDateLabel(appliedRange.end)}</span>
-              <span className="ml-1.5 text-slate-300">({days} days)</span>
-            </p>
-          </div>
-
-          {/* KPI Cards Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+          {/* KPI Cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3">
             {kpiCards.map((kpi, idx) => {
               const tones = ["violet", "emerald", "orange", "sky", "rose", "amber"] as const;
               return (
@@ -252,35 +215,35 @@ export default function DashboardPage() {
             })}
           </div>
 
-          {/* Row 2: Charts — Task Completion, Attendance Pie, Alert Summary */}
+          {/* Row: Charts */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
             <TaskCompletionChart data={dashboardData} />
             <AttendanceOverview data={dashboardData} />
             <AlertSummary data={dashboardData} />
           </div>
 
-          {/* Row 3: Approval Pipeline, Inventory Alerts, Recent Activity */}
+          {/* Row: Pipeline */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
             <ApprovalPipeline data={dashboardData} />
             <InventoryAlerts data={dashboardData} />
             <RecentActivity data={dashboardData} />
           </div>
 
-          {/* Row 4: Attendance, Hygiene, Power */}
+          {/* Row: Operations */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
             <AttendanceWidget data={dashboardData} />
             <HygieneWidget />
             <PowerWidget data={dashboardData} />
           </div>
 
-          {/* Row 3: Water Management, Asset Summary, Water Quality */}
+          {/* Row: Infrastructure */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
             <WaterManagementWidget data={dashboardData} />
             <AssetSummaryWidget data={dashboardData} />
             <WaterQualityWidget data={dashboardData} />
           </div>
 
-          {/* Row 4: Complaint, Task Status, Vendor Tickets */}
+          {/* Row: Service */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
             <ComplaintWidget data={dashboardData} />
             <TaskStatusWidget data={dashboardData} />
@@ -291,4 +254,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-

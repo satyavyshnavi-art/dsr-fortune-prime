@@ -87,7 +87,7 @@ export function ScheduleBoard() {
       {loading ? (
         <div className="flex items-center justify-center py-12">
           <div className="flex flex-col items-center gap-2">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-300 border-t-blue-600" />
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-300 border-t-violet-600" />
             <span className="text-[11px] text-slate-400">Loading schedules...</span>
           </div>
         </div>

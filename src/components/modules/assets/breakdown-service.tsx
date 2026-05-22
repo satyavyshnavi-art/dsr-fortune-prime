@@ -379,7 +379,7 @@ export function BreakdownService() {
             <div className="flex items-center gap-1.5">
               <Button
                 size="sm"
-                className="h-7 text-[11px] px-2.5 bg-blue-600 hover:bg-blue-700 text-white"
+                className="h-7 text-[11px] px-2.5 bg-violet-600 hover:bg-violet-700 text-white"
                 onClick={() => { setAddErrors({}); setShowAddModal(true); }}
               >
                 <Plus className="h-3 w-3 mr-1" />
@@ -671,8 +671,8 @@ export function BreakdownService() {
                       <div className="mt-2 grid grid-cols-2 gap-2">
                         {report.correctiveAction && (
                           <div className="bg-blue-50 rounded p-1.5">
-                            <p className="text-[10px] font-medium text-blue-700">Corrective Action</p>
-                            <p className="text-[10px] text-blue-600">{report.correctiveAction}</p>
+                            <p className="text-[10px] font-medium text-violet-700">Corrective Action</p>
+                            <p className="text-[10px] text-violet-600">{report.correctiveAction}</p>
                           </div>
                         )}
                         {report.preventiveAction && (
@@ -772,7 +772,7 @@ export function BreakdownService() {
               <Button variant="outline" onClick={() => setShowAddModal(false)} className="h-9 text-[13px] rounded-lg">
                 Cancel
               </Button>
-              <Button onClick={handleAdd} className="h-9 text-[13px] rounded-lg bg-blue-600 hover:bg-blue-700 text-white">
+              <Button onClick={handleAdd} className="h-9 text-[13px] rounded-lg bg-violet-600 hover:bg-violet-700 text-white">
                 Add Service
               </Button>
             </div>
@@ -897,7 +897,7 @@ export function BreakdownService() {
             </div>
             <div className="flex justify-end gap-2 pt-1">
               <Button variant="outline" onClick={() => setEditOpen(false)} className="h-9 text-[13px] rounded-lg">Cancel</Button>
-              <Button onClick={handleEdit} className="h-9 text-[13px] rounded-lg bg-blue-600 hover:bg-blue-700 text-white">Update Service</Button>
+              <Button onClick={handleEdit} className="h-9 text-[13px] rounded-lg bg-violet-600 hover:bg-violet-700 text-white">Update Service</Button>
             </div>
           </div>
         </DialogContent>

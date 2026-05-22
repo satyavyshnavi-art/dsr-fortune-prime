@@ -128,7 +128,7 @@ export function HygieneTab() {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <Calendar className="h-4 w-4 text-blue-600" />
+          <Calendar className="h-4 w-4 text-violet-600" />
           <h3 className="text-[15px] font-semibold text-slate-900">Daily Hygiene Calendar</h3>
         </div>
         <Button size="sm" className="bg-teal-600 hover:bg-teal-700 text-white h-8 text-[12px] px-4 rounded-lg" onClick={() => toast.success("Exporting hygiene report...")}>
@@ -190,7 +190,7 @@ export function HygieneTab() {
                 onClick={() => handleModeChange(mode)}
                 className={`px-3.5 py-1.5 text-[12px] font-medium transition-colors ${
                   viewMode === mode
-                    ? "bg-blue-600 text-white"
+                    ? "bg-violet-600 text-white"
                     : "bg-white text-slate-500 hover:bg-slate-50"
                 }`}
               >

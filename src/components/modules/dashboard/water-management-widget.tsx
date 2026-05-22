@@ -58,7 +58,7 @@ export function WaterManagementWidget({ data }: { data?: any }) {
               key={tab}
               className={`text-[10px] px-2 py-0.5 rounded transition-colors ${
                 i === 0
-                  ? "bg-blue-600 text-white"
+                  ? "bg-violet-600 text-white"
                   : "bg-slate-100 text-slate-500 hover:bg-slate-200"
               }`}
             >

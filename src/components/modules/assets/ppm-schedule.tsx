@@ -216,7 +216,7 @@ export function PPMSchedule() {
       {/* Summary bar */}
       <div className="flex items-center gap-3 text-[11px]">
         <span className="text-slate-400">
-          Total Tasks: <span className="font-bold text-blue-600">{totalTasks}</span>
+          Total Tasks: <span className="font-bold text-violet-600">{totalTasks}</span>
         </span>
         <span className="text-slate-400">
           Completed: <span className="font-bold text-teal-600">{completedTasks}</span>
@@ -233,7 +233,7 @@ export function PPMSchedule() {
       </div>
 
       {/* Title */}
-      <h2 className="text-[13px] font-bold text-blue-600 text-center">
+      <h2 className="text-[13px] font-bold text-violet-600 text-center">
         52 Weeks PPM Schedule ({year})
       </h2>
 

@@ -231,7 +231,7 @@ export function StaffShift() {
             />
           </div>
           <Button
-            className="h-7 text-[11px] px-2.5 gap-1 bg-blue-600 hover:bg-blue-700 text-white"
+            className="h-7 text-[11px] px-2.5 gap-1 bg-violet-600 hover:bg-violet-700 text-white"
             onClick={() => {
               const rows = filteredEmployees.map((emp: Employee) => ({
                 "Role": emp.designation,
@@ -359,7 +359,7 @@ function StaffRow({
       <td className="px-3 py-2 text-[12px] font-mono text-slate-800">
         {emp.empId}
       </td>
-      <td className="px-3 py-2 text-[12px] font-medium text-blue-600 truncate">
+      <td className="px-3 py-2 text-[12px] font-medium text-violet-600 truncate">
         {emp.firstName} {emp.lastName}
         {isInactive && (
           <span className="ml-1.5 text-[10px] text-red-400 font-normal">

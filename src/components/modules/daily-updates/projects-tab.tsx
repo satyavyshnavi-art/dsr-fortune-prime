@@ -340,7 +340,7 @@ export function ProjectsTab() {
           onClick={() => setActiveView("list")}
           className={`flex items-center gap-1.5 px-1 py-1.5 text-[12px] font-medium border-b-2 transition-colors ${
             activeView === "list"
-              ? "border-blue-600 text-blue-600"
+              ? "border-violet-600 text-violet-600"
               : "border-transparent text-slate-500 hover:text-slate-700"
           }`}
         >
@@ -351,7 +351,7 @@ export function ProjectsTab() {
           onClick={() => setActiveView("add")}
           className={`flex items-center gap-1.5 px-1 py-1.5 text-[12px] font-medium border-b-2 transition-colors ${
             activeView === "add"
-              ? "border-blue-600 text-blue-600"
+              ? "border-violet-600 text-violet-600"
               : "border-transparent text-slate-500 hover:text-slate-700"
           }`}
         >
@@ -413,7 +413,7 @@ export function ProjectsTab() {
                       <div className="flex items-center justify-center gap-1">
                         <button
                           onClick={() => openView(project)}
-                          className="h-7 w-7 rounded-md flex items-center justify-center text-blue-600 hover:bg-blue-50 transition-colors"
+                          className="h-7 w-7 rounded-md flex items-center justify-center text-violet-600 hover:bg-violet-50 transition-colors"
                           title="View"
                         >
                           <Eye className="h-3.5 w-3.5" />
@@ -595,7 +595,7 @@ export function ProjectsTab() {
               </div>
               <button
                 onClick={addMilestone}
-                className="mt-1.5 text-[11px] text-blue-600 hover:text-blue-700 font-medium flex items-center gap-0.5"
+                className="mt-1.5 text-[11px] text-violet-600 hover:text-violet-700 font-medium flex items-center gap-0.5"
               >
                 <Plus className="h-3 w-3" />
                 Add Milestone
@@ -631,10 +631,10 @@ export function ProjectsTab() {
               <Label className="text-[12px] text-slate-600 mb-1.5 block">Upload Photos</Label>
               <div
                 onClick={() => handleFileUpload(".jpg,.jpeg,.png,.gif", setPhotoName)}
-                className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-200 p-6 text-center cursor-pointer hover:border-blue-300 hover:bg-blue-50/30 transition-colors"
+                className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-200 p-6 text-center cursor-pointer hover:border-blue-300 hover:bg-violet-50/30 transition-colors"
               >
                 <UploadIcon className="h-6 w-6 text-slate-300 mb-1.5" />
-                <p className="text-[12px] text-blue-600 font-medium">
+                <p className="text-[12px] text-violet-600 font-medium">
                   Click to upload{" "}
                   <span className="text-slate-400 font-normal">or drag and drop</span>
                 </p>
@@ -644,7 +644,7 @@ export function ProjectsTab() {
             </div>
 
             {/* Submit */}
-            <Button onClick={handleAddProject} className="w-full bg-blue-600 hover:bg-blue-700 text-white h-9 text-[13px] rounded-lg">
+            <Button onClick={handleAddProject} className="w-full bg-violet-600 hover:bg-violet-700 text-white h-9 text-[13px] rounded-lg">
               <Plus className="h-3.5 w-3.5 mr-1.5" />
               Create Project
             </Button>
@@ -731,7 +731,7 @@ export function ProjectsTab() {
             </div>
             <div className="flex justify-end gap-2 pt-1">
               <Button variant="outline" onClick={() => { setEditOpen(false); setEditErrors({}); }} className="h-9 text-[13px] rounded-lg">Cancel</Button>
-              <Button onClick={handleEdit} className="h-9 text-[13px] rounded-lg bg-blue-600 hover:bg-blue-700 text-white">Update Project</Button>
+              <Button onClick={handleEdit} className="h-9 text-[13px] rounded-lg bg-violet-600 hover:bg-violet-700 text-white">Update Project</Button>
             </div>
           </div>
         </DialogContent>

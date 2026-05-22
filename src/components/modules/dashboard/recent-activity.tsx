@@ -37,12 +37,12 @@ const typeIconMap: Record<ActivityItem["type"], React.ElementType> = {
 };
 
 const typeColorMap: Record<ActivityItem["type"], string> = {
-  task: "text-emerald-500 bg-emerald-50",
+  task: "text-violet-500 bg-violet-50",
   attendance: "text-blue-500 bg-blue-50",
-  alert: "text-red-500 bg-red-50",
+  alert: "text-rose-500 bg-rose-50",
   report: "text-indigo-500 bg-indigo-50",
   maintenance: "text-amber-500 bg-amber-50",
-  general: "text-slate-500 bg-slate-50",
+  general: "text-slate-400 bg-slate-50",
 };
 
 interface RecentActivityProps {
@@ -63,17 +63,17 @@ export function RecentActivity({ data }: RecentActivityProps) {
           const colorClass = typeColorMap[activity.type] ?? typeColorMap.general;
 
           return (
-            <div key={activity.id} className="flex items-start gap-2.5 py-2 border-b border-slate-50 last:border-b-0">
-              <div className={`rounded-md p-1.5 shrink-0 ${colorClass}`}>
+            <div key={activity.id} className="flex items-start gap-2.5 py-2 border-b border-slate-100/60 last:border-b-0">
+              <div className={`rounded-lg p-1.5 shrink-0 ${colorClass}`}>
                 <Icon className="h-3 w-3" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[11px] text-slate-700 leading-snug">
+                <p className="text-[11px] text-slate-600 leading-snug">
                   {activity.action}
                 </p>
                 <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className="text-[10px] text-slate-400">{activity.user}</span>
-                  <span className="text-[10px] text-slate-300">--</span>
+                  <span className="text-[10px] font-medium text-slate-500">{activity.user}</span>
+                  <span className="text-[10px] text-slate-300">&middot;</span>
                   <span className="text-[10px] text-slate-400">{activity.timestamp}</span>
                 </div>
               </div>

@@ -245,7 +245,7 @@ export function ShiftView() {
           </div>
         </div>
         <Button
-          className="h-7 text-[11px] px-3 gap-1 bg-blue-600 hover:bg-blue-700 text-white uppercase tracking-wide"
+          className="h-7 text-[11px] px-3 gap-1 bg-violet-600 hover:bg-violet-700 text-white uppercase tracking-wide"
           onClick={() => setShowLogDialog(true)}
         >
           <Eye className="h-3 w-3" />

@@ -354,10 +354,10 @@ export function VendorTab() {
             <Label className="text-[11px] text-slate-500">Upload Files</Label>
             <div
               onClick={() => handleFileUpload(".jpg,.jpeg,.png,.pdf,.doc,.docx", setUploadedFileName)}
-              className="mt-1 flex flex-col items-center justify-center rounded-md border-2 border-dashed border-slate-200 p-5 text-center cursor-pointer hover:border-blue-300 hover:bg-blue-50/30 transition-colors"
+              className="mt-1 flex flex-col items-center justify-center rounded-md border-2 border-dashed border-slate-200 p-5 text-center cursor-pointer hover:border-violet-300 hover:bg-violet-50/30 transition-colors"
             >
               <UploadIcon className="h-5 w-5 text-slate-300 mb-1" />
-              <p className="text-[12px] text-blue-600 font-medium">
+              <p className="text-[12px] text-violet-600 font-medium">
                 Click to upload{" "}
                 <span className="text-slate-400 font-normal">or drag and drop files</span>
               </p>
@@ -497,7 +497,7 @@ export function VendorTab() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-6 text-[10px] px-2 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
+                    className="h-6 text-[10px] px-2 text-violet-600 hover:bg-violet-50 hover:text-violet-700"
                     onClick={() => openView(ticket)}
                   >
                     <Eye className="h-2.5 w-2.5 mr-0.5" />

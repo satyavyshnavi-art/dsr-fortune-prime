@@ -1,7 +1,6 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface ChartCardProps {
   title: string;
@@ -13,28 +12,28 @@ interface ChartCardProps {
 
 export function ChartCard({ title, subtitle, children, actions, className }: ChartCardProps) {
   return (
-    <Card
+    <div
       className={cn(
-        "shadow-none rounded-lg bg-[var(--vellum)] border-[var(--rule)]",
+        "bg-white rounded-2xl border border-slate-100 p-5",
         className
       )}
       role="region"
       aria-label={title}
     >
-      <CardHeader className="flex flex-row items-start justify-between gap-3 px-5 pt-5 pb-2">
+      <div className="flex items-start justify-between gap-3 mb-4">
         <div className="min-w-0">
-          <CardTitle className="text-[16px] font-semibold tracking-tight text-[var(--ink)] leading-tight">
+          <h3 className="text-[14px] font-semibold text-slate-800 leading-tight">
             {title}
-          </CardTitle>
+          </h3>
           {subtitle && (
-            <p className="text-[12px] text-[var(--ink-muted)] mt-1 leading-snug">
+            <p className="text-[11.5px] text-slate-400 mt-0.5 leading-snug">
               {subtitle}
             </p>
           )}
         </div>
         {actions}
-      </CardHeader>
-      <CardContent className="px-5 pb-5 pt-3">{children}</CardContent>
-    </Card>
+      </div>
+      {children}
+    </div>
   );
 }

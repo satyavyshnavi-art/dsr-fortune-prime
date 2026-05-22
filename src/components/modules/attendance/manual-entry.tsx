@@ -478,7 +478,7 @@ export function ManualEntry() {
         </span>
         <div className="flex items-center gap-2">
           <Button
-            className="h-7 text-[11px] px-3 bg-blue-600 hover:bg-blue-700 text-white"
+            className="h-7 text-[11px] px-3 bg-violet-600 hover:bg-violet-700 text-white"
             onClick={handleSave}
             disabled={editedCount === 0 || saving}
           >

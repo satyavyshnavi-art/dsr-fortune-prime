@@ -19,16 +19,9 @@ interface HeroBannerProps {
   tone?: Tone;
   badge?: React.ReactNode;
   actions?: React.ReactNode;
-  rightSlot?: React.ReactNode;
   className?: string;
 }
 
-/**
- * Gradient hero banner used at the top of dashboard / module pages.
- * Pattern from the Adivo reference: bold title, optional subtitle and
- * status badge on the left, action buttons on the right, all on a
- * vibrant gradient surface.
- */
 export function HeroBanner({
   title,
   subtitle,
@@ -36,59 +29,57 @@ export function HeroBanner({
   tone = "violet",
   badge,
   actions,
-  rightSlot,
   className,
 }: HeroBannerProps) {
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-2xl bg-gradient-to-br text-white p-6 md:p-7",
+        "relative overflow-hidden rounded-2xl bg-gradient-to-br text-white px-6 py-5",
         toneStyles[tone],
         className
       )}
     >
-      {/* Soft glow overlay for richness */}
       <div
         aria-hidden="true"
-        className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-white/10 blur-3xl pointer-events-none"
+        className="absolute -top-20 -right-20 h-56 w-56 rounded-full bg-white/8 blur-3xl pointer-events-none"
       />
       <div
         aria-hidden="true"
-        className="absolute -bottom-32 -left-20 h-72 w-72 rounded-full bg-black/10 blur-3xl pointer-events-none"
+        className="absolute -bottom-24 -left-16 h-56 w-56 rounded-full bg-black/8 blur-3xl pointer-events-none"
       />
 
-      <div className="relative flex flex-wrap items-start justify-between gap-5">
-        <div className="flex items-start gap-4 min-w-0 flex-1">
+      <div className="relative flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5 min-w-0 flex-1">
           {Icon && (
-            <div className="h-12 w-12 shrink-0 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center ring-1 ring-white/20">
-              <Icon className="h-6 w-6 text-white" aria-hidden="true" strokeWidth={2} />
+            <div className="h-10 w-10 shrink-0 rounded-xl bg-white/12 backdrop-blur-sm flex items-center justify-center ring-1 ring-white/15">
+              <Icon className="h-5 w-5 text-white/90" aria-hidden="true" strokeWidth={1.75} />
             </div>
           )}
           <div className="min-w-0">
-            <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="text-[24px] md:text-[28px] font-bold tracking-tight leading-tight text-white">
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <h1 className="text-[20px] font-semibold tracking-[-0.01em] leading-tight text-white">
                 {title}
               </h1>
               {badge}
             </div>
             {subtitle && (
-              <div className="mt-1.5 text-[14px] text-white/85 leading-snug">
+              <div className="mt-1 text-[12.5px] text-white/70 leading-snug">
                 {subtitle}
               </div>
             )}
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5 shrink-0">
-          {actions}
-          {rightSlot}
-        </div>
+        {actions && (
+          <div className="flex items-center gap-2 shrink-0">
+            {actions}
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
-/** Live status badge — the "● Live" / "Sprint 24 Active" pill from the reference. */
 export function HeroBadge({
   children,
   dot = true,
@@ -97,7 +88,7 @@ export function HeroBadge({
   dot?: boolean;
 }) {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 backdrop-blur-sm px-2.5 py-1 text-[11.5px] font-medium text-white ring-1 ring-white/20">
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-white/12 backdrop-blur-sm px-2.5 py-0.5 text-[11px] font-medium text-white/90 ring-1 ring-white/15">
       {dot && (
         <span className="h-1.5 w-1.5 rounded-full bg-emerald-300 animate-pulse" aria-hidden="true" />
       )}
@@ -106,7 +97,6 @@ export function HeroBadge({
   );
 }
 
-/** White outline pill button for the banner — secondary action style. */
 export function HeroButton({
   children,
   onClick,
@@ -122,13 +112,13 @@ export function HeroButton({
     <button
       onClick={onClick}
       className={cn(
-        "inline-flex items-center gap-2 rounded-full px-4 h-9 text-[12.5px] font-semibold transition-colors",
+        "inline-flex items-center gap-1.5 rounded-full px-3.5 h-8 text-[12px] font-medium transition-colors",
         variant === "solid"
-          ? "bg-white text-violet-700 hover:bg-white/95"
-          : "bg-white/15 backdrop-blur-sm text-white ring-1 ring-white/25 hover:bg-white/25"
+          ? "bg-white text-violet-700 hover:bg-white/90 shadow-sm"
+          : "bg-white/10 backdrop-blur-sm text-white/90 ring-1 ring-white/15 hover:bg-white/20"
       )}
     >
-      {Icon && <Icon className="h-4 w-4" aria-hidden="true" strokeWidth={2} />}
+      {Icon && <Icon className="h-3.5 w-3.5" aria-hidden="true" strokeWidth={1.75} />}
       {children}
     </button>
   );

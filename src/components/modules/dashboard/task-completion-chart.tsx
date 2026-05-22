@@ -38,7 +38,7 @@ export function TaskCompletionChart({ data }: TaskCompletionChartProps) {
       title="Task Completion by Cluster"
       subtitle="Completed vs total tasks across clusters"
     >
-      <div className="h-[200px]" role="img" aria-label="Bar chart showing task completion by cluster">
+      <div className="h-[190px]" role="img" aria-label="Bar chart showing task completion by cluster">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={chartData}
@@ -79,15 +79,15 @@ export function TaskCompletionChart({ data }: TaskCompletionChartProps) {
               dataKey="total"
               name="Total"
               fill="#e2e8f0"
-              radius={[3, 3, 0, 0]}
-              barSize={16}
+              radius={[4, 4, 0, 0]}
+              barSize={14}
             />
             <Bar
               dataKey="completed"
               name="Completed"
-              fill="#10b981"
-              radius={[3, 3, 0, 0]}
-              barSize={16}
+              fill="#8b5cf6"
+              radius={[4, 4, 0, 0]}
+              barSize={14}
             />
           </BarChart>
         </ResponsiveContainer>

@@ -36,7 +36,7 @@ export function InventoryAlerts({ data }: InventoryAlertsProps) {
           <p className="text-[11px]">All items are stocked</p>
         </div>
       ) : (
-        <div className="rounded-md border border-slate-200 overflow-hidden">
+        <div className="rounded-lg border border-slate-100 overflow-hidden">
           <table className="w-full">
             <thead>
               <tr className="bg-slate-50/80">

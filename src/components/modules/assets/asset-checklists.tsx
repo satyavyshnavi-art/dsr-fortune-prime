@@ -185,7 +185,7 @@ export function AssetChecklists() {
           </Button>
           <Button
             size="sm"
-            className="h-7 text-[11px] px-2.5 bg-blue-600 hover:bg-blue-700 text-white"
+            className="h-7 text-[11px] px-2.5 bg-violet-600 hover:bg-violet-700 text-white"
             onClick={() => {
               setNewName("");
               setNewCategory(selectedCategory);
@@ -231,8 +231,8 @@ export function AssetChecklists() {
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-2 min-w-0">
-                  <div className="p-1.5 bg-blue-50 rounded shrink-0">
-                    <FileText className="h-3.5 w-3.5 text-blue-600" />
+                  <div className="p-1.5 bg-violet-50 rounded shrink-0">
+                    <FileText className="h-3.5 w-3.5 text-violet-600" />
                   </div>
                   <div className="min-w-0">
                     <p className="text-[12px] font-medium text-slate-700 truncate">{cl.name}</p>
@@ -240,14 +240,14 @@ export function AssetChecklists() {
                       {cl.categoryName} | {cl.createdAt}
                     </p>
                     {cl.fileUrl && (
-                      <p className="text-[10px] text-blue-500 mt-0.5 truncate">{cl.fileUrl}</p>
+                      <p className="text-[10px] text-violet-500 mt-0.5 truncate">{cl.fileUrl}</p>
                     )}
                   </div>
                 </div>
                 <div className="flex items-center gap-0.5 shrink-0 ml-2">
                   <button
                     onClick={() => openView(cl)}
-                    className="h-6 w-6 rounded-md flex items-center justify-center text-blue-600 hover:bg-blue-50 transition-colors"
+                    className="h-6 w-6 rounded-md flex items-center justify-center text-violet-600 hover:bg-violet-50 transition-colors"
                     title="View"
                   >
                     <Eye className="h-3 w-3" />
@@ -314,7 +314,7 @@ export function AssetChecklists() {
               </Button>
               <Button
                 onClick={handleAddChecklist}
-                className="h-9 text-[13px] rounded-lg bg-blue-600 hover:bg-blue-700 text-white"
+                className="h-9 text-[13px] rounded-lg bg-violet-600 hover:bg-violet-700 text-white"
               >
                 <Plus className="h-3.5 w-3.5 mr-1.5" />
                 Add Checklist
@@ -348,7 +348,7 @@ export function AssetChecklists() {
                 {selectedChecklist.fileUrl && (
                   <div className="flex justify-between">
                     <span className="text-[11px] text-slate-400">File</span>
-                    <span className="text-[13px] text-blue-600">{selectedChecklist.fileUrl}</span>
+                    <span className="text-[13px] text-violet-600">{selectedChecklist.fileUrl}</span>
                   </div>
                 )}
               </div>

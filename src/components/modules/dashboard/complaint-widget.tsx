@@ -91,7 +91,7 @@ export function ComplaintWidget({ data }: { data?: any }) {
         {/* Bottom Stats */}
         <div className="grid grid-cols-3 gap-2 pt-1.5 border-t border-slate-100">
           <div className="text-center">
-            <div className="flex items-center justify-center gap-1 text-blue-600">
+            <div className="flex items-center justify-center gap-1 text-violet-600">
               <MessageSquare className="h-3 w-3" />
               <span className="text-[13px] font-bold">{total}</span>
             </div>

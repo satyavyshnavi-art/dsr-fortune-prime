@@ -217,7 +217,7 @@ export function ServiceProviderConfig() {
           <h2 className="text-[13px] font-semibold text-slate-800">Service Provider Management</h2>
           <p className="text-[11px] text-slate-400 mt-0.5">{filtered.length} providers configured</p>
         </div>
-        <Button size="sm" onClick={handleAdd} className="h-8 text-[12px] px-4 bg-blue-600 hover:bg-blue-700 text-white">
+        <Button size="sm" onClick={handleAdd} className="h-8 text-[12px] px-4 bg-violet-600 hover:bg-violet-700 text-white">
           <Plus className="h-3.5 w-3.5 mr-1.5" />
           Add Provider
         </Button>
@@ -304,7 +304,7 @@ export function ServiceProviderConfig() {
                     </td>
                     <td className="py-3 px-3">
                       <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button onClick={() => handleEdit(p)} className="p-1 rounded hover:bg-blue-50 text-slate-400 hover:text-blue-600 transition-colors" title="Edit">
+                        <button onClick={() => handleEdit(p)} className="p-1 rounded hover:bg-violet-50 text-slate-400 hover:text-violet-600 transition-colors" title="Edit">
                           <Pencil className="h-3.5 w-3.5" />
                         </button>
                         <button onClick={() => setDeleteConfirmId(p.id)} className="p-1 rounded hover:bg-red-50 text-slate-400 hover:text-red-600 transition-colors" title="Delete">
@@ -356,7 +356,7 @@ export function ServiceProviderConfig() {
                       onClick={() => toggleCategory(cat)}
                       className={`rounded-full text-[11px] font-medium px-2.5 py-1 border transition-colors ${
                         selected
-                          ? "bg-blue-50 border-blue-200 text-blue-600"
+                          ? "bg-violet-50 border-violet-200 text-violet-600"
                           : "bg-white border-slate-200 text-slate-500 hover:border-slate-300"
                       }`}
                     >
@@ -369,7 +369,7 @@ export function ServiceProviderConfig() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)} className="text-[13px]">Cancel</Button>
-            <Button onClick={handleSave} disabled={saving} className="bg-blue-600 hover:bg-blue-700 text-white text-[13px]">
+            <Button onClick={handleSave} disabled={saving} className="bg-violet-600 hover:bg-violet-700 text-white text-[13px]">
               {saving ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
               {editingProvider ? "Update" : "Add"}
             </Button>
