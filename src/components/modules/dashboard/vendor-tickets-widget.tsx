@@ -97,21 +97,21 @@ export function VendorTicketsWidget({ data }: { data?: any }) {
         {/* Bottom Stats */}
         <div className="grid grid-cols-3 gap-2 pt-1.5 border-t border-slate-100">
           <div className="text-center">
-            <div className="flex items-center justify-center gap-1 text-teal-600">
+            <div className="flex items-center justify-center gap-1 text-emerald-700">
               <Ticket className="h-3 w-3" />
               <span className="text-[13px] font-bold">{total}</span>
             </div>
             <p className="text-[9px] text-slate-400 mt-0.5">Total Tickets</p>
           </div>
           <div className="text-center">
-            <div className="flex items-center justify-center gap-1 text-teal-600">
+            <div className="flex items-center justify-center gap-1 text-emerald-700">
               <CheckCircle2 className="h-3 w-3" />
               <span className="text-[13px] font-bold">{resolutionRate}%</span>
             </div>
             <p className="text-[9px] text-slate-400 mt-0.5">Resolution Rate</p>
           </div>
           <div className="text-center">
-            <div className="flex items-center justify-center gap-1 text-teal-700">
+            <div className="flex items-center justify-center gap-1 text-emerald-800">
               <TrendingUp className="h-3 w-3" />
               <span className="text-[13px] font-bold">{avgDays}</span>
             </div>

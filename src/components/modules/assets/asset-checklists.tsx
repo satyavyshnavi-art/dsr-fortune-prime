@@ -170,7 +170,7 @@ export function AssetChecklists() {
         </div>
 
         <div className="flex items-center gap-1.5">
-          <Button size="sm" className="h-7 text-[11px] px-2.5 bg-teal-600 hover:bg-teal-700 text-white">
+          <Button size="sm" className="h-7 text-[11px] px-2.5 bg-emerald-700 hover:bg-emerald-800 text-white">
             <Calendar className="h-3 w-3 mr-1" />
             Calendar View
           </Button>
@@ -185,7 +185,7 @@ export function AssetChecklists() {
           </Button>
           <Button
             size="sm"
-            className="h-7 text-[11px] px-2.5 bg-teal-600 hover:bg-teal-700 text-white"
+            className="h-7 text-[11px] px-2.5 bg-emerald-700 hover:bg-emerald-800 text-white"
             onClick={() => {
               setNewName("");
               setNewCategory(selectedCategory);
@@ -215,7 +215,7 @@ export function AssetChecklists() {
                 setErrors({});
                 setAddOpen(true);
               }}
-              className="text-[11px] text-teal-600 hover:text-teal-700 flex items-center gap-1"
+              className="text-[11px] text-emerald-700 hover:text-emerald-800 flex items-center gap-1"
             >
               <Plus className="h-3.5 w-3.5" />
               Add your first checklist
@@ -231,8 +231,8 @@ export function AssetChecklists() {
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-2 min-w-0">
-                  <div className="p-1.5 bg-teal-50 rounded shrink-0">
-                    <FileText className="h-3.5 w-3.5 text-teal-600" />
+                  <div className="p-1.5 bg-emerald-50 rounded shrink-0">
+                    <FileText className="h-3.5 w-3.5 text-emerald-700" />
                   </div>
                   <div className="min-w-0">
                     <p className="text-[12px] font-medium text-slate-700 truncate">{cl.name}</p>
@@ -240,14 +240,14 @@ export function AssetChecklists() {
                       {cl.categoryName} | {cl.createdAt}
                     </p>
                     {cl.fileUrl && (
-                      <p className="text-[10px] text-teal-500 mt-0.5 truncate">{cl.fileUrl}</p>
+                      <p className="text-[10px] text-emerald-600 mt-0.5 truncate">{cl.fileUrl}</p>
                     )}
                   </div>
                 </div>
                 <div className="flex items-center gap-0.5 shrink-0 ml-2">
                   <button
                     onClick={() => openView(cl)}
-                    className="h-6 w-6 rounded-md flex items-center justify-center text-teal-600 hover:bg-teal-50 transition-colors"
+                    className="h-6 w-6 rounded-md flex items-center justify-center text-emerald-700 hover:bg-emerald-50 transition-colors"
                     title="View"
                   >
                     <Eye className="h-3 w-3" />
@@ -314,7 +314,7 @@ export function AssetChecklists() {
               </Button>
               <Button
                 onClick={handleAddChecklist}
-                className="h-9 text-[13px] rounded-lg bg-teal-600 hover:bg-teal-700 text-white"
+                className="h-9 text-[13px] rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white"
               >
                 <Plus className="h-3.5 w-3.5 mr-1.5" />
                 Add Checklist
@@ -348,7 +348,7 @@ export function AssetChecklists() {
                 {selectedChecklist.fileUrl && (
                   <div className="flex justify-between">
                     <span className="text-[11px] text-slate-400">File</span>
-                    <span className="text-[13px] text-teal-600">{selectedChecklist.fileUrl}</span>
+                    <span className="text-[13px] text-emerald-700">{selectedChecklist.fileUrl}</span>
                   </div>
                 )}
               </div>

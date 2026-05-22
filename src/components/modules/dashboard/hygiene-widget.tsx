@@ -30,7 +30,7 @@ export function HygieneWidget() {
               key={tab}
               className={`text-[10px] px-2 py-0.5 rounded transition-colors ${
                 i === 0
-                  ? "bg-teal-600 text-white"
+                  ? "bg-emerald-700 text-white"
                   : "bg-slate-100 text-slate-500 hover:bg-slate-200"
               }`}
             >

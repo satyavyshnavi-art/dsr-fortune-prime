@@ -147,7 +147,7 @@ export function RequestDetail({ open, onOpenChange, request }: RequestDetailProp
                     <Button
                       className={`h-7 text-[11px] px-3 text-white ${
                         actionType === "approve"
-                          ? "bg-teal-600 hover:bg-teal-700"
+                          ? "bg-emerald-700 hover:bg-emerald-800"
                           : "bg-red-600 hover:bg-red-700"
                       }`}
                       onClick={handleAction}
@@ -159,7 +159,7 @@ export function RequestDetail({ open, onOpenChange, request }: RequestDetailProp
               ) : (
                 <div className="flex items-center gap-2">
                   <Button
-                    className="h-8 text-[12px] px-4 gap-1.5 bg-teal-600 hover:bg-teal-700 text-white flex-1"
+                    className="h-8 text-[12px] px-4 gap-1.5 bg-emerald-700 hover:bg-emerald-800 text-white flex-1"
                     onClick={() => setActionType("approve")}
                   >
                     <CheckCircle2 className="h-3.5 w-3.5" />

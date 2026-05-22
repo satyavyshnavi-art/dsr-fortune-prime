@@ -318,7 +318,7 @@ export function AssetAudit() {
         <div className="flex gap-2">
           <Button
             size="sm"
-            className="h-7 text-[11px] px-2.5 bg-teal-600 hover:bg-teal-700 text-white"
+            className="h-7 text-[11px] px-2.5 bg-emerald-700 hover:bg-emerald-800 text-white"
             onClick={() => {
               setScanCategory("");
               setScanProgress(0);
@@ -348,7 +348,7 @@ export function AssetAudit() {
         <Button
           variant="outline"
           size="sm"
-          className={`h-7 text-[11px] px-2.5 ${notificationsEnabled ? "bg-emerald-50 border-emerald-200 text-teal-700" : ""}`}
+          className={`h-7 text-[11px] px-2.5 ${notificationsEnabled ? "bg-emerald-50 border-emerald-200 text-emerald-800" : ""}`}
           onClick={() => {
             setNotificationsEnabled(!notificationsEnabled);
             toast.success(notificationsEnabled ? "Notifications disabled" : "Notifications enabled — you'll be alerted for pending audits");
@@ -451,7 +451,7 @@ export function AssetAudit() {
                   <Button
                     onClick={handleStartScan}
                     disabled={!scanCategory}
-                    className="h-9 text-[13px] rounded-lg bg-teal-600 hover:bg-teal-700 text-white"
+                    className="h-9 text-[13px] rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white"
                   >
                     <ScanLine className="h-3.5 w-3.5 mr-1.5" /> Begin Scan
                   </Button>
@@ -461,12 +461,12 @@ export function AssetAudit() {
             {scanning && (
               <div className="space-y-3 py-2">
                 <div className="flex items-center gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin text-teal-600" />
+                  <Loader2 className="h-4 w-4 animate-spin text-emerald-700" />
                   <p className="text-[13px] text-slate-700">Scanning <span className="font-medium">{scanCategory}</span> assets...</p>
                 </div>
                 <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-teal-500 rounded-full transition-all duration-300"
+                    className="h-full bg-emerald-600 rounded-full transition-all duration-300"
                     style={{ width: `${scanProgress}%` }}
                   />
                 </div>
@@ -482,7 +482,7 @@ export function AssetAudit() {
                 </p>
                 <Button
                   onClick={() => setShowStartScanModal(false)}
-                  className="h-9 text-[13px] rounded-lg bg-teal-600 hover:bg-teal-700 text-white"
+                  className="h-9 text-[13px] rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white"
                 >
                   Done
                 </Button>
@@ -553,8 +553,8 @@ export function AssetAudit() {
               />
             </div>
             {individualAssetId && (
-              <div className="bg-teal-50 border border-blue-100 rounded-lg p-2.5">
-                <p className="text-[11px] text-teal-700">
+              <div className="bg-emerald-50 border border-blue-100 rounded-lg p-2.5">
+                <p className="text-[11px] text-emerald-800">
                   Asset: <span className="font-semibold">{realAssets.find(a => a.id === individualAssetId)?.name}</span>
                   {" · "}Tag: <span className="font-semibold">{realAssets.find(a => a.id === individualAssetId)?.assetTag}</span>
                 </p>
@@ -565,7 +565,7 @@ export function AssetAudit() {
               <Button
                 onClick={handleIndividualScan}
                 disabled={!individualAssetId}
-                className="h-9 text-[13px] rounded-lg bg-teal-600 hover:bg-teal-700 text-white"
+                className="h-9 text-[13px] rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white"
               >
                 <CheckCircle className="h-3.5 w-3.5 mr-1.5" /> Record Scan
               </Button>
@@ -687,7 +687,7 @@ export function AssetAudit() {
               <Button
                 onClick={handleAddConfig}
                 disabled={!newConfigCategory || !newConfigFrequency}
-                className="h-9 text-[13px] rounded-lg bg-teal-600 hover:bg-teal-700 text-white"
+                className="h-9 text-[13px] rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white"
               >
                 Add Config
               </Button>
@@ -737,7 +737,7 @@ export function AssetAudit() {
               <Button
                 onClick={handleEditConfig}
                 disabled={!editConfigCategory || !editConfigFrequency}
-                className="h-9 text-[13px] rounded-lg bg-teal-600 hover:bg-teal-700 text-white"
+                className="h-9 text-[13px] rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white"
               >
                 Update Config
               </Button>
@@ -809,11 +809,11 @@ function AuditDashboard({ extraScanned = 0, scannedCategories = {}, realAssets =
       {/* Progress KPIs */}
       <div className="grid grid-cols-3 gap-3">
         <div className="border border-slate-200 rounded-lg px-3 py-2.5 text-center">
-          <p className="text-xl font-bold text-teal-600">{totalAssets}</p>
+          <p className="text-xl font-bold text-emerald-700">{totalAssets}</p>
           <p className="text-[10px] text-slate-400 mt-0.5">Total Assets</p>
         </div>
         <div className="border border-slate-200 rounded-lg px-3 py-2.5 text-center">
-          <p className="text-xl font-bold text-teal-600">{scanned}</p>
+          <p className="text-xl font-bold text-emerald-700">{scanned}</p>
           <p className="text-[10px] text-slate-400 mt-0.5">Scanned</p>
         </div>
         <div className="border border-slate-200 rounded-lg px-3 py-2.5 text-center">
@@ -868,7 +868,7 @@ function AuditDashboard({ extraScanned = 0, scannedCategories = {}, realAssets =
                   {catRemaining} assets remaining
                 </p>
               ) : (
-                <p className="text-[10px] text-teal-600">
+                <p className="text-[10px] text-emerald-700">
                   <CheckCircle className="h-2.5 w-2.5 inline mr-0.5" />
                   All assets scanned
                 </p>
@@ -910,7 +910,7 @@ function AuditReport() {
     na: "bg-slate-300",
     needs_repair: "bg-red-500",
     damaged: "bg-orange-500",
-    missing: "bg-teal-500",
+    missing: "bg-emerald-600",
   };
 
   return (
@@ -947,7 +947,7 @@ function AuditReport() {
         </div>
         <Button
           size="sm"
-          className="h-9 text-[11px] bg-teal-600 hover:bg-teal-700 text-white"
+          className="h-9 text-[11px] bg-emerald-700 hover:bg-emerald-800 text-white"
           onClick={() => setLoaded(true)}
         >
           Load Report
@@ -961,7 +961,7 @@ function AuditReport() {
         <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-slate-300" /> N/A</span>
         <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-red-500" /> Needs Repair</span>
         <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-orange-500" /> Damaged</span>
-        <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-teal-500" /> Missing</span>
+        <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-emerald-600" /> Missing</span>
       </div>
 
       {!loaded ? (
@@ -1027,7 +1027,7 @@ function ScanReport({ onView, scans }: { onView: (scan: AuditScanRecord) => void
             value={filterDate}
             onChange={(e) => setFilterDate(e.target.value)}
           />
-          <Button size="sm" className="h-7 text-[11px] px-2.5 bg-teal-600 hover:bg-teal-700 text-white">
+          <Button size="sm" className="h-7 text-[11px] px-2.5 bg-emerald-700 hover:bg-emerald-800 text-white">
             <Download className="h-3 w-3 mr-1" />
             Export CSV
           </Button>
@@ -1082,7 +1082,7 @@ function ScanReport({ onView, scans }: { onView: (scan: AuditScanRecord) => void
                 <TableCell className="text-[12px] py-2 px-3">
                   <button
                     onClick={() => onView(scan)}
-                    className="h-7 w-7 rounded-md flex items-center justify-center text-teal-600 hover:bg-teal-50 transition-colors"
+                    className="h-7 w-7 rounded-md flex items-center justify-center text-emerald-700 hover:bg-emerald-50 transition-colors"
                     title="View Details"
                   >
                     <Eye className="h-3.5 w-3.5" />
@@ -1138,7 +1138,7 @@ function MyScans({ scans }: { scans: AuditScanRecord[] }) {
                   <span className="text-[10px] font-mono text-slate-400">{scan.assetTag}</span>
                 </div>
                 <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
-                  scan.condition === "Good" ? "bg-emerald-50 text-teal-700 border border-emerald-200"
+                  scan.condition === "Good" ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
                     : scan.condition === "Needs Repair" ? "bg-amber-50 text-amber-700 border border-amber-200"
                     : scan.condition === "Damaged" ? "bg-red-50 text-red-700 border border-red-200"
                     : "bg-slate-50 text-slate-500 border border-slate-200"
@@ -1203,7 +1203,7 @@ function ScanAnalytics({ scans = mockAuditScans }: { scans?: AuditScanRecord[] }
               {["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"].map((month, i) => (
                 <div key={month} className="flex-1 flex flex-col items-center justify-end h-full">
                   <div
-                    className="w-full bg-teal-500 rounded-t transition-all"
+                    className="w-full bg-emerald-600 rounded-t transition-all"
                     style={{ height: `${monthlyData[i] > 0 ? Math.max((monthlyData[i] / maxVal) * 100, 8) : 0}%` }}
                   />
                   {monthlyData[i] > 0 && (
@@ -1327,7 +1327,7 @@ function BulkGenerator({
       </h3>
 
       {generatedMessage && (
-        <div className="bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2 text-[12px] text-teal-700">
+        <div className="bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2 text-[12px] text-emerald-800">
           <CheckCircle className="h-3.5 w-3.5 inline mr-1.5" />
           {generatedMessage}
         </div>
@@ -1339,7 +1339,7 @@ function BulkGenerator({
           onClick={() => setBulkTab("excel")}
           className={`flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium rounded ${
             bulkTab === "excel"
-              ? "bg-teal-50 text-teal-700 border border-teal-200"
+              ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
               : "text-slate-400 hover:text-slate-600"
           }`}
         >
@@ -1350,7 +1350,7 @@ function BulkGenerator({
           onClick={() => setBulkTab("pattern")}
           className={`flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium rounded ${
             bulkTab === "pattern"
-              ? "bg-teal-50 text-teal-700 border border-teal-200"
+              ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
               : "text-slate-400 hover:text-slate-600"
           }`}
         >
@@ -1395,9 +1395,9 @@ function BulkGenerator({
             </div>
           </div>
 
-          <div className="bg-teal-50 border border-teal-200 rounded-lg p-2.5">
+          <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-2.5">
             <p className="text-[11px] font-medium text-blue-800">Required Excel columns:</p>
-            <p className="text-[10px] text-teal-600 mt-0.5">
+            <p className="text-[10px] text-emerald-700 mt-0.5">
               Category, Asset Tag, Facility, Block Type, Block, Floor, Equipment
             </p>
             <p className="text-[9px] text-blue-400 mt-0.5">
@@ -1408,7 +1408,7 @@ function BulkGenerator({
           <div className="flex items-center justify-between">
             <Button
               size="sm"
-              className="h-7 text-[11px] bg-teal-600 hover:bg-teal-700 text-white"
+              className="h-7 text-[11px] bg-emerald-700 hover:bg-emerald-800 text-white"
               disabled={!bulkCategory || !fileName}
             >
               <Upload className="h-3 w-3 mr-1" />
@@ -1471,7 +1471,7 @@ function BulkGenerator({
           </div>
           <Button
             size="sm"
-            className="h-7 text-[11px] bg-teal-600 hover:bg-teal-700 text-white"
+            className="h-7 text-[11px] bg-emerald-700 hover:bg-emerald-800 text-white"
             disabled={!patternCategory || !patternName || !patternCount}
             onClick={handlePatternGenerate}
           >
@@ -1503,7 +1503,7 @@ function AuditConfigTab({
         </h3>
         <Button
           size="sm"
-          className="h-7 text-[11px] px-2.5 bg-teal-600 hover:bg-teal-700 text-white"
+          className="h-7 text-[11px] px-2.5 bg-emerald-700 hover:bg-emerald-800 text-white"
           onClick={onAdd}
         >
           <Plus className="h-3 w-3 mr-1" />

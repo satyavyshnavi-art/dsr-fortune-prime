@@ -483,7 +483,7 @@ export function AttendanceTab() {
 
           <Button
             onClick={openCreateShift}
-            className="w-full h-8 text-[11px] bg-teal-700 hover:bg-teal-800 text-white gap-1"
+            className="w-full h-8 text-[11px] bg-emerald-800 hover:bg-emerald-900 text-white gap-1"
           >
             <Plus className="h-3 w-3" />
             Configure Shift Templates
@@ -537,7 +537,7 @@ export function AttendanceTab() {
                 key={day}
                 className={`flex-1 py-1 text-[10px] font-medium rounded transition-colors ${
                   weekOffDays.has(day)
-                    ? "bg-teal-600 text-white"
+                    ? "bg-emerald-700 text-white"
                     : "bg-slate-100 text-slate-500 hover:bg-slate-200"
                 }`}
                 onClick={() =>
@@ -557,14 +557,14 @@ export function AttendanceTab() {
           <Button
             onClick={handleAssignWeekOff}
             disabled={!selectedEmployee || weekOffDays.size === 0}
-            className="w-full h-8 text-[11px] bg-teal-600 hover:bg-teal-700 text-white gap-1 disabled:opacity-50"
+            className="w-full h-8 text-[11px] bg-emerald-700 hover:bg-emerald-800 text-white gap-1 disabled:opacity-50"
           >
             <Plus className="h-3 w-3" />
             Assign Weekoff
           </Button>
 
           {weekOffSaved && (
-            <div className="flex items-center gap-1 text-[11px] text-teal-600 font-medium">
+            <div className="flex items-center gap-1 text-[11px] text-emerald-700 font-medium">
               <Check className="h-3 w-3" />
               Week off saved successfully
             </div>
@@ -620,13 +620,13 @@ export function AttendanceTab() {
             <div className="flex items-center gap-2 mt-1">
               <button
                 onClick={() => setLeaveStatusFilter("all")}
-                className="text-[11px] text-teal-600 hover:underline font-medium"
+                className="text-[11px] text-emerald-700 hover:underline font-medium"
               >
                 View All
               </button>
               <button
                 onClick={() => setAddLeaveOpen(true)}
-                className="text-[11px] text-teal-600 hover:underline font-medium flex items-center gap-0.5"
+                className="text-[11px] text-emerald-700 hover:underline font-medium flex items-center gap-0.5"
               >
                 <Plus className="h-2.5 w-2.5" />
                 Add Leave
@@ -677,7 +677,7 @@ export function AttendanceTab() {
                   <Badge
                     className={`text-[10px] px-1.5 py-0 h-[18px] ${
                       leave.status === "Approved"
-                        ? "bg-emerald-100 text-teal-700 border-emerald-200"
+                        ? "bg-emerald-100 text-emerald-800 border-emerald-200"
                         : leave.status === "Rejected"
                           ? "bg-red-100 text-red-700 border-red-200"
                           : "bg-yellow-100 text-yellow-700 border-yellow-200"
@@ -689,7 +689,7 @@ export function AttendanceTab() {
                 <p className="text-[10px] text-slate-500">
                   {leave.dateFrom} - {leave.dateTo}
                 </p>
-                <p className="text-[10px] text-teal-600">{leave.days} days</p>
+                <p className="text-[10px] text-emerald-700">{leave.days} days</p>
                 {leave.reason && (
                   <p className="text-[10px] text-slate-400">{leave.reason}</p>
                 )}
@@ -703,7 +703,7 @@ export function AttendanceTab() {
                         onClick={() => handleApproveLeave(leave.id)}
                         title="Approve"
                       >
-                        <Check className="h-3 w-3 text-teal-600" />
+                        <Check className="h-3 w-3 text-emerald-700" />
                       </Button>
                       <Button
                         variant="ghost"
@@ -831,7 +831,7 @@ export function AttendanceTab() {
               </Button>
               <Button
                 onClick={handleSaveShift}
-                className="h-9 text-[13px] rounded-lg bg-teal-700 hover:bg-teal-800 text-white"
+                className="h-9 text-[13px] rounded-lg bg-emerald-800 hover:bg-emerald-900 text-white"
               >
                 {editingShift ? "Update Shift" : "Create Shift"}
               </Button>
@@ -882,7 +882,7 @@ export function AttendanceTab() {
               <Button
                 onClick={handleAssignShift}
                 disabled={!assignShiftEmp || !assignShiftId}
-                className="h-9 text-[13px] rounded-lg bg-teal-600 hover:bg-teal-700 text-white"
+                className="h-9 text-[13px] rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white"
               >
                 Assign
               </Button>
@@ -970,7 +970,7 @@ export function AttendanceTab() {
                                   OFF
                                 </span>
                               ) : (
-                                <span className="text-[9px] bg-emerald-100 text-teal-700 px-1 py-0.5 rounded font-medium">
+                                <span className="text-[9px] bg-emerald-100 text-emerald-800 px-1 py-0.5 rounded font-medium">
                                   {a.shiftName}
                                 </span>
                               )}
@@ -1003,7 +1003,7 @@ export function AttendanceTab() {
                   key={day}
                   className={`flex-1 py-1.5 text-[11px] font-medium rounded transition-colors ${
                     editWeekOffDays.has(day)
-                      ? "bg-teal-600 text-white"
+                      ? "bg-emerald-700 text-white"
                       : "bg-slate-100 text-slate-500 hover:bg-slate-200"
                   }`}
                   onClick={() =>
@@ -1029,7 +1029,7 @@ export function AttendanceTab() {
               </Button>
               <Button
                 onClick={handleEditWeekOff}
-                className="h-9 text-[13px] rounded-lg bg-teal-600 hover:bg-teal-700 text-white"
+                className="h-9 text-[13px] rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white"
               >
                 Save Changes
               </Button>
@@ -1167,7 +1167,7 @@ export function AttendanceTab() {
               </Button>
               <Button
                 onClick={handleAddLeave}
-                className="h-9 text-[13px] rounded-lg bg-teal-600 hover:bg-teal-700 text-white"
+                className="h-9 text-[13px] rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white"
               >
                 Submit Leave
               </Button>
@@ -1259,7 +1259,7 @@ export function AttendanceTab() {
               </Button>
               <Button
                 onClick={handleEditLeave}
-                className="h-9 text-[13px] rounded-lg bg-teal-600 hover:bg-teal-700 text-white"
+                className="h-9 text-[13px] rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white"
               >
                 Update Leave
               </Button>

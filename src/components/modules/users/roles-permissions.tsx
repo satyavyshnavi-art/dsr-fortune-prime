@@ -328,8 +328,8 @@ export function RolesPermissions() {
       header: "Role Name",
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
-          <div className="h-7 w-7 rounded-md bg-teal-50 flex items-center justify-center">
-            <Shield className="h-3.5 w-3.5 text-teal-600" />
+          <div className="h-7 w-7 rounded-md bg-emerald-50 flex items-center justify-center">
+            <Shield className="h-3.5 w-3.5 text-emerald-700" />
           </div>
           <div>
             <span className="font-medium text-[12px] text-slate-900">
@@ -383,7 +383,7 @@ export function RolesPermissions() {
         return (
           <button
             onClick={() => handleViewMatrix(row.original)}
-            className="text-[11px] text-teal-600 hover:text-teal-700 hover:underline"
+            className="text-[11px] text-emerald-700 hover:text-emerald-800 hover:underline"
           >
             {granted}/{total} permissions
           </button>
@@ -434,7 +434,7 @@ export function RolesPermissions() {
           </p>
         </div>
         <Button
-          className="h-7 text-[11px] px-2.5 gap-1 bg-teal-600 hover:bg-teal-700 text-white"
+          className="h-7 text-[11px] px-2.5 gap-1 bg-emerald-700 hover:bg-emerald-800 text-white"
           onClick={() => setShowCreateDialog(true)}
         >
           <Plus className="h-3 w-3" />
@@ -457,7 +457,7 @@ export function RolesPermissions() {
       {loading ? (
         <div className="flex items-center justify-center py-12">
           <div className="flex flex-col items-center gap-2">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-300 border-t-teal-600" />
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-300 border-t-emerald-700" />
             <span className="text-[11px] text-slate-400">Loading roles...</span>
           </div>
         </div>
@@ -513,7 +513,7 @@ export function RolesPermissions() {
                       <td key={action} className="text-center px-2 py-1.5">
                         <span
                           className={`text-[10px] font-medium ${
-                            count > 0 ? "text-teal-600" : "text-slate-300"
+                            count > 0 ? "text-emerald-700" : "text-slate-300"
                           }`}
                         >
                           {count}/{roles.length}
@@ -876,7 +876,7 @@ function RoleFormDialog({
               Cancel
             </Button>
             <Button
-              className="h-7 text-[11px] px-3 gap-1 bg-teal-600 hover:bg-teal-700 text-white"
+              className="h-7 text-[11px] px-3 gap-1 bg-emerald-700 hover:bg-emerald-800 text-white"
               onClick={handleSubmit}
             >
               <Shield className="h-3 w-3" />

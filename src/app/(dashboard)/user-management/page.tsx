@@ -32,7 +32,7 @@ export default function UserManagementPage() {
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium whitespace-nowrap border-b-2 transition-colors ${
                 isActive
-                  ? "border-teal-600 text-teal-600"
+                  ? "border-emerald-700 text-emerald-700"
                   : "border-transparent text-slate-400 hover:text-slate-600 hover:border-slate-300"
               }`}
             >

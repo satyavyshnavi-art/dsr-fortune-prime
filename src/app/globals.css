@@ -50,19 +50,19 @@
 
 :root {
   /* ──────────────────────────────────────────────────────────────────
-   * Teal green primary, gradient banners, cool surfaces.
+   * Forest green primary, gradient banners, cool surfaces.
    * ────────────────────────────────────────────────────────────────── */
   --ink: #0f172a;            /* Primary text — slate-900 */
   --ink-muted: #475569;      /* Secondary — slate-600 */
   --ink-faint: #94a3b8;      /* Tertiary — slate-400 */
   --rule: #e2e8f0;           /* Borders — slate-200 */
   --rule-soft: #f1f5f9;      /* Subtle dividers — slate-100 */
-  --parchment: #f8fafc;      /* Page background — cool light gray */
+  --parchment: #f8faf9;      /* Page background — warm light gray-green */
   --vellum: #ffffff;         /* Card surface */
-  --mark: #0d9488;           /* Primary — teal-600 */
-  --mark-soft: #ccfbf1;      /* Primary surface — teal-100 */
-  --mark-grad-from: #14b8a6; /* Gradient start — teal-500 */
-  --mark-grad-to: #0f766e;   /* Gradient end — teal-700 */
+  --mark: #2d5a47;           /* Primary — forest green */
+  --mark-soft: #e8f5ef;      /* Primary surface — soft mint */
+  --mark-grad-from: #3a7a60; /* Gradient start — medium forest */
+  --mark-grad-to: #1e4433;   /* Gradient end — deep forest */
   --seal: #059669;           /* Success — emerald-600 */
   --seal-soft: #d1fae5;
   --redline: #e11d48;        /* Destructive — rose-600 */

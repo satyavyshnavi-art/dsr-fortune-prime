@@ -245,7 +245,7 @@ export function ShiftView() {
           </div>
         </div>
         <Button
-          className="h-7 text-[11px] px-3 gap-1 bg-teal-600 hover:bg-teal-700 text-white uppercase tracking-wide"
+          className="h-7 text-[11px] px-3 gap-1 bg-emerald-700 hover:bg-emerald-800 text-white uppercase tracking-wide"
           onClick={() => setShowLogDialog(true)}
         >
           <Eye className="h-3 w-3" />
@@ -266,7 +266,7 @@ export function ShiftView() {
           <p className="text-[36px] font-bold text-slate-900 leading-none">
             {stats.presentPercent}%
           </p>
-          <p className="text-[11px] text-teal-600 mt-1">
+          <p className="text-[11px] text-emerald-700 mt-1">
             Present {stats.presentCount}/{stats.totalCount}
           </p>
         </div>
@@ -328,7 +328,7 @@ export function ShiftView() {
                     <Badge
                       className={`text-[10px] px-1.5 py-0 h-[18px] ${
                         entry.status === "P"
-                          ? "bg-emerald-100 text-teal-700 border-emerald-200"
+                          ? "bg-emerald-100 text-emerald-800 border-emerald-200"
                           : entry.status === "L"
                             ? "bg-yellow-100 text-yellow-700 border-yellow-200"
                             : entry.status === "WO"

@@ -200,7 +200,7 @@ export default function TaskManagementPage() {
         description="Create, assign, and track tasks across all sites"
         actions={
           <Button
-            className="h-8 text-[12px] px-3 gap-1.5 bg-teal-600 hover:bg-teal-700 text-white"
+            className="h-8 text-[12px] px-3 gap-1.5 bg-emerald-700 hover:bg-emerald-800 text-white"
             onClick={handleNewTask}
           >
             <PlusCircle className="h-3.5 w-3.5" />
@@ -223,7 +223,7 @@ export default function TaskManagementPage() {
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium whitespace-nowrap border-b-2 transition-colors ${
                 isActive
-                  ? "border-teal-600 text-teal-600"
+                  ? "border-emerald-700 text-emerald-700"
                   : "border-transparent text-slate-400 hover:text-slate-600 hover:border-slate-300"
               }`}
             >

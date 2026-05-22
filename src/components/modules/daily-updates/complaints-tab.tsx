@@ -311,7 +311,7 @@ export function ComplaintsTab() {
           onClick={() => setActiveView("list")}
           className={`flex items-center gap-1.5 px-1 py-1.5 text-[12px] font-medium border-b-2 transition-colors ${
             activeView === "list"
-              ? "border-teal-600 text-teal-600"
+              ? "border-emerald-700 text-emerald-700"
               : "border-transparent text-slate-500 hover:text-slate-700"
           }`}
         >
@@ -322,7 +322,7 @@ export function ComplaintsTab() {
           onClick={() => setActiveView("add")}
           className={`flex items-center gap-1.5 px-1 py-1.5 text-[12px] font-medium border-b-2 transition-colors ${
             activeView === "add"
-              ? "border-teal-600 text-teal-600"
+              ? "border-emerald-700 text-emerald-700"
               : "border-transparent text-slate-500 hover:text-slate-700"
           }`}
         >
@@ -387,14 +387,14 @@ export function ComplaintsTab() {
                           <div className="flex items-center justify-center gap-1">
                             <button
                               onClick={() => openAssign(c)}
-                              className="h-7 w-7 rounded-md flex items-center justify-center text-slate-500 hover:bg-teal-50 hover:text-teal-600 transition-colors"
+                              className="h-7 w-7 rounded-md flex items-center justify-center text-slate-500 hover:bg-emerald-50 hover:text-emerald-700 transition-colors"
                               title="Assign"
                             >
                               <UserPlus className="h-3.5 w-3.5" />
                             </button>
                             <button
                               onClick={() => openView(c)}
-                              className="h-7 w-7 rounded-md flex items-center justify-center text-teal-600 hover:bg-teal-50 transition-colors"
+                              className="h-7 w-7 rounded-md flex items-center justify-center text-emerald-700 hover:bg-emerald-50 transition-colors"
                               title="View"
                             >
                               <Eye className="h-3.5 w-3.5" />
@@ -477,7 +477,7 @@ export function ComplaintsTab() {
                 </select>
               </div>
             </div>
-            <Button onClick={handleAddComplaint} className="w-full bg-teal-600 hover:bg-teal-700 text-white h-9 text-[13px] rounded-lg">
+            <Button onClick={handleAddComplaint} className="w-full bg-emerald-700 hover:bg-emerald-800 text-white h-9 text-[13px] rounded-lg">
               <Plus className="h-3.5 w-3.5 mr-1.5" /> Create Complaint
             </Button>
           </div>
@@ -514,9 +514,9 @@ export function ComplaintsTab() {
               <button
                 key={idx}
                 onClick={() => handleAssign(employee)}
-                className="w-full text-left px-3 py-2 text-[13px] text-slate-700 hover:bg-teal-50 hover:text-teal-700 rounded-md transition-colors flex items-center gap-2"
+                className="w-full text-left px-3 py-2 text-[13px] text-slate-700 hover:bg-emerald-50 hover:text-emerald-800 rounded-md transition-colors flex items-center gap-2"
               >
-                <div className="h-6 w-6 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center text-[10px] font-semibold shrink-0">
+                <div className="h-6 w-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[10px] font-semibold shrink-0">
                   {employee[0]}
                 </div>
                 {employee}
@@ -586,7 +586,7 @@ export function ComplaintsTab() {
             </div>
             <div className="flex justify-end gap-2 pt-1">
               <Button variant="outline" onClick={() => { setEditOpen(false); setEditErrors({}); }} className="h-9 text-[13px] rounded-lg">Cancel</Button>
-              <Button onClick={handleEdit} className="h-9 text-[13px] rounded-lg bg-teal-600 hover:bg-teal-700 text-white">Update Complaint</Button>
+              <Button onClick={handleEdit} className="h-9 text-[13px] rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white">Update Complaint</Button>
             </div>
           </div>
         </DialogContent>

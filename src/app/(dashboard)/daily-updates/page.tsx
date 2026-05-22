@@ -80,7 +80,7 @@ export default function DailyUpdatesPage() {
               onClick={() => setActiveTab(tab.key)}
               className={`flex items-center gap-1.5 px-3 py-2 text-[12px] font-medium border-b-2 transition-colors whitespace-nowrap ${
                 isActive
-                  ? "border-teal-600 text-teal-600 bg-teal-50/60 rounded-t-md"
+                  ? "border-emerald-700 text-emerald-700 bg-emerald-50/60 rounded-t-md"
                   : "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded-t-md"
               }`}
             >

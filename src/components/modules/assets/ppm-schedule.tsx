@@ -189,7 +189,7 @@ export function PPMSchedule() {
 
           <Button
             size="sm"
-            className="h-7 text-[11px] px-2.5 bg-teal-600 hover:bg-teal-700 text-white"
+            className="h-7 text-[11px] px-2.5 bg-emerald-700 hover:bg-emerald-800 text-white"
             onClick={() => {
               setNewAsset("");
               setNewCategory("");
@@ -216,10 +216,10 @@ export function PPMSchedule() {
       {/* Summary bar */}
       <div className="flex items-center gap-3 text-[11px]">
         <span className="text-slate-400">
-          Total Tasks: <span className="font-bold text-teal-600">{totalTasks}</span>
+          Total Tasks: <span className="font-bold text-emerald-700">{totalTasks}</span>
         </span>
         <span className="text-slate-400">
-          Completed: <span className="font-bold text-teal-600">{completedTasks}</span>
+          Completed: <span className="font-bold text-emerald-700">{completedTasks}</span>
         </span>
         <span className="text-slate-400">
           Overdue: <span className="font-bold text-red-600">{overdueTasks}</span>
@@ -233,7 +233,7 @@ export function PPMSchedule() {
       </div>
 
       {/* Title */}
-      <h2 className="text-[13px] font-bold text-teal-600 text-center">
+      <h2 className="text-[13px] font-bold text-emerald-700 text-center">
         52 Weeks PPM Schedule ({year})
       </h2>
 
@@ -344,7 +344,7 @@ export function PPMSchedule() {
               </Button>
               <Button
                 onClick={handleAddPPM}
-                className="h-9 text-[13px] rounded-lg bg-teal-600 hover:bg-teal-700 text-white"
+                className="h-9 text-[13px] rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white"
               >
                 <Plus className="h-3.5 w-3.5 mr-1.5" />
                 Add Task

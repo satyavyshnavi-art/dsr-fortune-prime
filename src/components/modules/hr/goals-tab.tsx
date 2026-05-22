@@ -53,7 +53,7 @@ export function GoalsTab() {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="flex flex-col items-center gap-2">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-300 border-t-teal-600" />
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-300 border-t-emerald-700" />
           <span className="text-[11px] text-slate-400">Loading...</span>
         </div>
       </div>
@@ -174,7 +174,7 @@ export function GoalsTab() {
                           <span
                             className={`text-[12px] font-mono ${
                               ev.score >= 80
-                                ? "text-teal-600"
+                                ? "text-emerald-700"
                                 : ev.score >= 60
                                 ? "text-amber-600"
                                 : "text-red-600"

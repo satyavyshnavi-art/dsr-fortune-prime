@@ -120,7 +120,7 @@ export default function ProfilePage() {
           </Avatar>
           <div className="flex-1">
             <h2 className="text-xl font-bold text-slate-900">{user.name}</h2>
-            <p className="text-[13px] text-teal-600 font-medium mt-0.5">{user.role}</p>
+            <p className="text-[13px] text-emerald-700 font-medium mt-0.5">{user.role}</p>
             <div className="flex flex-wrap items-center gap-4 mt-3 text-[13px] text-slate-500">
               <span className="flex items-center gap-1.5">
                 <Mail className="h-3.5 w-3.5" />
@@ -197,7 +197,7 @@ export default function ProfilePage() {
             </div>
             <Button
               size="sm"
-              className="h-8 text-[12px] bg-teal-600 hover:bg-teal-700 text-white mt-2"
+              className="h-8 text-[12px] bg-emerald-700 hover:bg-emerald-800 text-white mt-2"
               onClick={handleSaveProfile}
               disabled={saving}
             >

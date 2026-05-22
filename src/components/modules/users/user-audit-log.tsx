@@ -76,7 +76,7 @@ const columns: ColumnDef<AuditEntry, unknown>[] = [
     accessorKey: "user",
     header: "User",
     cell: ({ row }) => (
-      <span className="text-[12px] font-medium text-teal-600">{row.original.user}</span>
+      <span className="text-[12px] font-medium text-emerald-700">{row.original.user}</span>
     ),
   },
   {

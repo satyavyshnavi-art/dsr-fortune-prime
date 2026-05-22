@@ -426,7 +426,7 @@ export function TaskDetail({
           <div className="flex items-center gap-2 border-t border-slate-200 pt-3 flex-wrap">
             {task.status !== "completed" && task.status !== "cancelled" && (
               <Button
-                className="h-8 text-[12px] px-3 gap-1.5 bg-teal-600 hover:bg-teal-700 text-white"
+                className="h-8 text-[12px] px-3 gap-1.5 bg-emerald-700 hover:bg-emerald-800 text-white"
                 onClick={handleMarkComplete}
               >
                 <CheckCircle2 className="h-3.5 w-3.5" />

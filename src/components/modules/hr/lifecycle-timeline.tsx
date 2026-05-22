@@ -19,7 +19,7 @@ const eventConfig: Record<
 > = {
   joining: { icon: UserPlus, color: "text-emerald-500", lineColor: "bg-emerald-200", variant: "success" },
   confirmation: { icon: CheckCircle2, color: "text-blue-500", lineColor: "bg-blue-200", variant: "info" },
-  promotion: { icon: TrendingUp, color: "text-teal-500", lineColor: "bg-teal-200", variant: "purple" },
+  promotion: { icon: TrendingUp, color: "text-emerald-600", lineColor: "bg-emerald-200", variant: "purple" },
   warning: { icon: AlertTriangle, color: "text-amber-500", lineColor: "bg-amber-200", variant: "warning" },
   separation: { icon: LogOut, color: "text-red-500", lineColor: "bg-red-200", variant: "danger" },
 };
@@ -71,7 +71,7 @@ export function LifecycleTimeline() {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="flex flex-col items-center gap-2">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-300 border-t-teal-600" />
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-300 border-t-emerald-700" />
           <span className="text-[11px] text-slate-400">Loading...</span>
         </div>
       </div>

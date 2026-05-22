@@ -20,7 +20,7 @@ interface KPICardProps {
 }
 
 const toneStyles: Record<Tone, { tile: string; spark: string }> = {
-  violet:  { tile: "bg-gradient-to-br from-teal-500 to-teal-600",          spark: "bg-teal-300" },
+  violet:  { tile: "bg-gradient-to-br from-emerald-700 to-emerald-800",    spark: "bg-emerald-400" },
   emerald: { tile: "bg-gradient-to-br from-emerald-500 to-teal-600",      spark: "bg-emerald-300" },
   orange:  { tile: "bg-gradient-to-br from-orange-400 to-amber-600",      spark: "bg-orange-300" },
   sky:     { tile: "bg-gradient-to-br from-sky-500 to-blue-600",          spark: "bg-sky-300" },

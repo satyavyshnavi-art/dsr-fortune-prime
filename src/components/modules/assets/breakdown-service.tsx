@@ -379,7 +379,7 @@ export function BreakdownService() {
             <div className="flex items-center gap-1.5">
               <Button
                 size="sm"
-                className="h-7 text-[11px] px-2.5 bg-teal-600 hover:bg-teal-700 text-white"
+                className="h-7 text-[11px] px-2.5 bg-emerald-700 hover:bg-emerald-800 text-white"
                 onClick={() => { setAddErrors({}); setShowAddModal(true); }}
               >
                 <Plus className="h-3 w-3 mr-1" />
@@ -487,7 +487,7 @@ export function BreakdownService() {
               onClick={() => setActiveSubTab("view")}
               className={`flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${
                 activeSubTab === "view"
-                  ? "bg-emerald-50 text-teal-700 border border-emerald-200"
+                  ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
                   : "text-slate-400 hover:text-slate-600"
               }`}
             >
@@ -501,8 +501,8 @@ export function BreakdownService() {
               {/* Success message */}
               {incidentSubmitted && (
                 <div className="flex items-center gap-2 p-2.5 bg-emerald-50 border border-emerald-200 rounded-lg">
-                  <CheckCircle2 className="h-4 w-4 text-teal-600" />
-                  <p className="text-[12px] text-teal-700 font-medium">Incident report submitted successfully!</p>
+                  <CheckCircle2 className="h-4 w-4 text-emerald-700" />
+                  <p className="text-[12px] text-emerald-800 font-medium">Incident report submitted successfully!</p>
                 </div>
               )}
 
@@ -671,14 +671,14 @@ export function BreakdownService() {
                       <div className="mt-2 grid grid-cols-2 gap-2">
                         {report.correctiveAction && (
                           <div className="bg-blue-50 rounded p-1.5">
-                            <p className="text-[10px] font-medium text-teal-700">Corrective Action</p>
-                            <p className="text-[10px] text-teal-600">{report.correctiveAction}</p>
+                            <p className="text-[10px] font-medium text-emerald-800">Corrective Action</p>
+                            <p className="text-[10px] text-emerald-700">{report.correctiveAction}</p>
                           </div>
                         )}
                         {report.preventiveAction && (
                           <div className="bg-emerald-50 rounded p-1.5">
-                            <p className="text-[10px] font-medium text-teal-700">Preventive Action</p>
-                            <p className="text-[10px] text-teal-600">{report.preventiveAction}</p>
+                            <p className="text-[10px] font-medium text-emerald-800">Preventive Action</p>
+                            <p className="text-[10px] text-emerald-700">{report.preventiveAction}</p>
                           </div>
                         )}
                       </div>
@@ -772,7 +772,7 @@ export function BreakdownService() {
               <Button variant="outline" onClick={() => setShowAddModal(false)} className="h-9 text-[13px] rounded-lg">
                 Cancel
               </Button>
-              <Button onClick={handleAdd} className="h-9 text-[13px] rounded-lg bg-teal-600 hover:bg-teal-700 text-white">
+              <Button onClick={handleAdd} className="h-9 text-[13px] rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white">
                 Add Service
               </Button>
             </div>
@@ -897,7 +897,7 @@ export function BreakdownService() {
             </div>
             <div className="flex justify-end gap-2 pt-1">
               <Button variant="outline" onClick={() => setEditOpen(false)} className="h-9 text-[13px] rounded-lg">Cancel</Button>
-              <Button onClick={handleEdit} className="h-9 text-[13px] rounded-lg bg-teal-600 hover:bg-teal-700 text-white">Update Service</Button>
+              <Button onClick={handleEdit} className="h-9 text-[13px] rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white">Update Service</Button>
             </div>
           </div>
         </DialogContent>

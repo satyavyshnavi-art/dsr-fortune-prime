@@ -151,7 +151,7 @@ export function AlertCard({
                 <Button
                   size="sm"
                   variant="outline"
-                  className="h-6 text-[10px] px-2 bg-white hover:bg-teal-50 border-teal-200 text-teal-700"
+                  className="h-6 text-[10px] px-2 bg-white hover:bg-emerald-50 border-emerald-200 text-emerald-800"
                   onClick={() => onAcknowledge(alert.id)}
                 >
                   <CheckCircle className="h-2.5 w-2.5 mr-0.5" />
@@ -174,7 +174,7 @@ export function AlertCard({
                   <Button
                     size="sm"
                     variant="outline"
-                    className="h-6 text-[10px] px-2 bg-white hover:bg-emerald-50 border-emerald-200 text-teal-700"
+                    className="h-6 text-[10px] px-2 bg-white hover:bg-emerald-50 border-emerald-200 text-emerald-800"
                     onClick={() => onResolve(alert.id)}
                   >
                     <CheckCircle className="h-2.5 w-2.5 mr-0.5" />
@@ -195,7 +195,7 @@ export function AlertCard({
               </>
             )}
             {alert.status === "resolved" && (
-              <Badge className="bg-emerald-100 text-teal-700 text-[9px] h-[16px] px-1.5">
+              <Badge className="bg-emerald-100 text-emerald-800 text-[9px] h-[16px] px-1.5">
                 <CheckCircle className="h-2.5 w-2.5 mr-0.5" />
                 Resolved
               </Badge>

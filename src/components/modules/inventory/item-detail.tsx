@@ -45,7 +45,7 @@ export function ItemDetail({ open, onOpenChange, item }: ItemDetailProps) {
       <DialogContent className="sm:max-w-[520px] p-5 max-h-[80vh] overflow-y-auto" showCloseButton>
         <DialogHeader className="pb-1">
           <DialogTitle className="text-[14px] font-semibold text-slate-800 flex items-center gap-2">
-            <Package className="h-4 w-4 text-teal-600" />
+            <Package className="h-4 w-4 text-emerald-700" />
             {item.name}
           </DialogTitle>
         </DialogHeader>

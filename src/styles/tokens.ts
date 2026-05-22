@@ -163,10 +163,10 @@ export const accent = {
     progress: "bg-rose-500",
   },
   lavender: {
-    tile: "bg-teal-100 text-teal-600",
-    pill: "bg-teal-100 text-teal-700",
-    gradient: "bg-gradient-to-br from-teal-50 to-teal-100/40",
-    progress: "bg-teal-500",
+    tile: "bg-emerald-100 text-emerald-700",
+    pill: "bg-emerald-100 text-emerald-800",
+    gradient: "bg-gradient-to-br from-emerald-50 to-emerald-100/40",
+    progress: "bg-emerald-600",
   },
   sky: {
     tile: "bg-sky-100 text-sky-600",
@@ -175,10 +175,10 @@ export const accent = {
     progress: "bg-sky-500",
   },
   teal: {
-    tile: "bg-teal-100 text-teal-600",
-    pill: "bg-teal-100 text-teal-700",
-    gradient: "bg-gradient-to-br from-teal-50 to-teal-100/40",
-    progress: "bg-teal-500",
+    tile: "bg-emerald-100 text-emerald-700",
+    pill: "bg-emerald-100 text-emerald-800",
+    gradient: "bg-gradient-to-br from-emerald-50 to-emerald-100/40",
+    progress: "bg-emerald-600",
   },
 } as const;
 
@@ -202,7 +202,7 @@ export const status = {
   /** Closed, archived, inactive */
   neutral: "bg-slate-100 text-slate-600",
   /** Medium priority, in-between states */
-  purple: "bg-teal-100 text-teal-700",
+  purple: "bg-emerald-100 text-emerald-800",
 } as const;
 
 // ──────────────────────────────────────────────────────────────────────────────

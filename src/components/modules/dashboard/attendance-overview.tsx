@@ -10,7 +10,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-const PIE_COLORS = ["#14b8a6", "#ef4444", "#3b82f6", "#f59e0b"];
+const PIE_COLORS = ["#059669", "#ef4444", "#3b82f6", "#f59e0b"];
 
 interface AttendanceSlice {
   name: string;

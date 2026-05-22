@@ -354,10 +354,10 @@ export function VendorTab() {
             <Label className="text-[11px] text-slate-500">Upload Files</Label>
             <div
               onClick={() => handleFileUpload(".jpg,.jpeg,.png,.pdf,.doc,.docx", setUploadedFileName)}
-              className="mt-1 flex flex-col items-center justify-center rounded-md border-2 border-dashed border-slate-200 p-5 text-center cursor-pointer hover:border-teal-300 hover:bg-teal-50/30 transition-colors"
+              className="mt-1 flex flex-col items-center justify-center rounded-md border-2 border-dashed border-slate-200 p-5 text-center cursor-pointer hover:border-emerald-300 hover:bg-emerald-50/30 transition-colors"
             >
               <UploadIcon className="h-5 w-5 text-slate-300 mb-1" />
-              <p className="text-[12px] text-teal-600 font-medium">
+              <p className="text-[12px] text-emerald-700 font-medium">
                 Click to upload{" "}
                 <span className="text-slate-400 font-normal">or drag and drop files</span>
               </p>
@@ -366,7 +366,7 @@ export function VendorTab() {
                 <FileText className="h-3 w-3 mr-1" />
                 Choose Files
               </Button>
-              {uploadedFileName && <p className="text-[11px] text-teal-600 mt-1.5 font-medium">{uploadedFileName}</p>}
+              {uploadedFileName && <p className="text-[11px] text-emerald-700 mt-1.5 font-medium">{uploadedFileName}</p>}
             </div>
           </div>
 
@@ -386,7 +386,7 @@ export function VendorTab() {
           <div className="flex items-center gap-2">
             <Button
               onClick={handleCreateTicket}
-              className="bg-teal-600 hover:bg-teal-700 text-white h-7 text-[11px]"
+              className="bg-emerald-700 hover:bg-emerald-800 text-white h-7 text-[11px]"
             >
               <Plus className="h-3 w-3 mr-1" />
               Create Ticket
@@ -497,7 +497,7 @@ export function VendorTab() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-6 text-[10px] px-2 text-teal-600 hover:bg-teal-50 hover:text-teal-700"
+                    className="h-6 text-[10px] px-2 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800"
                     onClick={() => openView(ticket)}
                   >
                     <Eye className="h-2.5 w-2.5 mr-0.5" />
@@ -507,7 +507,7 @@ export function VendorTab() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="h-6 text-[10px] px-2 text-teal-600 hover:bg-emerald-50 hover:text-teal-700"
+                      className="h-6 text-[10px] px-2 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800"
                       onClick={() => openResolve(ticket)}
                     >
                       <CheckCircle className="h-2.5 w-2.5 mr-0.5" />
@@ -648,7 +648,7 @@ export function VendorTab() {
               </Button>
               <Button
                 onClick={handleResolve}
-                className="h-9 text-[13px] rounded-lg bg-teal-600 hover:bg-teal-700 text-white"
+                className="h-9 text-[13px] rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white"
               >
                 <CheckCircle className="h-3.5 w-3.5 mr-1.5" />
                 Mark as Resolved

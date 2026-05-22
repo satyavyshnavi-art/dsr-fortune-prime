@@ -98,7 +98,7 @@ export function CandidatesTracker() {
       cell: ({ row }) => {
         const score = row.original.interviewScore;
         if (score === null) return <span className="text-[12px] text-slate-300">-</span>;
-        const color = score >= 80 ? "text-teal-600" : score >= 60 ? "text-amber-600" : "text-red-600";
+        const color = score >= 80 ? "text-emerald-700" : score >= 60 ? "text-amber-600" : "text-red-600";
         return <span className={`text-[12px] font-mono ${color}`}>{score}</span>;
       },
     },
@@ -130,7 +130,7 @@ export function CandidatesTracker() {
       {loading ? (
         <div className="flex items-center justify-center py-12">
           <div className="flex flex-col items-center gap-2">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-300 border-t-teal-600" />
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-300 border-t-emerald-700" />
             <span className="text-[11px] text-slate-400">Loading...</span>
           </div>
         </div>

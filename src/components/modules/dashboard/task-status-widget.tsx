@@ -66,7 +66,7 @@ export function TaskStatusWidget({ data }: { data?: any }) {
             onClick={() => setActiveTab("matrix")}
             className={`px-2.5 py-1 text-[10px] font-medium border-b-2 transition-colors ${
               activeTab === "matrix"
-                ? "border-teal-500 text-teal-600"
+                ? "border-emerald-600 text-emerald-700"
                 : "border-transparent text-slate-400 hover:text-slate-600"
             }`}
           >
@@ -76,7 +76,7 @@ export function TaskStatusWidget({ data }: { data?: any }) {
             onClick={() => setActiveTab("list")}
             className={`px-2.5 py-1 text-[10px] font-medium border-b-2 transition-colors ${
               activeTab === "list"
-                ? "border-teal-500 text-teal-600"
+                ? "border-emerald-600 text-emerald-700"
                 : "border-transparent text-slate-400 hover:text-slate-600"
             }`}
           >
@@ -196,7 +196,7 @@ export function TaskStatusWidget({ data }: { data?: any }) {
             <p className="text-[9px] text-slate-400">Total Tasks</p>
           </div>
           <div className="text-center">
-            <div className="flex items-center justify-center gap-0.5 text-teal-600">
+            <div className="flex items-center justify-center gap-0.5 text-emerald-700">
               <CheckCircle2 className="h-2.5 w-2.5" />
               <span className="text-[12px] font-bold">{completed}</span>
             </div>

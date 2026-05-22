@@ -251,7 +251,7 @@ export function BillingView() {
             <Switch checked={showAgreed} onCheckedChange={setShowAgreed} />
           </div>
           <Button
-            className="h-7 text-[11px] px-2.5 gap-1 bg-teal-600 hover:bg-teal-700 text-white"
+            className="h-7 text-[11px] px-2.5 gap-1 bg-emerald-700 hover:bg-emerald-800 text-white"
             disabled={downloading === "pdf"}
             onClick={() => handleDownload("pdf")}
           >
@@ -259,7 +259,7 @@ export function BillingView() {
             {downloading === "pdf" ? "Downloading..." : "Download PDF"}
           </Button>
           <Button
-            className="h-7 text-[11px] px-2.5 gap-1 bg-teal-600 hover:bg-teal-700 text-white"
+            className="h-7 text-[11px] px-2.5 gap-1 bg-emerald-700 hover:bg-emerald-800 text-white"
             disabled={downloading === "csv"}
             onClick={() => handleDownload("csv")}
           >
@@ -290,7 +290,7 @@ export function BillingView() {
           />
         </div>
         <Button
-          className="h-7 text-[11px] px-3 bg-teal-600 hover:bg-teal-700 text-white font-semibold"
+          className="h-7 text-[11px] px-3 bg-emerald-700 hover:bg-emerald-800 text-white font-semibold"
           onClick={handleGo}
         >
           GO
@@ -353,7 +353,7 @@ export function BillingView() {
                 Absent
               </th>
               {showAgreed && (
-                <th className="px-3 py-2 text-center text-[10px] font-semibold text-teal-600 uppercase tracking-wider">
+                <th className="px-3 py-2 text-center text-[10px] font-semibold text-emerald-700 uppercase tracking-wider">
                   Agreement
                 </th>
               )}
@@ -386,7 +386,7 @@ export function BillingView() {
                     <td className="px-3 py-2 text-[12px] text-center text-slate-600">{row.leaveE}</td>
                     <td className="px-3 py-2 text-[12px] text-center text-slate-600">{row.absent}</td>
                     {showAgreed && (
-                      <td className="px-3 py-2 text-[12px] text-center text-teal-600 font-medium">
+                      <td className="px-3 py-2 text-[12px] text-center text-emerald-700 font-medium">
                         {row.agreement}
                       </td>
                     )}
@@ -407,7 +407,7 @@ export function BillingView() {
                   <td className="px-3 py-2 text-[12px] text-center text-slate-700">{totals.leaveE}</td>
                   <td className="px-3 py-2 text-[12px] text-center text-slate-700">{totals.absent}</td>
                   {showAgreed && (
-                    <td className="px-3 py-2 text-[12px] text-center text-teal-700 font-bold">
+                    <td className="px-3 py-2 text-[12px] text-center text-emerald-800 font-bold">
                       {totals.agreement}
                     </td>
                   )}

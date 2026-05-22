@@ -28,28 +28,28 @@ export function DailyUpdateConfig() {
         <TabsList variant="line" className="border-b border-slate-200 w-full justify-start gap-0">
           <TabsTrigger
             value={0}
-            className="px-3 py-1.5 text-[12px] font-medium gap-1.5 data-active:text-teal-600 data-active:after:bg-teal-600"
+            className="px-3 py-1.5 text-[12px] font-medium gap-1.5 data-active:text-emerald-700 data-active:after:bg-emerald-700"
           >
             <SprayCan className="h-3.5 w-3.5" />
             Hygiene
           </TabsTrigger>
           <TabsTrigger
             value={1}
-            className="px-3 py-1.5 text-[12px] font-medium gap-1.5 data-active:text-teal-600 data-active:after:bg-teal-600"
+            className="px-3 py-1.5 text-[12px] font-medium gap-1.5 data-active:text-emerald-700 data-active:after:bg-emerald-700"
           >
             <Zap className="h-3.5 w-3.5" />
             Power
           </TabsTrigger>
           <TabsTrigger
             value={2}
-            className="px-3 py-1.5 text-[12px] font-medium gap-1.5 data-active:text-teal-600 data-active:after:bg-teal-600"
+            className="px-3 py-1.5 text-[12px] font-medium gap-1.5 data-active:text-emerald-700 data-active:after:bg-emerald-700"
           >
             <Droplets className="h-3.5 w-3.5" />
             Water Infrastructure
           </TabsTrigger>
           <TabsTrigger
             value={3}
-            className="px-3 py-1.5 text-[12px] font-medium gap-1.5 data-active:text-teal-600 data-active:after:bg-teal-600"
+            className="px-3 py-1.5 text-[12px] font-medium gap-1.5 data-active:text-emerald-700 data-active:after:bg-emerald-700"
           >
             <FlaskConical className="h-3.5 w-3.5" />
             Water Quality

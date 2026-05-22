@@ -136,8 +136,8 @@ export function FacilityDetailsForm() {
       <Card className="shadow-none border-slate-200">
         <CardContent className="p-4 space-y-3">
           <div className="flex items-start gap-2.5">
-            <div className="rounded-md bg-teal-50 p-1.5">
-              <Building2 className="h-4 w-4 text-teal-600" />
+            <div className="rounded-md bg-emerald-50 p-1.5">
+              <Building2 className="h-4 w-4 text-emerald-700" />
             </div>
             <div>
               <h3 className="text-[13px] font-semibold text-slate-800">
@@ -173,8 +173,8 @@ export function FacilityDetailsForm() {
       <Card className="shadow-none border-slate-200">
         <CardContent className="p-4 space-y-3">
           <div className="flex items-start gap-2.5">
-            <div className="rounded-md bg-teal-50 p-1.5">
-              <Building2 className="h-4 w-4 text-teal-600" />
+            <div className="rounded-md bg-emerald-50 p-1.5">
+              <Building2 className="h-4 w-4 text-emerald-700" />
             </div>
             <div>
               <h3 className="text-[13px] font-semibold text-slate-800">
@@ -270,7 +270,7 @@ export function FacilityDetailsForm() {
           </div>
 
           <Button
-            className="h-7 text-[11px] bg-teal-600 hover:bg-teal-700 text-white gap-1.5 px-3"
+            className="h-7 text-[11px] bg-emerald-700 hover:bg-emerald-800 text-white gap-1.5 px-3"
             onClick={handleSubmit}
             disabled={saving}
           >

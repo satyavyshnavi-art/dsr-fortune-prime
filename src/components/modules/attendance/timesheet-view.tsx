@@ -279,7 +279,7 @@ export function TimesheetView() {
         </div>
         <div className="flex items-center gap-1.5">
           <Button
-            className="h-7 text-[11px] px-2.5 gap-1 bg-teal-600 hover:bg-teal-700 text-white"
+            className="h-7 text-[11px] px-2.5 gap-1 bg-emerald-700 hover:bg-emerald-800 text-white"
             disabled={downloading === "pdf"}
             onClick={() => handleDownload("pdf")}
           >
@@ -287,7 +287,7 @@ export function TimesheetView() {
             {downloading === "pdf" ? "Downloading..." : "Download PDF"}
           </Button>
           <Button
-            className="h-7 text-[11px] px-2.5 gap-1 bg-teal-600 hover:bg-teal-700 text-white"
+            className="h-7 text-[11px] px-2.5 gap-1 bg-emerald-700 hover:bg-emerald-800 text-white"
             disabled={downloading === "csv"}
             onClick={() => handleDownload("csv")}
           >

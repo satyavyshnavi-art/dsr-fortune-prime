@@ -25,7 +25,7 @@ import {
   type InsightItem,
 } from "./mock-data";
 
-const PIE_COLORS = ["#0d9488", "#3b82f6", "#ef4444"];
+const PIE_COLORS = ["#047857", "#3b82f6", "#ef4444"];
 
 function InsightRow({ insight }: { insight: InsightItem }) {
   const dotColor =
@@ -46,7 +46,7 @@ function InsightRow({ insight }: { insight: InsightItem }) {
 
   const labelColor =
     insight.type === "positive" || insight.type === "improving"
-      ? "text-teal-600"
+      ? "text-emerald-700"
       : insight.type === "stable"
         ? "text-blue-600"
         : "text-yellow-600";

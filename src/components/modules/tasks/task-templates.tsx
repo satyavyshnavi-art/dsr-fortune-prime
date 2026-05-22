@@ -229,7 +229,7 @@ export function TaskTemplates({ facilityId, orgId }: TaskTemplatesProps) {
       <div className="flex items-center justify-between">
         <p className="text-[12px] text-slate-500">{templates.length} templates available</p>
         <Button
-          className="h-8 text-[12px] px-3 gap-1.5 bg-teal-600 hover:bg-teal-700 text-white"
+          className="h-8 text-[12px] px-3 gap-1.5 bg-emerald-700 hover:bg-emerald-800 text-white"
           onClick={openCreateForm}
         >
           <PlusCircle className="h-3.5 w-3.5" />
@@ -240,7 +240,7 @@ export function TaskTemplates({ facilityId, orgId }: TaskTemplatesProps) {
       {loading ? (
         <div className="flex items-center justify-center py-12">
           <div className="flex flex-col items-center gap-2">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-300 border-t-teal-600" />
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-300 border-t-emerald-700" />
             <span className="text-[11px] text-slate-400">Loading templates...</span>
           </div>
         </div>
@@ -359,7 +359,7 @@ export function TaskTemplates({ facilityId, orgId }: TaskTemplatesProps) {
 
             <Button
               onClick={handleSave}
-              className="w-full bg-teal-600 hover:bg-teal-700 text-white h-9 text-[13px] rounded-lg"
+              className="w-full bg-emerald-700 hover:bg-emerald-800 text-white h-9 text-[13px] rounded-lg"
             >
               <Save className="h-3.5 w-3.5 mr-1.5" />
               {editingTemplate ? "Update Template" : "Create Template"}

@@ -330,8 +330,8 @@ export function AssetDashboard() {
                   <div
                     className={`mt-0.5 rounded-full p-1 shrink-0 ${
                       obs.type === "positive"
-                        ? "bg-emerald-100 text-teal-600"
-                        : "bg-teal-100 text-teal-600"
+                        ? "bg-emerald-100 text-emerald-700"
+                        : "bg-emerald-100 text-emerald-700"
                     }`}
                   >
                     {obs.type === "positive" ? (
@@ -347,7 +347,7 @@ export function AssetDashboard() {
                       </p>
                       <button
                         onClick={() => handleOpenObservation(obs)}
-                        className="text-[10px] text-teal-600 hover:text-teal-800 font-medium shrink-0 flex items-center gap-0.5"
+                        className="text-[10px] text-emerald-700 hover:text-emerald-900 font-medium shrink-0 flex items-center gap-0.5"
                       >
                         <Eye className="h-3 w-3" />
                         View
@@ -375,7 +375,7 @@ export function AssetDashboard() {
               </h3>
               <button
                 onClick={() => setPpmDialogOpen(true)}
-                className="text-[10px] text-teal-600 hover:text-teal-800 font-medium flex items-center gap-0.5"
+                className="text-[10px] text-emerald-700 hover:text-emerald-900 font-medium flex items-center gap-0.5"
               >
                 <CalendarClock className="h-3 w-3" />
                 View All
@@ -527,9 +527,9 @@ export function AssetDashboard() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               {selectedObservation?.type === "positive" ? (
-                <CheckCircle2 className="h-4 w-4 text-teal-600" />
+                <CheckCircle2 className="h-4 w-4 text-emerald-700" />
               ) : (
-                <TrendingUp className="h-4 w-4 text-teal-600" />
+                <TrendingUp className="h-4 w-4 text-emerald-700" />
               )}
               {selectedObservation?.title}
             </DialogTitle>

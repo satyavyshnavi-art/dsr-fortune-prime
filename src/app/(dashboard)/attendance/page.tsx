@@ -51,9 +51,9 @@ export default function AttendancePage() {
       <PageHeader title="Attendance & Staffing" />
 
       {/* Info Banner */}
-      <div className="bg-teal-50/60 border border-teal-200 rounded-md px-3 py-2 flex items-center gap-2">
-        <AlertTriangle className="h-3.5 w-3.5 text-teal-500 flex-shrink-0" />
-        <p className="text-[11px] text-teal-700">
+      <div className="bg-emerald-50/60 border border-emerald-200 rounded-md px-3 py-2 flex items-center gap-2">
+        <AlertTriangle className="h-3.5 w-3.5 text-emerald-600 flex-shrink-0" />
+        <p className="text-[11px] text-emerald-800">
           <span className="font-semibold">Note:</span> Please add employees first in the
           &quot;Employees&quot; tab, then configure their QR codes.
         </p>
@@ -68,7 +68,7 @@ export default function AttendancePage() {
               onClick={() => setActiveTab(tab.value)}
               className={`whitespace-nowrap px-3 py-2 text-[12px] font-medium border-b-2 transition-colors ${
                 activeTab === tab.value
-                  ? "border-teal-600 text-teal-600"
+                  ? "border-emerald-700 text-emerald-700"
                   : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
               }`}
             >

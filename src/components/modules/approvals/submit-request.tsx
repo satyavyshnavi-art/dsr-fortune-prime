@@ -162,7 +162,7 @@ export function SubmitRequest() {
         {/* Submit */}
         <Button
           onClick={handleSubmit}
-          className="w-full bg-teal-600 hover:bg-teal-700 text-white h-9 text-[13px] rounded-lg"
+          className="w-full bg-emerald-700 hover:bg-emerald-800 text-white h-9 text-[13px] rounded-lg"
         >
           <Send className="h-3.5 w-3.5 mr-1.5" />
           Submit Request

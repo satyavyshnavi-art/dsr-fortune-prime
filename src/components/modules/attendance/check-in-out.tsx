@@ -307,7 +307,7 @@ export function CheckInOut() {
               <Badge
                 className={`text-[10px] px-1.5 py-0 h-[18px] ${
                   status.isCheckedIn
-                    ? "bg-emerald-100 text-teal-700 border-emerald-200"
+                    ? "bg-emerald-100 text-emerald-800 border-emerald-200"
                     : "bg-slate-100 text-slate-600 border-slate-200"
                 }`}
               >
@@ -370,7 +370,7 @@ export function CheckInOut() {
                 <Button
                   onClick={handleCheckIn}
                   disabled={loading || geoLoading}
-                  className="w-full h-9 text-[12px] bg-teal-600 hover:bg-teal-700 text-white gap-1.5"
+                  className="w-full h-9 text-[12px] bg-emerald-700 hover:bg-emerald-800 text-white gap-1.5"
                 >
                   <LogIn className="h-3.5 w-3.5" />
                   {geoLoading ? "Capturing Location..." : loading ? "Checking In..." : "Check In"}
@@ -431,7 +431,7 @@ export function CheckInOut() {
                   onClick={() => setSelectedShift(shift)}
                   className={`rounded-md border px-3 py-2 text-[12px] font-medium transition-colors ${
                     selectedShift === shift
-                      ? "border-teal-500 bg-teal-50 text-teal-700"
+                      ? "border-emerald-600 bg-emerald-50 text-emerald-800"
                       : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
                   }`}
                 >

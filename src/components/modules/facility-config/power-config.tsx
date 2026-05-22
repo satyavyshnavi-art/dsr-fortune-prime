@@ -96,7 +96,7 @@ function MeterCard({
         <div className="flex items-center gap-1 pt-1 border-t border-slate-100">
           <button
             onClick={() => onEdit(meter)}
-            className="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-teal-600 transition-colors"
+            className="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-emerald-700 transition-colors"
           >
             <Pencil className="h-3.5 w-3.5" />
           </button>
@@ -321,7 +321,7 @@ export function PowerConfig() {
       <div className="flex items-center justify-between">
         <h2 className="text-[13px] font-semibold text-slate-800">Energy Meters</h2>
         <Button
-          className="h-7 text-[11px] bg-teal-600 hover:bg-teal-700 text-white gap-1.5 px-2.5"
+          className="h-7 text-[11px] bg-emerald-700 hover:bg-emerald-800 text-white gap-1.5 px-2.5"
           onClick={() => setAddOpen(true)}
         >
           <Plus className="h-3.5 w-3.5" />

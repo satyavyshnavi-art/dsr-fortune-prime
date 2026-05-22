@@ -292,7 +292,7 @@ export function WaterTab() {
             onClick={() => setActiveSubTab(tab)}
             className={`px-3 py-1.5 text-[12px] font-medium border-b-2 transition-colors ${
               activeSubTab === tab
-                ? "border-teal-600 text-teal-600"
+                ? "border-emerald-700 text-emerald-700"
                 : "border-transparent text-slate-500 hover:text-slate-700"
             }`}
           >
@@ -317,7 +317,7 @@ export function WaterTab() {
             <h4 className="text-[13px] font-semibold text-slate-800">Daily Water Consumption Tracking</h4>
           </div>
           <div className="flex items-center gap-2">
-            <Button size="sm" onClick={handleAdd} className="h-7 text-[12px] px-3 bg-teal-600 hover:bg-teal-700 text-white">
+            <Button size="sm" onClick={handleAdd} className="h-7 text-[12px] px-3 bg-emerald-700 hover:bg-emerald-800 text-white">
               <Plus className="h-3.5 w-3.5 mr-1" />
               Add Reading
             </Button>
@@ -403,7 +403,7 @@ export function WaterTab() {
                       </td>
                       <td className="py-3.5 px-3 text-[13px] text-slate-800 font-medium truncate">{r.sourceName}</td>
                       <td className="py-3.5 px-3">
-                        <span className="inline-block rounded bg-teal-50 text-teal-500 text-[11px] font-medium px-2 py-0.5">
+                        <span className="inline-block rounded bg-emerald-50 text-emerald-600 text-[11px] font-medium px-2 py-0.5">
                           {r.sourceType}
                         </span>
                       </td>
@@ -413,7 +413,7 @@ export function WaterTab() {
                       <td className="py-3.5 px-3 text-right text-[13px] text-slate-500">
                         {parseFloat(r.currentLiters || "0").toLocaleString()}
                       </td>
-                      <td className={`py-3.5 px-3 text-right text-[13px] font-medium ${consumed < 0 ? "text-red-500" : "text-teal-600"}`}>
+                      <td className={`py-3.5 px-3 text-right text-[13px] font-medium ${consumed < 0 ? "text-red-500" : "text-emerald-700"}`}>
                         {consumed.toLocaleString()} L
                       </td>
                       <td className="py-3.5 px-3 text-right text-[13px] text-slate-500">
@@ -423,7 +423,7 @@ export function WaterTab() {
                         <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button
                             onClick={() => handleEdit(r)}
-                            className="p-1 rounded hover:bg-teal-50 text-slate-400 hover:text-teal-600 transition-colors"
+                            className="p-1 rounded hover:bg-emerald-50 text-slate-400 hover:text-emerald-700 transition-colors"
                             title="Edit"
                           >
                             <Pencil className="h-3.5 w-3.5" />
@@ -522,7 +522,7 @@ export function WaterTab() {
             <Button variant="outline" onClick={() => setDialogOpen(false)} className="text-[13px]">
               Cancel
             </Button>
-            <Button onClick={handleSave} disabled={saving} className="bg-teal-600 hover:bg-teal-700 text-white text-[13px]">
+            <Button onClick={handleSave} disabled={saving} className="bg-emerald-700 hover:bg-emerald-800 text-white text-[13px]">
               {saving ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
               {editingRecord ? "Update" : "Add"}
             </Button>

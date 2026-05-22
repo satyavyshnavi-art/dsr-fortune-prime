@@ -45,7 +45,7 @@ export interface User {
 }
 
 const AVATAR_COLORS = [
-  "bg-blue-600", "bg-teal-600", "bg-teal-600", "bg-pink-600",
+  "bg-blue-600", "bg-emerald-700", "bg-emerald-700", "bg-pink-600",
   "bg-emerald-600", "bg-amber-600", "bg-indigo-600", "bg-rose-600",
 ];
 
@@ -150,7 +150,7 @@ function CreateUserDialog({ onCreated }: { onCreated?: () => void }) {
     <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
       <DialogTrigger
         render={
-          <Button size="sm" className="h-7 text-[11px] bg-teal-600 hover:bg-teal-700 text-white">
+          <Button size="sm" className="h-7 text-[11px] bg-emerald-700 hover:bg-emerald-800 text-white">
             <Plus className="h-3 w-3 mr-1" />
             Create User
           </Button>
@@ -218,7 +218,7 @@ function CreateUserDialog({ onCreated }: { onCreated?: () => void }) {
             <Button type="button" variant="outline" size="sm" className="h-7 text-[11px]" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" size="sm" className="h-7 text-[11px] bg-teal-600 hover:bg-teal-700 text-white" disabled={loading}>
+            <Button type="submit" size="sm" className="h-7 text-[11px] bg-emerald-700 hover:bg-emerald-800 text-white" disabled={loading}>
               {loading ? "Creating..." : "Create User"}
             </Button>
           </DialogFooter>
@@ -297,7 +297,7 @@ function EditUserDialog({
             <Button type="button" variant="outline" size="sm" className="h-7 text-[11px]" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" size="sm" className="h-7 text-[11px] bg-teal-600 hover:bg-teal-700 text-white" disabled={loading}>
+            <Button type="submit" size="sm" className="h-7 text-[11px] bg-emerald-700 hover:bg-emerald-800 text-white" disabled={loading}>
               {loading ? "Saving..." : "Save Changes"}
             </Button>
           </DialogFooter>
@@ -374,7 +374,7 @@ function ChangeRoleDialog({
             <Button type="button" variant="outline" size="sm" className="h-7 text-[11px]" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" size="sm" className="h-7 text-[11px] bg-teal-600 hover:bg-teal-700 text-white" disabled={loading}>
+            <Button type="submit" size="sm" className="h-7 text-[11px] bg-emerald-700 hover:bg-emerald-800 text-white" disabled={loading}>
               {loading ? "Updating..." : "Update Role"}
             </Button>
           </DialogFooter>
@@ -484,10 +484,10 @@ export function UserList() {
         cell: ({ row }) => (
           <button
             onClick={() => setRoleUser(row.original)}
-            className="flex items-center gap-1 text-teal-600 font-medium text-[12px] hover:text-teal-800 cursor-pointer"
+            className="flex items-center gap-1 text-emerald-700 font-medium text-[12px] hover:text-emerald-900 cursor-pointer"
           >
             {row.original.role}
-            <Pencil className="h-2.5 w-2.5 text-teal-400" />
+            <Pencil className="h-2.5 w-2.5 text-emerald-400" />
           </button>
         ),
       },

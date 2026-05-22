@@ -155,7 +155,7 @@ export function ApprovalsList({ onViewDetail }: ApprovalsListProps) {
             onClick={() => setActiveTab(tab.id)}
             className={`px-3 py-1.5 text-[12px] font-medium whitespace-nowrap border-b-2 transition-colors ${
               activeTab === tab.id
-                ? "border-teal-600 text-teal-600"
+                ? "border-emerald-700 text-emerald-700"
                 : "border-transparent text-slate-400 hover:text-slate-600"
             }`}
           >
@@ -167,7 +167,7 @@ export function ApprovalsList({ onViewDetail }: ApprovalsListProps) {
       {loading ? (
         <div className="flex items-center justify-center py-12">
           <div className="flex flex-col items-center gap-2">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-300 border-t-teal-600" />
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-300 border-t-emerald-700" />
             <span className="text-[11px] text-slate-400">Loading approvals...</span>
           </div>
         </div>

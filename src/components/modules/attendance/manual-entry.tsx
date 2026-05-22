@@ -311,13 +311,13 @@ export function ManualEntry() {
             variant="outline"
             className={`h-6 text-[10px] px-2 font-medium border transition-colors ${
               s === "P"
-                ? "hover:bg-emerald-50 hover:text-teal-700 hover:border-emerald-300"
+                ? "hover:bg-emerald-50 hover:text-emerald-800 hover:border-emerald-300"
                 : s === "A"
                   ? "hover:bg-red-50 hover:text-red-700 hover:border-red-300"
                   : s === "HD"
                     ? "hover:bg-orange-50 hover:text-orange-700 hover:border-orange-300"
                     : s === "L"
-                      ? "hover:bg-teal-50 hover:text-teal-800 hover:border-teal-300"
+                      ? "hover:bg-emerald-50 hover:text-emerald-900 hover:border-emerald-300"
                       : "hover:bg-slate-100 hover:text-slate-700 hover:border-slate-300"
             }`}
             onClick={() => bulkMark(s)}
@@ -478,7 +478,7 @@ export function ManualEntry() {
         </span>
         <div className="flex items-center gap-2">
           <Button
-            className="h-7 text-[11px] px-3 bg-teal-600 hover:bg-teal-700 text-white"
+            className="h-7 text-[11px] px-3 bg-emerald-700 hover:bg-emerald-800 text-white"
             onClick={handleSave}
             disabled={editedCount === 0 || saving}
           >

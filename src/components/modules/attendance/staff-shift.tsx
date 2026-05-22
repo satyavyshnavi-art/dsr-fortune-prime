@@ -231,7 +231,7 @@ export function StaffShift() {
             />
           </div>
           <Button
-            className="h-7 text-[11px] px-2.5 gap-1 bg-teal-600 hover:bg-teal-700 text-white"
+            className="h-7 text-[11px] px-2.5 gap-1 bg-emerald-700 hover:bg-emerald-800 text-white"
             onClick={() => {
               const rows = filteredEmployees.map((emp: Employee) => ({
                 "Role": emp.designation,
@@ -248,7 +248,7 @@ export function StaffShift() {
             Download PDF
           </Button>
           <Button
-            className="h-7 text-[11px] px-2.5 gap-1 bg-teal-600 hover:bg-teal-700 text-white"
+            className="h-7 text-[11px] px-2.5 gap-1 bg-emerald-700 hover:bg-emerald-800 text-white"
             onClick={() => {
               const rows = filteredEmployees.map((emp: Employee) => ({
                 "Role": emp.designation,
@@ -265,7 +265,7 @@ export function StaffShift() {
             Download CSV
           </Button>
           <Button
-            className="h-7 text-[11px] px-2.5 gap-1 bg-teal-700 hover:bg-teal-800 text-white"
+            className="h-7 text-[11px] px-2.5 gap-1 bg-emerald-800 hover:bg-emerald-900 text-white"
             onClick={() => toast.info("QR codes downloading...")}
           >
             <QrCode className="h-3 w-3" />
@@ -359,7 +359,7 @@ function StaffRow({
       <td className="px-3 py-2 text-[12px] font-mono text-slate-800">
         {emp.empId}
       </td>
-      <td className="px-3 py-2 text-[12px] font-medium text-teal-600 truncate">
+      <td className="px-3 py-2 text-[12px] font-medium text-emerald-700 truncate">
         {emp.firstName} {emp.lastName}
         {isInactive && (
           <span className="ml-1.5 text-[10px] text-red-400 font-normal">

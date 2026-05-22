@@ -49,7 +49,7 @@ export function TopBar({ title, subtitle }: TopBarProps) {
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-1 text-[10.5px] text-slate-400">
           <MapPin className="h-3 w-3" aria-hidden="true" />
-          <span className="font-medium text-teal-600">{FACILITY_LOCATION.name}</span>
+          <span className="font-medium text-emerald-700">{FACILITY_LOCATION.name}</span>
           <span className="hidden sm:inline text-slate-400">
             {FACILITY_LOCATION.area}, {FACILITY_LOCATION.city}
           </span>
@@ -60,7 +60,7 @@ export function TopBar({ title, subtitle }: TopBarProps) {
             render={
               <button className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 hover:bg-slate-50 transition-colors cursor-pointer">
                 <Avatar className="h-7 w-7">
-                  <AvatarFallback className="bg-teal-50 text-teal-600 text-[10px] font-semibold">
+                  <AvatarFallback className="bg-emerald-50 text-emerald-700 text-[10px] font-semibold">
                     {initials}
                   </AvatarFallback>
                 </Avatar>
@@ -80,7 +80,7 @@ export function TopBar({ title, subtitle }: TopBarProps) {
             <div className="px-3 py-2.5">
               <p className="text-[12.5px] font-semibold text-slate-900">{displayName}</p>
               <p className="text-[11px] text-slate-500">{email}</p>
-              <p className="text-[10px] text-teal-600 font-medium mt-0.5">{role}</p>
+              <p className="text-[10px] text-emerald-700 font-medium mt-0.5">{role}</p>
             </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="text-[11.5px] cursor-pointer" onClick={() => router.push("/profile")}>

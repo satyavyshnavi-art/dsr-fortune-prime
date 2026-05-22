@@ -48,7 +48,7 @@ interface SectionShellProps {
 const ACCENT_TILE = {
   peach: "bg-amber-100 text-amber-600",
   sky: "bg-sky-100 text-sky-600",
-  teal: "bg-teal-100 text-teal-600",
+  teal: "bg-emerald-100 text-emerald-700",
 } as const;
 
 function SectionShell({ icon: Icon, accent, title, subtitle, action, children }: SectionShellProps) {
@@ -227,7 +227,7 @@ function PowerReadingsSection() {
         <Button
           onClick={handleSave}
           disabled={saving}
-          className="h-9 text-[12px] px-4 gap-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg disabled:opacity-60"
+          className="h-9 text-[12px] px-4 gap-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg disabled:opacity-60"
         >
           <Save className="h-3.5 w-3.5" />
           {saving ? "Saving..." : "Save Readings"}
@@ -462,7 +462,7 @@ function WaterReadingsSection() {
         <Button
           onClick={handleSave}
           disabled={saving}
-          className="h-9 text-[12px] px-4 gap-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg disabled:opacity-60"
+          className="h-9 text-[12px] px-4 gap-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg disabled:opacity-60"
         >
           <Save className="h-3.5 w-3.5" />
           {saving ? "Saving..." : "Save Readings"}
@@ -562,7 +562,7 @@ function WaterQualitySection() {
       action={
         <Button
           onClick={handleSave}
-          className="h-9 text-[12px] px-4 gap-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg"
+          className="h-9 text-[12px] px-4 gap-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg"
         >
           <Save className="h-3.5 w-3.5" />
           Save Readings
@@ -571,7 +571,7 @@ function WaterQualitySection() {
     >
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-4">
         <QualityCard
-          dot="bg-teal-500"
+          dot="bg-emerald-600"
           title="STP Daily"
           fields={[
             [

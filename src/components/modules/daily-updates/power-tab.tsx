@@ -333,7 +333,7 @@ export function PowerTab() {
                 <td className="py-3.5 px-3 text-right text-[13px] text-slate-500">{row.previousReading}</td>
                 <td className="py-3.5 px-3 text-right text-[13px] text-slate-500">{row.currentReading}</td>
                 <td className="py-3.5 px-3 text-right">
-                  <span className="text-[13px] text-teal-600 font-medium">{row.unitsConsumed}</span>
+                  <span className="text-[13px] text-emerald-700 font-medium">{row.unitsConsumed}</span>
                 </td>
                 <td className="py-3.5 px-3 text-center text-[13px] text-slate-500">{row.mf}</td>
                 <td className="py-3.5 px-3 text-right text-[13px] text-slate-400">{row.recordedAt}</td>
@@ -341,7 +341,7 @@ export function PowerTab() {
                   <div className="flex items-center justify-center gap-1">
                     <button
                       onClick={() => openEdit(originalIdx)}
-                      className="h-7 w-7 rounded-md flex items-center justify-center text-teal-600 hover:bg-teal-50 transition-colors"
+                      className="h-7 w-7 rounded-md flex items-center justify-center text-emerald-700 hover:bg-emerald-50 transition-colors"
                     >
                       <Pencil className="h-3.5 w-3.5" />
                     </button>
@@ -375,8 +375,8 @@ export function PowerTab() {
           {editRow && (
             <div className="space-y-4 pt-2">
               {/* Meter info banner */}
-              <div className="bg-teal-50 border border-blue-100 rounded-lg px-4 py-2.5">
-                <p className="text-[12px] text-teal-700">
+              <div className="bg-emerald-50 border border-blue-100 rounded-lg px-4 py-2.5">
+                <p className="text-[12px] text-emerald-800">
                   Meter: <span className="font-semibold">{editRow.meterId}</span>
                   {" · "}Location: <span className="font-semibold">{editRow.location}</span>
                 </p>
@@ -430,7 +430,7 @@ export function PowerTab() {
               {/* Live units calculation */}
               <div className="bg-emerald-50 border border-emerald-100 rounded-lg px-4 py-2.5">
                 <p className="text-[13px] text-slate-700">
-                  Units Consumed: <span className="font-bold text-teal-700">{editUnits} kWh</span>
+                  Units Consumed: <span className="font-bold text-emerald-800">{editUnits} kWh</span>
                 </p>
               </div>
 
@@ -445,7 +445,7 @@ export function PowerTab() {
                 </Button>
                 <Button
                   onClick={handleUpdate}
-                  className="h-9 text-[13px] px-5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white"
+                  className="h-9 text-[13px] px-5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white"
                 >
                   <Save className="h-3.5 w-3.5 mr-1.5" />
                   Update Reading

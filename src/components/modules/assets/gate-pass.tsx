@@ -242,7 +242,7 @@ export function GatePassManagement() {
             </div>
             <Button
               size="sm"
-              className="h-7 text-[11px] px-2.5 bg-teal-600 hover:bg-teal-700 text-white"
+              className="h-7 text-[11px] px-2.5 bg-emerald-700 hover:bg-emerald-800 text-white"
               onClick={() => { setErrors({}); setShowCreateModal(true); }}
             >
               <Plus className="h-3 w-3 mr-1" />
@@ -325,7 +325,7 @@ export function GatePassManagement() {
                             onClick={() => handleMarkReturned(gp)}
                             title="Mark Returned"
                           >
-                            <RotateCcw className="h-3 w-3 text-teal-600" />
+                            <RotateCcw className="h-3 w-3 text-emerald-700" />
                           </Button>
                         )}
                         <Button
@@ -424,7 +424,7 @@ export function GatePassManagement() {
               <Button variant="outline" onClick={() => setShowCreateModal(false)} className="h-9 text-[13px] rounded-lg">
                 Cancel
               </Button>
-              <Button onClick={handleCreate} className="h-9 text-[13px] rounded-lg bg-teal-600 hover:bg-teal-700 text-white">
+              <Button onClick={handleCreate} className="h-9 text-[13px] rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white">
                 Create Pass
               </Button>
             </div>

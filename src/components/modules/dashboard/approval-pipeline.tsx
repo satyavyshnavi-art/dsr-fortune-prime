@@ -70,7 +70,7 @@ export function ApprovalPipeline({ data }: ApprovalPipelineProps) {
             <Bar
               dataKey="pending"
               name="Pending"
-              fill="#2dd4bf"
+              fill="#34d399"
               radius={[0, 6, 6, 0]}
               barSize={12}
             />

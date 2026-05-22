@@ -162,7 +162,7 @@ export function TransactionModal({ open, onOpenChange, item }: TransactionModalP
               Cancel
             </Button>
             <Button
-              className="h-7 text-[11px] px-3 gap-1 bg-teal-600 hover:bg-teal-700 text-white"
+              className="h-7 text-[11px] px-3 gap-1 bg-emerald-700 hover:bg-emerald-800 text-white"
               onClick={handleSubmit}
             >
               Record Transaction
