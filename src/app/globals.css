@@ -50,24 +50,25 @@
 
 :root {
   /* ──────────────────────────────────────────────────────────────────
-   * Editorial Architectural palette — DSR Fortune Prime
-   * Cream parchment surfaces, pure ink type, single blueprint-navy accent.
+   * Adivo-style palette — purple primary, gradient banners, cool surfaces.
    * ────────────────────────────────────────────────────────────────── */
-  --ink: #111111;            /* Primary text — pure ink */
-  --ink-muted: #5b5d5e;      /* Secondary */
-  --ink-faint: #999b9d;      /* Tertiary, placeholders */
-  --rule: #e8e6e2;           /* Borders — warm grey, not cool slate */
-  --rule-soft: #f1efea;      /* Subtle dividers */
-  --parchment: #faf8f4;      /* Page background — warm cream */
+  --ink: #0f172a;            /* Primary text — slate-900 */
+  --ink-muted: #475569;      /* Secondary — slate-600 */
+  --ink-faint: #94a3b8;      /* Tertiary — slate-400 */
+  --rule: #e2e8f0;           /* Borders — slate-200 */
+  --rule-soft: #f1f5f9;      /* Subtle dividers — slate-100 */
+  --parchment: #f8f9fb;      /* Page background — cool light gray */
   --vellum: #ffffff;         /* Card surface */
-  --mark: #1a3a5c;           /* Accent — blueprint navy */
-  --mark-soft: #e8eef6;      /* Accent surface */
-  --seal: #2d5a3f;           /* Success — moss green */
-  --seal-soft: #e7efe9;
-  --redline: #8c2929;        /* Destructive — burgundy */
-  --redline-soft: #f3e6e6;
-  --sodium: #b86d1b;         /* Warning — amber lamp */
-  --sodium-soft: #f5ebde;
+  --mark: #7c3aed;           /* Primary — violet-600 */
+  --mark-soft: #ede9fe;      /* Primary surface — violet-100 */
+  --mark-grad-from: #8b5cf6; /* Gradient start — violet-500 */
+  --mark-grad-to: #6d28d9;   /* Gradient end — violet-700 */
+  --seal: #059669;           /* Success — emerald-600 */
+  --seal-soft: #d1fae5;
+  --redline: #e11d48;        /* Destructive — rose-600 */
+  --redline-soft: #ffe4e6;
+  --sodium: #f59e0b;         /* Warning — amber-500 */
+  --sodium-soft: #fef3c7;
 
   --background: var(--parchment);
   --foreground: var(--ink);
@@ -92,7 +93,7 @@
   --chart-3: var(--sodium);
   --chart-4: var(--redline);
   --chart-5: var(--ink-faint);
-  --radius: 0.125rem;        /* 2 px — specification sheet, near-sharp corners */
+  --radius: 0.75rem;         /* 12 px — Adivo-style soft cards */
   --sidebar: var(--parchment);
   --sidebar-foreground: var(--ink);
   --sidebar-primary: var(--mark);

@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { TopBar } from "@/components/layout/top-bar";
-import { KPICard } from "@/components/shared";
+import { KPICard, HeroBanner, HeroBadge, HeroButton } from "@/components/shared";
 import {
   Users,
   Droplets,
@@ -13,6 +13,8 @@ import {
   Calendar,
   Search,
   CheckCircle2,
+  LayoutDashboard,
+  Download,
 } from "lucide-react";
 import {
   AttendanceWidget,
@@ -143,8 +145,34 @@ export default function DashboardPage() {
     <div className="flex flex-col h-full">
       <TopBar title="Dashboard" />
 
-      <div className="flex-1 overflow-y-auto">
-        <div className="p-5 space-y-3">
+      <div className="flex-1 overflow-y-auto bg-slate-50/40">
+        <div className="p-5 space-y-4">
+          {/* Hero banner — Adivo style */}
+          <HeroBanner
+            icon={LayoutDashboard}
+            tone="violet"
+            title="Welcome back, here's what's happening today 👋"
+            subtitle={
+              <>
+                Showing data for <span className="font-semibold text-white">{formatDateLabel(appliedRange.start)}</span>
+                {" → "}
+                <span className="font-semibold text-white">{formatDateLabel(appliedRange.end)}</span>
+                <span className="ml-2 text-white/70">({days} days)</span>
+              </>
+            }
+            badge={<HeroBadge>All systems operational</HeroBadge>}
+            actions={
+              <>
+                <HeroButton icon={Calendar} variant="ghost">
+                  {formatDateLabel(appliedRange.start)} – {formatDateLabel(appliedRange.end)}
+                </HeroButton>
+                <HeroButton icon={Download} variant="solid">
+                  Download Report
+                </HeroButton>
+              </>
+            }
+          />
+
           {/* Date Range Picker */}
           <div className="flex items-center justify-end gap-3">
             {showApplied && (
@@ -208,17 +236,20 @@ export default function DashboardPage() {
           </div>
 
           {/* KPI Cards Row */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-            {kpiCards.map((kpi) => (
-              <KPICard
-                key={kpi.title}
-                title={kpi.title}
-                value={kpi.value}
-                subtitle={kpi.subtitle}
-                icon={kpi.icon}
-                color={kpi.color}
-              />
-            ))}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+            {kpiCards.map((kpi, idx) => {
+              const tones = ["violet", "emerald", "orange", "sky", "rose", "amber"] as const;
+              return (
+                <KPICard
+                  key={kpi.title}
+                  title={kpi.title}
+                  value={kpi.value}
+                  subtitle={kpi.subtitle}
+                  icon={kpi.icon}
+                  tone={tones[idx % tones.length]}
+                />
+              );
+            })}
           </div>
 
           {/* Row 2: Charts — Task Completion, Attendance Pie, Alert Summary */}

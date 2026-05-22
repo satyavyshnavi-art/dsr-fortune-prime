@@ -75,7 +75,7 @@ export function Sidebar() {
       {/* Mobile hamburger button */}
       <button
         onClick={() => setMobileOpen(true)}
-        className="fixed top-2.5 left-2.5 z-50 md:hidden flex items-center justify-center h-8 w-8 rounded bg-[var(--mark)] text-white shadow-md"
+        className="fixed top-2.5 left-2.5 z-50 md:hidden flex items-center justify-center h-9 w-9 rounded-xl bg-gradient-to-br from-violet-500 to-purple-700 text-white shadow-md"
         aria-label="Open navigation menu"
       >
         <Menu className="h-4 w-4" aria-hidden="true" />
@@ -92,7 +92,7 @@ export function Sidebar() {
 
       <aside
         className={cn(
-          "flex flex-col h-screen bg-[var(--parchment)] border-r border-[var(--rule)] text-[var(--ink-muted)] transition-all duration-200 shrink-0",
+          "flex flex-col h-screen bg-white border-r border-slate-200 text-slate-600 transition-all duration-200 shrink-0",
           // Desktop
           "hidden md:flex",
           collapsed ? "w-[68px]" : "w-[240px]",
@@ -103,15 +103,15 @@ export function Sidebar() {
         {/* Logo */}
         <div className="flex items-center justify-between px-5 py-5 border-b border-[var(--rule)]">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="flex h-10 w-10 items-center justify-center shrink-0 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 shadow-sm">
-              <Leaf className="h-5 w-5 text-white" aria-hidden="true" strokeWidth={1.75} />
+            <div className="flex h-10 w-10 items-center justify-center shrink-0 rounded-xl bg-gradient-to-br from-violet-500 to-purple-700 shadow-sm">
+              <Leaf className="h-5 w-5 text-white" aria-hidden="true" strokeWidth={2} />
             </div>
             {!collapsed && (
               <div className="min-w-0 leading-tight">
-                <span className="text-[15px] font-bold tracking-tight text-[var(--ink)] block leading-tight">
+                <span className="text-[15px] font-bold tracking-tight text-slate-900 block leading-tight">
                   DSR Fortune
                 </span>
-                <p className="text-[11px] text-[var(--ink-faint)] mt-0.5 font-medium">
+                <p className="text-[11px] text-slate-400 mt-0.5 font-medium">
                   Facility Management
                 </p>
               </div>
@@ -137,23 +137,23 @@ export function Sidebar() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "group relative flex items-center gap-3 px-3 py-2 rounded-lg text-[13.5px] font-medium transition-all",
+                  "group relative flex items-center gap-3 px-3 py-2 rounded-xl text-[13.5px] font-medium transition-all",
                   isActive
-                    ? "text-[var(--ink)] bg-gradient-to-r from-emerald-100/80 to-emerald-50/40"
-                    : "text-[var(--ink-muted)] hover:text-[var(--ink)] hover:bg-emerald-50/40"
+                    ? "text-violet-700 bg-violet-50"
+                    : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"
                 )}
                 title={collapsed ? item.label : undefined}
               >
                 {isActive && (
                   <span
-                    className="absolute left-0 top-1/2 -translate-y-1/2 h-[60%] w-[2.5px] rounded-r bg-gradient-to-b from-emerald-400 to-teal-500"
+                    className="absolute left-0 top-1/2 -translate-y-1/2 h-[60%] w-[3px] rounded-r-full bg-gradient-to-b from-violet-500 to-purple-700"
                     aria-hidden="true"
                   />
                 )}
                 <item.Icon
                   className={cn(
-                    "h-[16px] w-[16px] shrink-0 transition-colors",
-                    isActive ? "text-emerald-600" : "text-[var(--ink-faint)] group-hover:text-[var(--ink-muted)]"
+                    "h-[17px] w-[17px] shrink-0 transition-colors",
+                    isActive ? "text-violet-600" : "text-slate-400 group-hover:text-slate-700"
                   )}
                   aria-hidden="true"
                   strokeWidth={1.75}
@@ -171,7 +171,7 @@ export function Sidebar() {
               "flex items-center gap-3 px-4 py-3",
               collapsed ? "justify-center" : ""
             )}>
-              <div className="flex h-9 w-9 items-center justify-center text-white text-[12px] font-semibold shrink-0 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500">
+              <div className="flex h-9 w-9 items-center justify-center text-white text-[12px] font-semibold shrink-0 rounded-full bg-gradient-to-br from-violet-500 to-purple-700">
                 {user.initials}
               </div>
               {!collapsed && (
