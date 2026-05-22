@@ -61,7 +61,7 @@ export function KPICard({
     >
       <div className="flex items-start justify-between gap-3 mb-3">
         <p
-          className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--ink-muted)]"
+          className="text-[12px] font-semibold uppercase tracking-[0.1em] text-[var(--ink-muted)]"
           style={{ fontFamily: "var(--font-mono)" }}
         >
           {title}
@@ -76,7 +76,7 @@ export function KPICard({
       </div>
 
       <p
-        className="text-[32px] font-medium leading-none text-[var(--ink)] tabular-nums"
+        className="text-[38px] font-medium leading-none text-[var(--ink)] tabular-nums"
         style={{ fontFamily: "var(--font-display)", fontStyle: "italic" }}
       >
         {value}
@@ -85,7 +85,7 @@ export function KPICard({
       <div className="mt-4 pt-3 border-t border-[var(--rule)] flex items-center justify-between gap-2 min-h-[20px]">
         {subtitle ? (
           <span
-            className="text-[10px] uppercase tracking-[0.1em] text-[var(--ink-faint)] truncate"
+            className="text-[11px] uppercase tracking-[0.08em] text-[var(--ink-faint)] truncate"
             style={{ fontFamily: "var(--font-mono)" }}
           >
             {subtitle}
@@ -94,7 +94,7 @@ export function KPICard({
         {trend && trendValue && (
           <span
             className={cn(
-              "text-[11px] font-semibold tabular-nums shrink-0",
+              "text-[12px] font-semibold tabular-nums shrink-0",
               trendStyles[trend]
             )}
             style={{ fontFamily: "var(--font-mono)" }}

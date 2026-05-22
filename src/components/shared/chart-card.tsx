@@ -29,14 +29,14 @@ export function ChartCard({ title, subtitle, children, actions, className }: Cha
       <CardHeader className="flex flex-row items-start justify-between gap-3 px-5 pt-5 pb-3 border-b border-[var(--rule)]">
         <div className="min-w-0">
           <CardTitle
-            className="text-[18px] font-medium tracking-tight text-[var(--ink)] leading-tight italic"
+            className="text-[20px] font-medium tracking-tight text-[var(--ink)] leading-tight italic"
             style={{ fontFamily: "var(--font-display)" }}
           >
             {title}
           </CardTitle>
           {subtitle && (
             <p
-              className="text-[10px] uppercase tracking-[0.12em] text-[var(--ink-muted)] mt-2 font-medium"
+              className="text-[11px] uppercase tracking-[0.1em] text-[var(--ink-muted)] mt-2 font-medium"
               style={{ fontFamily: "var(--font-mono)" }}
             >
               {subtitle}

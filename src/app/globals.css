@@ -143,7 +143,7 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply text-foreground text-[13px] leading-relaxed;
+    @apply text-foreground text-[14px] leading-relaxed;
     background-color: var(--parchment);
     color: var(--ink);
     font-family: var(--font-mono);
@@ -152,11 +152,11 @@
     font-family: var(--font-mono);
     font-feature-settings: "ss01", "cv11";
   }
-  /* Specification Sheet type scale */
-  h1 { font-family: var(--font-display); font-style: italic; @apply text-[28px] font-medium tracking-tight leading-tight; }
-  h2 { font-family: var(--font-display); font-style: italic; @apply text-[20px] font-medium tracking-tight leading-tight; }
-  h3 { font-family: var(--font-mono); @apply text-[12px] font-semibold uppercase tracking-[0.1em]; }
-  h4 { font-family: var(--font-mono); @apply text-[11px] font-semibold uppercase tracking-[0.1em]; }
+  /* Specification Sheet type scale — mono compensated (mono reads ~1px smaller per glyph than sans) */
+  h1 { font-family: var(--font-display); font-style: italic; @apply text-[32px] font-medium tracking-tight leading-tight; }
+  h2 { font-family: var(--font-display); font-style: italic; @apply text-[24px] font-medium tracking-tight leading-tight; }
+  h3 { font-family: var(--font-mono); @apply text-[13px] font-semibold uppercase tracking-[0.08em]; }
+  h4 { font-family: var(--font-mono); @apply text-[12px] font-semibold uppercase tracking-[0.08em]; }
   .tabular { font-variant-numeric: tabular-nums; }
 
   /* Corner-tick utility — top-left blueprint mark for spec-sheet cards */

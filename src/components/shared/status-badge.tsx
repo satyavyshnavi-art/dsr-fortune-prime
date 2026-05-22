@@ -66,7 +66,7 @@ export function StatusBadge({ status, variant, className }: StatusBadgeProps) {
   return (
     <span
       className={cn(
-        "inline-flex items-baseline gap-1.5 whitespace-nowrap text-[10px] font-semibold uppercase tracking-[0.1em]",
+        "inline-flex items-baseline gap-1.5 whitespace-nowrap text-[11px] font-semibold uppercase tracking-[0.08em]",
         color,
         className
       )}

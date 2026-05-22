@@ -109,13 +109,13 @@ export function Sidebar() {
             {!collapsed && (
               <div className="min-w-0 leading-none">
                 <span
-                  className="text-[18px] font-medium tracking-tight text-[var(--ink)] block leading-none italic"
+                  className="text-[22px] font-medium tracking-tight text-[var(--ink)] block leading-none italic"
                   style={{ fontFamily: "var(--font-display)" }}
                 >
                   DSR Fortune
                 </span>
                 <p
-                  className="text-[9px] uppercase tracking-[0.18em] text-[var(--ink-faint)] mt-2 font-semibold"
+                  className="text-[10px] uppercase tracking-[0.16em] text-[var(--ink-faint)] mt-2 font-semibold"
                   style={{ fontFamily: "var(--font-mono)" }}
                 >
                   Facility &nbsp;/&nbsp; Spec
@@ -144,7 +144,7 @@ export function Sidebar() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "group flex items-center gap-3 px-2 py-[7px] text-[12px] font-medium transition-colors uppercase tracking-[0.05em] border-b border-transparent",
+                  "group flex items-center gap-3 px-2 py-2 text-[13px] font-medium transition-colors uppercase tracking-[0.04em] border-b border-transparent",
                   isActive
                     ? "text-[var(--ink)] border-b-[var(--ink)]"
                     : "text-[var(--ink-muted)] hover:text-[var(--ink)]"
@@ -155,7 +155,7 @@ export function Sidebar() {
                 {!collapsed && (
                   <span
                     className={cn(
-                      "text-[10px] shrink-0 w-5",
+                      "text-[11px] shrink-0 w-5",
                       isActive ? "text-[var(--ink)]" : "text-[var(--ink-faint)]"
                     )}
                   >
@@ -164,7 +164,7 @@ export function Sidebar() {
                 )}
                 <item.Icon
                   className={cn(
-                    "h-[14px] w-[14px] shrink-0 transition-colors",
+                    "h-[15px] w-[15px] shrink-0 transition-colors",
                     isActive ? "text-[var(--ink)]" : "text-[var(--ink-faint)] group-hover:text-[var(--ink-muted)]"
                   )}
                   aria-hidden="true"
@@ -192,13 +192,13 @@ export function Sidebar() {
               {!collapsed && (
                 <div className="flex-1 min-w-0">
                   <p
-                    className="text-[12px] font-semibold text-[var(--ink)] truncate uppercase tracking-[0.04em]"
+                    className="text-[13px] font-semibold text-[var(--ink)] truncate uppercase tracking-[0.04em]"
                     style={{ fontFamily: "var(--font-mono)" }}
                   >
                     {user.name}
                   </p>
                   <p
-                    className="text-[9px] uppercase tracking-[0.14em] text-[var(--ink-faint)] truncate mt-0.5"
+                    className="text-[10px] uppercase tracking-[0.14em] text-[var(--ink-faint)] truncate mt-1"
                     style={{ fontFamily: "var(--font-mono)" }}
                   >
                     {user.role}
