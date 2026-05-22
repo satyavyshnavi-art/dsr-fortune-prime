@@ -109,12 +109,12 @@ export function Sidebar() {
             {!collapsed && (
               <div className="min-w-0 leading-none">
                 <span
-                  className="text-[22px] font-medium tracking-tight text-[var(--ink)] block leading-none"
+                  className="text-[16px] font-semibold tracking-tight text-[var(--ink)] block leading-none"
                   style={{ fontFamily: "var(--font-display)" }}
                 >
                   DSR Fortune
                 </span>
-                <p className="text-[10px] uppercase tracking-[0.14em] text-[var(--ink-faint)] mt-2 font-medium">
+                <p className="text-[10px] uppercase tracking-[0.12em] text-[var(--ink-faint)] mt-1.5 font-medium">
                   Facility Management
                 </p>
               </div>
@@ -140,7 +140,7 @@ export function Sidebar() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "group relative flex items-center gap-3 rounded px-3 py-2 text-[13.5px] font-medium transition-colors",
+                  "group relative flex items-center gap-3 rounded px-3 py-2 text-[13px] font-medium transition-colors",
                   isActive
                     ? "text-[var(--ink)] bg-[var(--vellum)]"
                     : "text-[var(--ink-muted)] hover:text-[var(--ink)] hover:bg-[var(--vellum)]/60"

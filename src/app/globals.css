@@ -151,11 +151,11 @@
     @apply font-sans;
     font-feature-settings: "ss01", "cv11";
   }
-  /* Editorial type scale — Cormorant for display, Manrope for type, JetBrains for data */
-  h1 { font-family: var(--font-display); @apply text-[32px] font-medium tracking-tight leading-tight; }
-  h2 { font-family: var(--font-display); @apply text-[24px] font-medium tracking-tight leading-tight; }
-  h3 { @apply text-[16px] font-semibold tracking-tight; }
-  h4 { @apply text-[13px] font-semibold uppercase tracking-[0.08em]; }
+  /* Standard web type scale — Cormorant for display, Manrope for headings */
+  h1 { font-family: var(--font-display); @apply text-[22px] font-semibold tracking-tight leading-tight; }
+  h2 { font-family: var(--font-display); @apply text-[18px] font-semibold tracking-tight leading-tight; }
+  h3 { @apply text-[15px] font-semibold tracking-tight; }
+  h4 { @apply text-[12px] font-semibold uppercase tracking-[0.06em]; }
   /* Tabular numbers everywhere by default */
   .tabular { font-variant-numeric: tabular-nums; }
 
