@@ -11,30 +11,25 @@ interface StatusBadgeProps {
 }
 
 /**
- * Editorial status tag: a single colored dot + uppercase Manrope label.
- * No pill bg, no border — the dot carries the meaning, the label reads as type.
+ * Specification Sheet status tag.
  *
- * Reads like a legend entry in a blueprint or an inspection log:
- *   ●  IN PROGRESS
- *   ●  COMPLETED
- *   ●  OVERDUE
+ * Format: GLYPH SP LABEL
+ *   ✓ COMPLETED
+ *   ▲ OVERDUE
+ *   ◆ IN PROGRESS
+ *   ◯ PENDING
+ *
+ * No pill. No background. The glyph carries the meaning; the label is
+ * monospace uppercase with track. Reads like a legend in a technical drawing.
  */
-const variantDot: Record<BadgeVariant, string> = {
-  success: "bg-[var(--seal)]",
-  warning: "bg-[var(--sodium)]",
-  danger: "bg-[var(--redline)]",
-  info: "bg-[var(--mark)]",
-  neutral: "bg-[var(--ink-faint)]",
-  purple: "bg-[#6b4f8c]", // editorial plum — used sparingly
-};
 
-const variantText: Record<BadgeVariant, string> = {
-  success: "text-[var(--seal)]",
-  warning: "text-[var(--sodium)]",
-  danger: "text-[var(--redline)]",
-  info: "text-[var(--mark)]",
-  neutral: "text-[var(--ink-muted)]",
-  purple: "text-[#6b4f8c]",
+const variantStyle: Record<BadgeVariant, { color: string; glyph: string }> = {
+  success:  { color: "text-[var(--seal)]",      glyph: "✓" },
+  warning:  { color: "text-[var(--sodium)]",    glyph: "◐" },
+  danger:   { color: "text-[var(--redline)]",   glyph: "▲" },
+  info:     { color: "text-[var(--mark)]",      glyph: "◆" },
+  neutral:  { color: "text-[var(--ink-muted)]", glyph: "◯" },
+  purple:   { color: "text-[#6b4f8c]",          glyph: "◇" },
 };
 
 const autoVariant: Record<string, BadgeVariant> = {
@@ -65,28 +60,21 @@ const autoVariant: Record<string, BadgeVariant> = {
 
 export function StatusBadge({ status, variant, className }: StatusBadgeProps) {
   const resolvedVariant = variant || autoVariant[status.toLowerCase()] || "neutral";
+  const { color, glyph } = variantStyle[resolvedVariant];
   const displayLabel = status.replace(/_/g, " ");
 
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 whitespace-nowrap",
+        "inline-flex items-baseline gap-1.5 whitespace-nowrap text-[10px] font-semibold uppercase tracking-[0.1em]",
+        color,
         className
       )}
+      style={{ fontFamily: "var(--font-mono)" }}
       aria-label={`Status: ${displayLabel}`}
     >
-      <span
-        className={cn("inline-block h-1.5 w-1.5 rounded-full shrink-0", variantDot[resolvedVariant])}
-        aria-hidden="true"
-      />
-      <span
-        className={cn(
-          "text-[11px] font-semibold uppercase tracking-[0.08em]",
-          variantText[resolvedVariant]
-        )}
-      >
-        {displayLabel}
-      </span>
+      <span aria-hidden="true">{glyph}</span>
+      <span>{displayLabel}</span>
     </span>
   );
 }

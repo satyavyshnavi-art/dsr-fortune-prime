@@ -12,36 +12,40 @@ interface ChartCardProps {
 }
 
 /**
- * Editorial chart/section card. Title in Cormorant Garamond (display),
- * subtitle in Manrope ink-muted. Vellum surface on the parchment page.
+ * Specification Sheet chart card.
+ * Italic Newsreader title + mono uppercase subtitle.
+ * Sharp corners, 1px ink hairline border, vellum surface.
  */
 export function ChartCard({ title, subtitle, children, actions, className }: ChartCardProps) {
   return (
     <Card
       className={cn(
-        "shadow-none rounded-md bg-[var(--vellum)] border-[var(--rule)]",
+        "shadow-none rounded-none bg-[var(--vellum)] border-[var(--ink)]",
         className
       )}
       role="region"
       aria-label={title}
     >
-      <CardHeader className="flex flex-row items-start justify-between gap-3 px-5 pt-5 pb-3">
+      <CardHeader className="flex flex-row items-start justify-between gap-3 px-5 pt-5 pb-3 border-b border-[var(--rule)]">
         <div className="min-w-0">
           <CardTitle
-            className="text-[16px] font-semibold tracking-tight text-[var(--ink)] leading-tight"
+            className="text-[18px] font-medium tracking-tight text-[var(--ink)] leading-tight italic"
             style={{ fontFamily: "var(--font-display)" }}
           >
             {title}
           </CardTitle>
           {subtitle && (
-            <p className="text-[12px] text-[var(--ink-muted)] mt-1 leading-snug">
+            <p
+              className="text-[10px] uppercase tracking-[0.12em] text-[var(--ink-muted)] mt-2 font-medium"
+              style={{ fontFamily: "var(--font-mono)" }}
+            >
               {subtitle}
             </p>
           )}
         </div>
         {actions}
       </CardHeader>
-      <CardContent className="px-5 pb-5 pt-2">{children}</CardContent>
+      <CardContent className="px-5 pb-5 pt-4">{children}</CardContent>
     </Card>
   );
 }

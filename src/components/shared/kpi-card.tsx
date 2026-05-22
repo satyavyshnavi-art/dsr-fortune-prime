@@ -4,19 +4,15 @@ import { cn } from "@/lib/utils";
 import { type LucideIcon } from "lucide-react";
 
 /**
- * Editorial Architectural KPI card.
+ * Specification Sheet KPI card.
  *
- * No colored icon tile. No pastel accents. Each card is a vellum surface with
- * a single warm rule above the data — like a column in a balance sheet.
+ * Signature elements:
+ *   - Corner tick (top-left blueprint mark, via .spec-card)
+ *   - Hero number in Newsreader Italic — modulated serif italic numerals
+ *   - All chrome (label, subtitle, trend) in JetBrains Mono uppercase
  *
- * Structure (top → bottom):
- *   1. Eyebrow label (uppercase Manrope, tracking, ink-muted)
- *   2. Hero number (large JetBrains Mono, ink, tabular)
- *   3. Sub-text (Manrope, ink-faint)
- *   4. Optional trend chip (text-only, monospace)
- *
- * The icon, if provided, sits TOP-RIGHT as a quiet stroked glyph in ink-faint —
- * never as a colored tile. Color carries meaning only on the trend chip.
+ * No colored tiles. No rounded corners. No shadows. The card looks like
+ * a row torn from a building's spec book.
  */
 
 type Trend = "up" | "down" | "neutral";
@@ -28,7 +24,7 @@ interface KPICardProps {
   icon?: LucideIcon;
   trend?: Trend;
   trendValue?: string;
-  /** Kept for backward-compat with old call sites; ignored in editorial layout. */
+  /** Kept for backward-compat; ignored. */
   color?: string;
   className?: string;
 }
@@ -40,9 +36,9 @@ const trendStyles: Record<Trend, string> = {
 };
 
 const trendGlyph: Record<Trend, string> = {
-  up: "↑",
-  down: "↓",
-  neutral: "–",
+  up: "▲",
+  down: "▼",
+  neutral: "—",
 };
 
 export function KPICard({
@@ -57,43 +53,53 @@ export function KPICard({
   return (
     <div
       className={cn(
-        "bg-[var(--vellum)] border border-[var(--rule)] rounded-md p-5 transition-colors hover:border-[var(--ink-faint)]/40",
+        "spec-card bg-[var(--vellum)] border border-[var(--ink)] p-5 pt-7",
         className
       )}
       role="region"
       aria-label={`${title}: ${value}`}
     >
       <div className="flex items-start justify-between gap-3 mb-3">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--ink-muted)] leading-tight">
+        <p
+          className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--ink-muted)]"
+          style={{ fontFamily: "var(--font-mono)" }}
+        >
           {title}
         </p>
         {Icon && (
-          <Icon className="h-4 w-4 text-[var(--ink-faint)] shrink-0" aria-hidden="true" strokeWidth={1.5} />
+          <Icon
+            className="h-4 w-4 text-[var(--ink)] shrink-0"
+            aria-hidden="true"
+            strokeWidth={1.25}
+          />
         )}
       </div>
 
       <p
-        className="font-mono text-[28px] font-semibold leading-tight text-[var(--ink)] tabular-nums"
-        style={{ fontFamily: "var(--font-mono)" }}
+        className="text-[32px] font-medium leading-none text-[var(--ink)] tabular-nums"
+        style={{ fontFamily: "var(--font-display)", fontStyle: "italic" }}
       >
         {value}
       </p>
 
-      <div className="mt-2 flex items-center gap-2 min-h-[16px]">
+      <div className="mt-4 pt-3 border-t border-[var(--rule)] flex items-center justify-between gap-2 min-h-[20px]">
+        {subtitle ? (
+          <span
+            className="text-[10px] uppercase tracking-[0.1em] text-[var(--ink-faint)] truncate"
+            style={{ fontFamily: "var(--font-mono)" }}
+          >
+            {subtitle}
+          </span>
+        ) : <span />}
         {trend && trendValue && (
           <span
             className={cn(
-              "font-mono text-[12px] font-medium tabular-nums",
+              "text-[11px] font-semibold tabular-nums shrink-0",
               trendStyles[trend]
             )}
             style={{ fontFamily: "var(--font-mono)" }}
           >
             {trendGlyph[trend]} {trendValue}
-          </span>
-        )}
-        {subtitle && (
-          <span className="text-[12px] text-[var(--ink-faint)] truncate">
-            {subtitle}
           </span>
         )}
       </div>

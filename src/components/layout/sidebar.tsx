@@ -100,22 +100,25 @@ export function Sidebar() {
           mobileOpen && "!flex fixed inset-y-0 left-0 z-50 w-[240px]"
         )}
       >
-        {/* Logo — editorial serif */}
-        <div className="flex items-center justify-between px-5 py-6 border-b border-[var(--rule)]">
+        {/* Logo — Newsreader italic wordmark */}
+        <div className="flex items-center justify-between px-5 py-6 border-b border-[var(--ink)]">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="flex h-9 w-9 items-center justify-center rounded shrink-0 bg-[var(--mark)]">
-              <Leaf className="h-4 w-4 text-white" aria-hidden="true" />
+            <div className="flex h-9 w-9 items-center justify-center shrink-0 border border-[var(--ink)] bg-[var(--parchment)]">
+              <Leaf className="h-4 w-4 text-[var(--ink)]" aria-hidden="true" strokeWidth={1.5} />
             </div>
             {!collapsed && (
               <div className="min-w-0 leading-none">
                 <span
-                  className="text-[16px] font-semibold tracking-tight text-[var(--ink)] block leading-none"
+                  className="text-[18px] font-medium tracking-tight text-[var(--ink)] block leading-none italic"
                   style={{ fontFamily: "var(--font-display)" }}
                 >
                   DSR Fortune
                 </span>
-                <p className="text-[10px] uppercase tracking-[0.12em] text-[var(--ink-faint)] mt-1.5 font-medium">
-                  Facility Management
+                <p
+                  className="text-[9px] uppercase tracking-[0.18em] text-[var(--ink-faint)] mt-2 font-semibold"
+                  style={{ fontFamily: "var(--font-mono)" }}
+                >
+                  Facility &nbsp;/&nbsp; Spec
                 </p>
               </div>
             )}
@@ -131,33 +134,38 @@ export function Sidebar() {
           )}
         </div>
 
-        {/* Navigation */}
-        <nav aria-label="Main navigation" className="flex-1 overflow-y-auto py-4 px-3 space-y-0.5">
-          {navItems.map((item) => {
+        {/* Navigation — numbered, spec-sheet TOC */}
+        <nav aria-label="Main navigation" className="flex-1 overflow-y-auto py-4 px-3 space-y-0">
+          {navItems.map((item, idx) => {
             const isActive = pathname.startsWith(item.href);
+            const num = String(idx + 1).padStart(2, "0");
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "group relative flex items-center gap-3 rounded px-3 py-2 text-[13px] font-medium transition-colors",
+                  "group flex items-center gap-3 px-2 py-[7px] text-[12px] font-medium transition-colors uppercase tracking-[0.05em] border-b border-transparent",
                   isActive
-                    ? "text-[var(--ink)] bg-[var(--vellum)]"
-                    : "text-[var(--ink-muted)] hover:text-[var(--ink)] hover:bg-[var(--vellum)]/60"
+                    ? "text-[var(--ink)] border-b-[var(--ink)]"
+                    : "text-[var(--ink-muted)] hover:text-[var(--ink)]"
                 )}
+                style={{ fontFamily: "var(--font-mono)" }}
                 title={collapsed ? item.label : undefined}
               >
-                {/* Active rule — single line on the left, signature mark */}
-                {isActive && (
+                {!collapsed && (
                   <span
-                    className="absolute left-0 top-1/2 -translate-y-1/2 h-[60%] w-[2px] bg-[var(--mark)]"
-                    aria-hidden="true"
-                  />
+                    className={cn(
+                      "text-[10px] shrink-0 w-5",
+                      isActive ? "text-[var(--ink)]" : "text-[var(--ink-faint)]"
+                    )}
+                  >
+                    {num}
+                  </span>
                 )}
                 <item.Icon
                   className={cn(
-                    "h-[16px] w-[16px] shrink-0 transition-colors",
-                    isActive ? "text-[var(--mark)]" : "text-[var(--ink-faint)] group-hover:text-[var(--ink-muted)]"
+                    "h-[14px] w-[14px] shrink-0 transition-colors",
+                    isActive ? "text-[var(--ink)]" : "text-[var(--ink-faint)] group-hover:text-[var(--ink-muted)]"
                   )}
                   aria-hidden="true"
                   strokeWidth={1.5}
@@ -175,13 +183,26 @@ export function Sidebar() {
               "flex items-center gap-3 px-4 py-3",
               collapsed ? "justify-center" : ""
             )}>
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--mark)] text-white text-[11px] font-semibold shrink-0 tracking-wide">
+              <div
+                className="flex h-9 w-9 items-center justify-center border border-[var(--ink)] text-[var(--ink)] text-[10px] font-semibold shrink-0 tracking-[0.05em] bg-[var(--parchment)]"
+                style={{ fontFamily: "var(--font-mono)" }}
+              >
                 {user.initials}
               </div>
               {!collapsed && (
                 <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-medium text-[var(--ink)] truncate">{user.name}</p>
-                  <p className="text-[10px] uppercase tracking-[0.12em] text-[var(--ink-faint)] truncate mt-0.5">{user.role}</p>
+                  <p
+                    className="text-[12px] font-semibold text-[var(--ink)] truncate uppercase tracking-[0.04em]"
+                    style={{ fontFamily: "var(--font-mono)" }}
+                  >
+                    {user.name}
+                  </p>
+                  <p
+                    className="text-[9px] uppercase tracking-[0.14em] text-[var(--ink-faint)] truncate mt-0.5"
+                    style={{ fontFamily: "var(--font-mono)" }}
+                  >
+                    {user.role}
+                  </p>
                 </div>
               )}
             </div>
