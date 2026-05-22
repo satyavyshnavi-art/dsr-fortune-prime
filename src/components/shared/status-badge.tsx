@@ -81,7 +81,7 @@ export function StatusBadge({ status, variant, className }: StatusBadgeProps) {
       />
       <span
         className={cn(
-          "text-[10px] font-medium uppercase tracking-[0.1em]",
+          "text-[11px] font-semibold uppercase tracking-[0.08em]",
           variantText[resolvedVariant]
         )}
       >

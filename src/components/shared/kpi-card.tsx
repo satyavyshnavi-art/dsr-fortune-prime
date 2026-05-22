@@ -57,33 +57,33 @@ export function KPICard({
   return (
     <div
       className={cn(
-        "bg-[var(--vellum)] border border-[var(--rule)] rounded-md p-5 transition-colors hover:border-[var(--ink-faint)]/40",
+        "bg-[var(--vellum)] border border-[var(--rule)] rounded-md p-6 transition-colors hover:border-[var(--ink-faint)]/40",
         className
       )}
       role="region"
       aria-label={`${title}: ${value}`}
     >
-      <div className="flex items-start justify-between gap-3 mb-4">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--ink-muted)]">
+      <div className="flex items-start justify-between gap-3 mb-5">
+        <p className="text-[12px] font-semibold uppercase tracking-[0.1em] text-[var(--ink-muted)] leading-tight">
           {title}
         </p>
         {Icon && (
-          <Icon className="h-4 w-4 text-[var(--ink-faint)] shrink-0" aria-hidden="true" strokeWidth={1.5} />
+          <Icon className="h-5 w-5 text-[var(--ink-faint)] shrink-0" aria-hidden="true" strokeWidth={1.5} />
         )}
       </div>
 
       <p
-        className="font-mono text-[30px] font-medium leading-none text-[var(--ink)] tabular-nums"
+        className="font-mono text-[40px] font-medium leading-none text-[var(--ink)] tabular-nums"
         style={{ fontFamily: "var(--font-mono)" }}
       >
         {value}
       </p>
 
-      <div className="mt-3 flex items-center gap-3 min-h-[16px]">
+      <div className="mt-4 flex items-center gap-3 min-h-[18px]">
         {trend && trendValue && (
           <span
             className={cn(
-              "font-mono text-[11px] font-medium tabular-nums",
+              "font-mono text-[13px] font-medium tabular-nums",
               trendStyles[trend]
             )}
             style={{ fontFamily: "var(--font-mono)" }}
@@ -92,7 +92,7 @@ export function KPICard({
           </span>
         )}
         {subtitle && (
-          <span className="text-[11px] text-[var(--ink-faint)] truncate">
+          <span className="text-[12px] text-[var(--ink-faint)] truncate">
             {subtitle}
           </span>
         )}

@@ -109,12 +109,12 @@ export function Sidebar() {
             {!collapsed && (
               <div className="min-w-0 leading-none">
                 <span
-                  className="text-[20px] font-medium tracking-tight text-[var(--ink)] block leading-none"
+                  className="text-[22px] font-medium tracking-tight text-[var(--ink)] block leading-none"
                   style={{ fontFamily: "var(--font-display)" }}
                 >
                   DSR Fortune
                 </span>
-                <p className="text-[9px] uppercase tracking-[0.14em] text-[var(--ink-faint)] mt-1.5">
+                <p className="text-[10px] uppercase tracking-[0.14em] text-[var(--ink-faint)] mt-2 font-medium">
                   Facility Management
                 </p>
               </div>
@@ -140,7 +140,7 @@ export function Sidebar() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "group relative flex items-center gap-3 rounded px-3 py-[7px] text-[12.5px] font-medium transition-colors",
+                  "group relative flex items-center gap-3 rounded px-3 py-2 text-[13.5px] font-medium transition-colors",
                   isActive
                     ? "text-[var(--ink)] bg-[var(--vellum)]"
                     : "text-[var(--ink-muted)] hover:text-[var(--ink)] hover:bg-[var(--vellum)]/60"
@@ -175,13 +175,13 @@ export function Sidebar() {
               "flex items-center gap-3 px-4 py-3",
               collapsed ? "justify-center" : ""
             )}>
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--mark)] text-white text-[10px] font-semibold shrink-0 tracking-wide">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--mark)] text-white text-[11px] font-semibold shrink-0 tracking-wide">
                 {user.initials}
               </div>
               {!collapsed && (
                 <div className="flex-1 min-w-0">
-                  <p className="text-[12px] font-medium text-[var(--ink)] truncate">{user.name}</p>
-                  <p className="text-[9px] uppercase tracking-[0.12em] text-[var(--ink-faint)] truncate mt-0.5">{user.role}</p>
+                  <p className="text-[13px] font-medium text-[var(--ink)] truncate">{user.name}</p>
+                  <p className="text-[10px] uppercase tracking-[0.12em] text-[var(--ink-faint)] truncate mt-0.5">{user.role}</p>
                 </div>
               )}
             </div>
@@ -190,7 +190,7 @@ export function Sidebar() {
           <button
             onClick={handleLogout}
             className={cn(
-              "flex items-center gap-3 w-full px-4 py-2.5 text-[var(--ink-faint)] hover:text-[var(--redline)] hover:bg-[var(--redline-soft)]/40 transition-colors text-[11px] uppercase tracking-[0.1em] font-medium",
+              "flex items-center gap-3 w-full px-4 py-3 text-[var(--ink-faint)] hover:text-[var(--redline)] hover:bg-[var(--redline-soft)]/40 transition-colors text-[12px] uppercase tracking-[0.1em] font-medium",
               collapsed ? "justify-center" : ""
             )}
           >
