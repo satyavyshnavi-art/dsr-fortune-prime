@@ -76,8 +76,8 @@ export function KPICard({
       </div>
 
       <p
-        className="text-[38px] font-medium leading-none text-[var(--ink)] tabular-nums"
-        style={{ fontFamily: "var(--font-display)", fontStyle: "italic" }}
+        className="text-[38px] font-semibold leading-none text-[var(--ink)] tabular-nums"
+        style={{ fontFamily: "var(--font-display)" }}
       >
         {value}
       </p>

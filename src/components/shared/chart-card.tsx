@@ -29,7 +29,7 @@ export function ChartCard({ title, subtitle, children, actions, className }: Cha
       <CardHeader className="flex flex-row items-start justify-between gap-3 px-5 pt-5 pb-3 border-b border-[var(--rule)]">
         <div className="min-w-0">
           <CardTitle
-            className="text-[20px] font-medium tracking-tight text-[var(--ink)] leading-tight italic"
+            className="text-[20px] font-semibold tracking-tight text-[var(--ink)] leading-tight"
             style={{ fontFamily: "var(--font-display)" }}
           >
             {title}

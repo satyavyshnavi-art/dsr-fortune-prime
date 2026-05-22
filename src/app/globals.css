@@ -153,8 +153,8 @@
     font-feature-settings: "ss01", "cv11";
   }
   /* Specification Sheet type scale — mono compensated (mono reads ~1px smaller per glyph than sans) */
-  h1 { font-family: var(--font-display); font-style: italic; @apply text-[32px] font-medium tracking-tight leading-tight; }
-  h2 { font-family: var(--font-display); font-style: italic; @apply text-[24px] font-medium tracking-tight leading-tight; }
+  h1 { font-family: var(--font-display); @apply text-[32px] font-medium tracking-tight leading-tight; }
+  h2 { font-family: var(--font-display); @apply text-[24px] font-medium tracking-tight leading-tight; }
   h3 { font-family: var(--font-mono); @apply text-[13px] font-semibold uppercase tracking-[0.08em]; }
   h4 { font-family: var(--font-mono); @apply text-[12px] font-semibold uppercase tracking-[0.08em]; }
   .tabular { font-variant-numeric: tabular-nums; }

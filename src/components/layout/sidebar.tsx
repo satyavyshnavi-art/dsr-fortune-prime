@@ -100,16 +100,16 @@ export function Sidebar() {
           mobileOpen && "!flex fixed inset-y-0 left-0 z-50 w-[240px]"
         )}
       >
-        {/* Logo — Newsreader italic wordmark */}
+        {/* Logo — Newsreader wordmark with a touch of green on the leaf tile */}
         <div className="flex items-center justify-between px-5 py-6 border-b border-[var(--ink)]">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="flex h-9 w-9 items-center justify-center shrink-0 border border-[var(--ink)] bg-[var(--parchment)]">
-              <Leaf className="h-4 w-4 text-[var(--ink)]" aria-hidden="true" strokeWidth={1.5} />
+            <div className="flex h-10 w-10 items-center justify-center shrink-0 bg-gradient-to-br from-emerald-400 to-teal-500 shadow-sm">
+              <Leaf className="h-5 w-5 text-white" aria-hidden="true" strokeWidth={1.75} />
             </div>
             {!collapsed && (
               <div className="min-w-0 leading-none">
                 <span
-                  className="text-[22px] font-medium tracking-tight text-[var(--ink)] block leading-none italic"
+                  className="text-[22px] font-semibold tracking-tight text-[var(--ink)] block leading-none"
                   style={{ fontFamily: "var(--font-display)" }}
                 >
                   DSR Fortune
@@ -144,19 +144,25 @@ export function Sidebar() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "group flex items-center gap-3 px-2 py-2 text-[13px] font-medium transition-colors uppercase tracking-[0.04em] border-b border-transparent",
+                  "group relative flex items-center gap-3 pl-3 pr-2 py-2 text-[13px] font-medium transition-all uppercase tracking-[0.04em]",
                   isActive
-                    ? "text-[var(--ink)] border-b-[var(--ink)]"
-                    : "text-[var(--ink-muted)] hover:text-[var(--ink)]"
+                    ? "text-[var(--ink)] bg-gradient-to-r from-emerald-50 to-transparent"
+                    : "text-[var(--ink-muted)] hover:text-[var(--ink)] hover:bg-emerald-50/40"
                 )}
                 style={{ fontFamily: "var(--font-mono)" }}
                 title={collapsed ? item.label : undefined}
               >
+                {isActive && (
+                  <span
+                    className="absolute left-0 top-1/2 -translate-y-1/2 h-[60%] w-[2px] bg-gradient-to-b from-emerald-400 to-teal-500"
+                    aria-hidden="true"
+                  />
+                )}
                 {!collapsed && (
                   <span
                     className={cn(
                       "text-[11px] shrink-0 w-5",
-                      isActive ? "text-[var(--ink)]" : "text-[var(--ink-faint)]"
+                      isActive ? "text-emerald-600" : "text-[var(--ink-faint)]"
                     )}
                   >
                     {num}
@@ -165,7 +171,7 @@ export function Sidebar() {
                 <item.Icon
                   className={cn(
                     "h-[15px] w-[15px] shrink-0 transition-colors",
-                    isActive ? "text-[var(--ink)]" : "text-[var(--ink-faint)] group-hover:text-[var(--ink-muted)]"
+                    isActive ? "text-emerald-600" : "text-[var(--ink-faint)] group-hover:text-[var(--ink-muted)]"
                   )}
                   aria-hidden="true"
                   strokeWidth={1.5}
@@ -184,7 +190,7 @@ export function Sidebar() {
               collapsed ? "justify-center" : ""
             )}>
               <div
-                className="flex h-9 w-9 items-center justify-center border border-[var(--ink)] text-[var(--ink)] text-[10px] font-semibold shrink-0 tracking-[0.05em] bg-[var(--parchment)]"
+                className="flex h-9 w-9 items-center justify-center text-white text-[11px] font-semibold shrink-0 tracking-[0.05em] bg-gradient-to-br from-emerald-400 to-teal-500"
                 style={{ fontFamily: "var(--font-mono)" }}
               >
                 {user.initials}
