@@ -210,7 +210,7 @@ export function EmployeeConfig() {
           <h2 className="text-[13px] font-semibold text-slate-800">Employee Management</h2>
           <p className="text-[11px] text-slate-400 mt-0.5">{filtered.length} employees configured</p>
         </div>
-        <Button size="sm" onClick={handleAdd} className="h-8 text-[12px] px-4 bg-violet-600 hover:bg-violet-700 text-white">
+        <Button size="sm" onClick={handleAdd} className="h-8 text-[12px] px-4 bg-teal-600 hover:bg-teal-700 text-white">
           <Plus className="h-3.5 w-3.5 mr-1.5" />
           Add Employee
         </Button>
@@ -272,7 +272,7 @@ export function EmployeeConfig() {
               {filtered.map((emp) => (
                 <tr key={emp.id} className="hover:bg-slate-50/40 group">
                   <td className="py-3 px-3">
-                    <span className="inline-block rounded bg-violet-50 text-violet-600 text-[11px] font-mono font-medium px-2 py-0.5">
+                    <span className="inline-block rounded bg-teal-50 text-teal-600 text-[11px] font-mono font-medium px-2 py-0.5">
                       {emp.empId}
                     </span>
                   </td>
@@ -303,7 +303,7 @@ export function EmployeeConfig() {
                   </td>
                   <td className="py-3 px-3">
                     <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button onClick={() => handleEdit(emp)} className="p-1 rounded hover:bg-violet-50 text-slate-400 hover:text-violet-600 transition-colors" title="Edit">
+                      <button onClick={() => handleEdit(emp)} className="p-1 rounded hover:bg-teal-50 text-slate-400 hover:text-teal-600 transition-colors" title="Edit">
                         <Pencil className="h-3.5 w-3.5" />
                       </button>
                       <button onClick={() => setDeleteConfirmId(emp.id)} className="p-1 rounded hover:bg-red-50 text-slate-400 hover:text-red-600 transition-colors" title="Delete">
@@ -369,7 +369,7 @@ export function EmployeeConfig() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)} className="text-[13px]">Cancel</Button>
-            <Button onClick={handleSave} disabled={saving} className="bg-violet-600 hover:bg-violet-700 text-white text-[13px]">
+            <Button onClick={handleSave} disabled={saving} className="bg-teal-600 hover:bg-teal-700 text-white text-[13px]">
               {saving ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
               {editingEmployee ? "Update" : "Add"}
             </Button>

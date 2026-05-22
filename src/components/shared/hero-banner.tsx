@@ -6,8 +6,8 @@ import { type LucideIcon } from "lucide-react";
 type Tone = "violet" | "magenta" | "teal" | "sunset";
 
 const toneStyles: Record<Tone, string> = {
-  violet: "from-violet-600 via-violet-500 to-fuchsia-500",
-  magenta: "from-fuchsia-600 via-purple-600 to-violet-700",
+  violet: "from-teal-600 via-teal-500 to-emerald-500",
+  magenta: "from-emerald-600 via-teal-600 to-cyan-700",
   teal: "from-teal-600 via-cyan-600 to-blue-600",
   sunset: "from-rose-500 via-orange-500 to-amber-500",
 };
@@ -114,7 +114,7 @@ export function HeroButton({
       className={cn(
         "inline-flex items-center gap-1.5 rounded-full px-3.5 h-8 text-[12px] font-medium transition-colors",
         variant === "solid"
-          ? "bg-white text-violet-700 hover:bg-white/90 shadow-sm"
+          ? "bg-white text-teal-700 hover:bg-white/90 shadow-sm"
           : "bg-white/10 backdrop-blur-sm text-white/90 ring-1 ring-white/15 hover:bg-white/20"
       )}
     >

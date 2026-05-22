@@ -35,7 +35,7 @@ export function AttendanceWidget({ data }: { data?: any }) {
           <span
             className={`text-[15px] font-bold ${
               rate >= 80
-                ? "text-violet-600"
+                ? "text-teal-600"
                 : rate >= 50
                 ? "text-yellow-600"
                 : "text-red-500"
@@ -76,14 +76,14 @@ export function AttendanceWidget({ data }: { data?: any }) {
         {/* Bottom Stats */}
         <div className="grid grid-cols-4 gap-2 pt-1.5">
           <div className="flex flex-col items-center">
-            <div className="flex items-center gap-1 text-violet-600">
+            <div className="flex items-center gap-1 text-teal-600">
               <Users className="h-3 w-3" />
               <span className="text-[13px] font-bold">{total}</span>
             </div>
             <span className="text-[9px] text-slate-400 mt-0.5">Total</span>
           </div>
           <div className="flex flex-col items-center">
-            <div className="flex items-center gap-1 text-violet-600">
+            <div className="flex items-center gap-1 text-teal-600">
               <UserCheck className="h-3 w-3" />
               <span className="text-[13px] font-bold">{present}</span>
             </div>
@@ -109,11 +109,11 @@ export function AttendanceWidget({ data }: { data?: any }) {
         <div className="flex items-center gap-2">
           <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
             <div
-              className="h-full bg-violet-500 rounded-full"
+              className="h-full bg-teal-500 rounded-full"
               style={{ width: `${rate}%` }}
             />
           </div>
-          <div className="flex items-center gap-0.5 text-violet-600">
+          <div className="flex items-center gap-0.5 text-teal-600">
             <TrendingUp className="h-2.5 w-2.5" />
             <span className="text-[11px] font-semibold">{rate}%</span>
           </div>

@@ -48,7 +48,7 @@ export default function WorkLogsPage() {
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium whitespace-nowrap border-b-2 transition-colors ${
                 isActive
-                  ? "border-violet-600 text-violet-600"
+                  ? "border-teal-600 text-teal-600"
                   : "border-transparent text-slate-400 hover:text-slate-600 hover:border-slate-300"
               }`}
             >

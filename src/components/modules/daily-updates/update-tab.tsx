@@ -571,7 +571,7 @@ function WaterQualitySection() {
     >
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-4">
         <QualityCard
-          dot="bg-violet-500"
+          dot="bg-teal-500"
           title="STP Daily"
           fields={[
             [

@@ -163,10 +163,10 @@ export const accent = {
     progress: "bg-rose-500",
   },
   lavender: {
-    tile: "bg-violet-100 text-violet-600",
-    pill: "bg-violet-100 text-violet-700",
-    gradient: "bg-gradient-to-br from-violet-50 to-violet-100/40",
-    progress: "bg-violet-500",
+    tile: "bg-teal-100 text-teal-600",
+    pill: "bg-teal-100 text-teal-700",
+    gradient: "bg-gradient-to-br from-teal-50 to-teal-100/40",
+    progress: "bg-teal-500",
   },
   sky: {
     tile: "bg-sky-100 text-sky-600",
@@ -202,7 +202,7 @@ export const status = {
   /** Closed, archived, inactive */
   neutral: "bg-slate-100 text-slate-600",
   /** Medium priority, in-between states */
-  purple: "bg-violet-100 text-violet-700",
+  purple: "bg-teal-100 text-teal-700",
 } as const;
 
 // ──────────────────────────────────────────────────────────────────────────────

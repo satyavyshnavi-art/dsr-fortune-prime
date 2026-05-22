@@ -128,7 +128,7 @@ export function HygieneTab() {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <Calendar className="h-4 w-4 text-violet-600" />
+          <Calendar className="h-4 w-4 text-teal-600" />
           <h3 className="text-[15px] font-semibold text-slate-900">Daily Hygiene Calendar</h3>
         </div>
         <Button size="sm" className="bg-teal-600 hover:bg-teal-700 text-white h-8 text-[12px] px-4 rounded-lg" onClick={() => toast.success("Exporting hygiene report...")}>
@@ -190,7 +190,7 @@ export function HygieneTab() {
                 onClick={() => handleModeChange(mode)}
                 className={`px-3.5 py-1.5 text-[12px] font-medium transition-colors ${
                   viewMode === mode
-                    ? "bg-violet-600 text-white"
+                    ? "bg-teal-600 text-white"
                     : "bg-white text-slate-500 hover:bg-slate-50"
                 }`}
               >
@@ -206,8 +206,8 @@ export function HygieneTab() {
         {/* Card Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
           <div className="flex items-center gap-3">
-            <div className="rounded-full bg-purple-50 p-2">
-              <Sparkles className="h-4 w-4 text-purple-600" />
+            <div className="rounded-full bg-teal-50 p-2">
+              <Sparkles className="h-4 w-4 text-teal-700" />
             </div>
             <div>
               <h4 className="text-[14px] font-semibold text-slate-900">{config.title}</h4>

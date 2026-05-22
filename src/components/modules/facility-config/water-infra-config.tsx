@@ -102,7 +102,7 @@ function CollapsibleSection({
         </button>
         <Button
           variant="ghost"
-          className="h-7 text-[11px] text-violet-600 hover:text-violet-700 hover:bg-violet-50 gap-1 px-2"
+          className="h-7 text-[11px] text-teal-600 hover:text-teal-700 hover:bg-teal-50 gap-1 px-2"
           onClick={onAdd}
         >
           <Plus className="h-3 w-3" />
@@ -146,7 +146,7 @@ function InfraCard({
         <div className="flex items-center gap-1 pt-1 border-t border-slate-100">
           <button
             onClick={() => onEdit(item)}
-            className="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-violet-600 transition-colors"
+            className="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-teal-600 transition-colors"
           >
             <Pencil className="h-3.5 w-3.5" />
           </button>

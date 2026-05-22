@@ -37,7 +37,7 @@ const typeIconMap: Record<ActivityItem["type"], React.ElementType> = {
 };
 
 const typeColorMap: Record<ActivityItem["type"], string> = {
-  task: "text-violet-500 bg-violet-50",
+  task: "text-teal-500 bg-teal-50",
   attendance: "text-blue-500 bg-blue-50",
   alert: "text-rose-500 bg-rose-50",
   report: "text-indigo-500 bg-indigo-50",

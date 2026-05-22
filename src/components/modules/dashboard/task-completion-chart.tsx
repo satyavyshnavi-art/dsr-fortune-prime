@@ -85,7 +85,7 @@ export function TaskCompletionChart({ data }: TaskCompletionChartProps) {
             <Bar
               dataKey="completed"
               name="Completed"
-              fill="#8b5cf6"
+              fill="#14b8a6"
               radius={[4, 4, 0, 0]}
               barSize={14}
             />

@@ -147,7 +147,7 @@ export function VendorEvaluation() {
         </p>
         {loading ? (
           <div className="flex items-center justify-center py-8">
-            <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-300 border-t-violet-600" />
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-300 border-t-teal-600" />
           </div>
         ) : evaluations.length === 0 ? (
           <p className="text-[11px] text-slate-400 py-4">No evaluations recorded yet.</p>

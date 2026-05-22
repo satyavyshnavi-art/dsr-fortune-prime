@@ -546,7 +546,7 @@ export function AssetCategories() {
             </p>
             <Button
               size="sm"
-              className="bg-violet-600 hover:bg-violet-700 text-white"
+              className="bg-teal-600 hover:bg-teal-700 text-white"
               onClick={() => setExpandedCategory(null)}
             >
               Close
@@ -887,7 +887,7 @@ function AssetForm({
         <Button
           size="sm"
           onClick={handleSubmit}
-          className="h-7 text-[11px] bg-violet-600 hover:bg-violet-700 text-white"
+          className="h-7 text-[11px] bg-teal-600 hover:bg-teal-700 text-white"
         >
           {submitLabel}
         </Button>

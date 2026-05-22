@@ -159,10 +159,10 @@ export default function DashboardPage() {
           <div className="flex items-center justify-end gap-2">
             <div
               className={`inline-flex items-center bg-white border rounded-xl px-3.5 h-9 transition-colors ${
-                hasUnappliedChanges ? "border-violet-300 ring-1 ring-violet-100" : "border-slate-200"
+                hasUnappliedChanges ? "border-teal-300 ring-1 ring-teal-100" : "border-slate-200"
               }`}
             >
-              <Calendar className="h-3.5 w-3.5 text-violet-500 mr-2 shrink-0" aria-hidden="true" />
+              <Calendar className="h-3.5 w-3.5 text-teal-500 mr-2 shrink-0" aria-hidden="true" />
               <input
                 type="date"
                 value={startDate}
@@ -185,8 +185,8 @@ export default function DashboardPage() {
               disabled={isLoading}
               className={`flex items-center gap-1.5 h-9 px-4 rounded-xl text-[12px] font-semibold transition-all ${
                 isLoading
-                  ? "bg-violet-400 text-white cursor-wait"
-                  : "bg-violet-600 text-white hover:bg-violet-700 active:bg-violet-800"
+                  ? "bg-teal-400 text-white cursor-wait"
+                  : "bg-teal-600 text-white hover:bg-teal-700 active:bg-teal-800"
               }`}
             >
               {isLoading ? (

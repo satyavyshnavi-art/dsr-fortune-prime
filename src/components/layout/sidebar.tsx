@@ -75,7 +75,7 @@ export function Sidebar() {
       {/* Mobile hamburger */}
       <button
         onClick={() => setMobileOpen(true)}
-        className="fixed top-3 left-3 z-50 md:hidden flex items-center justify-center h-9 w-9 rounded-xl bg-gradient-to-br from-violet-500 to-purple-700 text-white shadow-md"
+        className="fixed top-3 left-3 z-50 md:hidden flex items-center justify-center h-9 w-9 rounded-xl bg-gradient-to-br from-teal-500 to-teal-700 text-white shadow-md"
         aria-label="Open navigation menu"
       >
         <Menu className="h-4 w-4" aria-hidden="true" />
@@ -101,7 +101,7 @@ export function Sidebar() {
         {/* Logo */}
         <div className="flex items-center justify-between px-4 h-[60px] border-b border-slate-100 shrink-0">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="flex h-8 w-8 items-center justify-center shrink-0 rounded-lg bg-gradient-to-br from-violet-500 to-purple-700">
+            <div className="flex h-8 w-8 items-center justify-center shrink-0 rounded-lg bg-gradient-to-br from-teal-500 to-teal-700">
               <Leaf className="h-4 w-4 text-white" aria-hidden="true" strokeWidth={2} />
             </div>
             {!collapsed && (
@@ -138,21 +138,21 @@ export function Sidebar() {
                   className={cn(
                     "group relative flex items-center gap-2.5 px-2.5 py-[7px] rounded-lg text-[12.5px] font-medium transition-colors",
                     isActive
-                      ? "text-violet-700 bg-violet-50/80"
+                      ? "text-teal-700 bg-teal-50/80"
                       : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"
                   )}
                   title={collapsed ? item.label : undefined}
                 >
                   {isActive && (
                     <span
-                      className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[2.5px] rounded-r-full bg-violet-500"
+                      className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[2.5px] rounded-r-full bg-teal-500"
                       aria-hidden="true"
                     />
                   )}
                   <item.Icon
                     className={cn(
                       "h-4 w-4 shrink-0 transition-colors",
-                      isActive ? "text-violet-500" : "text-slate-400 group-hover:text-slate-600"
+                      isActive ? "text-teal-500" : "text-slate-400 group-hover:text-slate-600"
                     )}
                     aria-hidden="true"
                     strokeWidth={1.75}
@@ -171,7 +171,7 @@ export function Sidebar() {
               "flex items-center gap-2.5 px-3.5 py-3",
               collapsed ? "justify-center" : ""
             )}>
-              <div className="flex h-7 w-7 items-center justify-center text-white text-[10px] font-semibold shrink-0 rounded-full bg-gradient-to-br from-violet-500 to-purple-600">
+              <div className="flex h-7 w-7 items-center justify-center text-white text-[10px] font-semibold shrink-0 rounded-full bg-gradient-to-br from-teal-500 to-teal-600">
                 {user.initials}
               </div>
               {!collapsed && (

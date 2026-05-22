@@ -10,7 +10,7 @@ import {
   Tooltip,
 } from "recharts";
 
-const COLORS = ["#a855f7", "#3b82f6", "#22c55e", "#f59e0b", "#ef4444"];
+const COLORS = ["#14b8a6", "#3b82f6", "#22c55e", "#f59e0b", "#ef4444"];
 
 const tabs = ["EB Power", "DG Power", "Solar"];
 
@@ -48,7 +48,7 @@ export function PowerWidget({ data }: { data?: any }) {
     <ChartCard
       title="Power Management"
       actions={
-        <span className="text-[10px] font-semibold text-violet-600 bg-violet-50 px-1.5 py-0.5 rounded">
+        <span className="text-[10px] font-semibold text-teal-600 bg-teal-50 px-1.5 py-0.5 rounded">
           {totalKwh.toFixed(1)} kWh
         </span>
       }
@@ -61,7 +61,7 @@ export function PowerWidget({ data }: { data?: any }) {
               key={tab}
               className={`text-[10px] px-2 py-0.5 rounded transition-colors ${
                 i === 0
-                  ? "bg-violet-600 text-white"
+                  ? "bg-teal-600 text-white"
                   : "bg-slate-100 text-slate-500 hover:bg-slate-200"
               }`}
             >

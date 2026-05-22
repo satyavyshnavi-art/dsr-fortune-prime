@@ -638,7 +638,7 @@ export function TasksTab() {
                                 className="text-[12px] gap-2"
                                 onClick={() => openView(task)}
                               >
-                                <Eye className="h-3.5 w-3.5 text-violet-500" />
+                                <Eye className="h-3.5 w-3.5 text-teal-500" />
                                 View
                               </DropdownMenuItem>
                               <DropdownMenuItem
@@ -745,7 +745,7 @@ export function TasksTab() {
           <Card className="rounded-xl">
             <CardContent className="p-5">
               <h4 className="text-[14px] font-semibold text-slate-900 mb-4 flex items-center gap-2">
-                <ListTodo className="h-4 w-4 text-violet-600" />
+                <ListTodo className="h-4 w-4 text-teal-600" />
                 Add New Task
               </h4>
               <div className="space-y-4">
@@ -1013,7 +1013,7 @@ export function TasksTab() {
                   </Button>
                   <Button
                     onClick={handleAddTask}
-                    className="h-9 text-[13px] rounded-lg bg-violet-600 hover:bg-violet-700 text-white gap-1.5"
+                    className="h-9 text-[13px] rounded-lg bg-teal-600 hover:bg-teal-700 text-white gap-1.5"
                   >
                     <Plus className="h-3.5 w-3.5" />
                     Create Task
@@ -1051,9 +1051,9 @@ export function TasksTab() {
               <button
                 key={emp}
                 onClick={() => handleAssign(emp)}
-                className="w-full text-left px-3 py-2 text-[13px] text-slate-700 hover:bg-violet-50 hover:text-violet-700 rounded-md transition-colors flex items-center gap-2"
+                className="w-full text-left px-3 py-2 text-[13px] text-slate-700 hover:bg-teal-50 hover:text-teal-700 rounded-md transition-colors flex items-center gap-2"
               >
-                <div className="h-7 w-7 rounded-full bg-violet-100 text-violet-700 flex items-center justify-center text-[11px] font-semibold shrink-0">
+                <div className="h-7 w-7 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center text-[11px] font-semibold shrink-0">
                   {emp[0]}
                 </div>
                 {emp}
@@ -1204,7 +1204,7 @@ export function TasksTab() {
             </Button>
             <Button
               onClick={handleEdit}
-              className="h-9 text-[13px] rounded-lg bg-violet-600 hover:bg-violet-700 text-white"
+              className="h-9 text-[13px] rounded-lg bg-teal-600 hover:bg-teal-700 text-white"
             >
               Update Task
             </Button>
@@ -1250,18 +1250,18 @@ export function TasksTab() {
             <DialogTitle className="text-[14px]">Bulk Upload Tasks</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
-            <div className="rounded-lg border border-blue-200 bg-violet-50 p-3">
+            <div className="rounded-lg border border-blue-200 bg-teal-50 p-3">
               <p className="text-[12px] font-medium text-blue-800">
                 Excel Format Required
               </p>
-              <p className="text-[11px] text-violet-600 mt-0.5">
+              <p className="text-[11px] text-teal-600 mt-0.5">
                 Columns: Task Title, Description, Due Date, Department,
                 Priority, Responsibility, Source
               </p>
               <Button
                 variant="link"
                 size="sm"
-                className="text-violet-700 text-[11px] h-6 px-0 mt-1 gap-1"
+                className="text-teal-700 text-[11px] h-6 px-0 mt-1 gap-1"
                 onClick={() => toast.success("Downloading template...")}
               >
                 <Download className="h-3 w-3" />

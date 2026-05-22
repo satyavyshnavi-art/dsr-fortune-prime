@@ -173,8 +173,8 @@ export function AlertConfiguration() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-lg bg-violet-50 flex items-center justify-center">
-            <Bell className="h-4.5 w-4.5 text-violet-600" />
+          <div className="h-9 w-9 rounded-lg bg-teal-50 flex items-center justify-center">
+            <Bell className="h-4.5 w-4.5 text-teal-600" />
           </div>
           <div>
             <h3 className="font-semibold text-[14px] text-slate-900">Alert Configuration</h3>
@@ -188,7 +188,7 @@ export function AlertConfiguration() {
             <RotateCcw className="h-3 w-3 mr-1.5" />
             Reset Defaults
           </Button>
-          <Button size="sm" className="h-8 text-[12px] px-3 bg-violet-600 hover:bg-violet-700 text-white" onClick={handleSaveConfiguration}>
+          <Button size="sm" className="h-8 text-[12px] px-3 bg-teal-600 hover:bg-teal-700 text-white" onClick={handleSaveConfiguration}>
             <CheckCircle className="h-3 w-3 mr-1.5" />
             Save Changes
           </Button>
@@ -225,18 +225,18 @@ export function AlertConfiguration() {
                 onClick={() => toggleCategory(cat.key)}
                 className={`flex items-center justify-between rounded-lg border px-3.5 py-2.5 cursor-pointer transition-all ${
                   cat.enabled
-                    ? "border-violet-200 bg-violet-50/50 hover:bg-violet-50"
+                    ? "border-teal-200 bg-teal-50/50 hover:bg-teal-50"
                     : "border-slate-200 bg-white hover:bg-slate-50"
                 }`}
               >
                 <div className="flex items-center gap-2.5">
-                  <CatIcon className={`h-3.5 w-3.5 ${cat.enabled ? "text-violet-600" : "text-slate-400"}`} />
-                  <span className={`text-[12px] font-medium ${cat.enabled ? "text-violet-700" : "text-slate-600"}`}>
+                  <CatIcon className={`h-3.5 w-3.5 ${cat.enabled ? "text-teal-600" : "text-slate-400"}`} />
+                  <span className={`text-[12px] font-medium ${cat.enabled ? "text-teal-700" : "text-slate-600"}`}>
                     {cat.label}
                   </span>
                 </div>
                 <div className={`h-4.5 w-4.5 rounded flex items-center justify-center text-white transition-colors ${
-                  cat.enabled ? "bg-violet-600" : "border border-slate-300 bg-white"
+                  cat.enabled ? "bg-teal-600" : "border border-slate-300 bg-white"
                 }`}>
                   {cat.enabled && <CheckCircle className="h-3 w-3" />}
                 </div>
@@ -298,9 +298,9 @@ export function AlertConfiguration() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className={`h-7 w-7 rounded-md flex items-center justify-center ${
-                      channel.enabled ? "bg-violet-50" : "bg-slate-100"
+                      channel.enabled ? "bg-teal-50" : "bg-slate-100"
                     }`}>
-                      <Icon className={`h-3.5 w-3.5 ${channel.enabled ? "text-violet-600" : "text-slate-400"}`} />
+                      <Icon className={`h-3.5 w-3.5 ${channel.enabled ? "text-teal-600" : "text-slate-400"}`} />
                     </div>
                     <div>
                       <p className={`text-[12px] font-medium ${channel.enabled ? "text-slate-900" : "text-slate-500"}`}>
@@ -325,7 +325,7 @@ export function AlertConfiguration() {
                         onClick={() => toggleChannelRole(channel.key, role.name)}
                         className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-medium border transition-all cursor-pointer ${
                           role.active
-                            ? "bg-violet-50 border-violet-200 text-violet-700 shadow-sm"
+                            ? "bg-teal-50 border-teal-200 text-teal-700 shadow-sm"
                             : "bg-white border-slate-200 text-slate-500 hover:border-slate-300 hover:bg-slate-50"
                         }`}
                       >
@@ -347,7 +347,7 @@ export function AlertConfiguration() {
           <RotateCcw className="h-3 w-3 mr-1.5" />
           Reset Defaults
         </Button>
-        <Button size="sm" className="h-8 text-[12px] px-4 bg-violet-600 hover:bg-violet-700 text-white" onClick={handleSaveConfiguration}>
+        <Button size="sm" className="h-8 text-[12px] px-4 bg-teal-600 hover:bg-teal-700 text-white" onClick={handleSaveConfiguration}>
           <CheckCircle className="h-3 w-3 mr-1.5" />
           Save Configuration
         </Button>

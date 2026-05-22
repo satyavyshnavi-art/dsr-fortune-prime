@@ -39,7 +39,7 @@ export default function HRPage() {
         actions={
           activeTab === "candidates" ? (
             <Button
-              className="h-7 text-[11px] px-2.5 gap-1 bg-violet-600 hover:bg-violet-700 text-white"
+              className="h-7 text-[11px] px-2.5 gap-1 bg-teal-600 hover:bg-teal-700 text-white"
               onClick={() => setShowInterview(true)}
             >
               <Plus className="h-3 w-3" />
@@ -60,7 +60,7 @@ export default function HRPage() {
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium whitespace-nowrap border-b-2 transition-colors ${
                 isActive
-                  ? "border-violet-600 text-violet-600"
+                  ? "border-teal-600 text-teal-600"
                   : "border-transparent text-slate-400 hover:text-slate-600 hover:border-slate-300"
               }`}
             >

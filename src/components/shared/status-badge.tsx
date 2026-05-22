@@ -17,7 +17,7 @@ const variantStyles: Record<BadgeVariant, string> = {
   danger: "bg-rose-100 text-rose-700",
   info: "bg-sky-100 text-sky-700",
   neutral: "bg-slate-100 text-slate-600",
-  purple: "bg-violet-100 text-violet-700",
+  purple: "bg-teal-100 text-teal-700",
 };
 
 const autoVariant: Record<string, BadgeVariant> = {

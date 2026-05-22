@@ -317,7 +317,7 @@ export function ManualEntry() {
                   : s === "HD"
                     ? "hover:bg-orange-50 hover:text-orange-700 hover:border-orange-300"
                     : s === "L"
-                      ? "hover:bg-purple-50 hover:text-purple-700 hover:border-purple-300"
+                      ? "hover:bg-teal-50 hover:text-teal-800 hover:border-teal-300"
                       : "hover:bg-slate-100 hover:text-slate-700 hover:border-slate-300"
             }`}
             onClick={() => bulkMark(s)}
@@ -478,7 +478,7 @@ export function ManualEntry() {
         </span>
         <div className="flex items-center gap-2">
           <Button
-            className="h-7 text-[11px] px-3 bg-violet-600 hover:bg-violet-700 text-white"
+            className="h-7 text-[11px] px-3 bg-teal-600 hover:bg-teal-700 text-white"
             onClick={handleSave}
             disabled={editedCount === 0 || saving}
           >

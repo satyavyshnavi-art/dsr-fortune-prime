@@ -280,7 +280,7 @@ export function AMCContracts() {
           </Button>
           <Button
             size="sm"
-            className="h-7 text-[11px] px-2.5 bg-violet-600 hover:bg-violet-700 text-white"
+            className="h-7 text-[11px] px-2.5 bg-teal-600 hover:bg-teal-700 text-white"
             onClick={() => { setAddErrors({}); setShowAddModal(true); }}
           >
             <Plus className="h-3 w-3 mr-1" />
@@ -449,7 +449,7 @@ export function AMCContracts() {
               <Button variant="outline" onClick={() => setShowAddModal(false)} className="h-9 text-[13px] rounded-lg">
                 Cancel
               </Button>
-              <Button onClick={handleAdd} className="h-9 text-[13px] rounded-lg bg-violet-600 hover:bg-violet-700 text-white">
+              <Button onClick={handleAdd} className="h-9 text-[13px] rounded-lg bg-teal-600 hover:bg-teal-700 text-white">
                 Add Contract
               </Button>
             </div>
@@ -588,7 +588,7 @@ export function AMCContracts() {
             </div>
             <div className="flex justify-end gap-2 pt-1">
               <Button variant="outline" onClick={() => setEditOpen(false)} className="h-9 text-[13px] rounded-lg">Cancel</Button>
-              <Button onClick={handleEdit} className="h-9 text-[13px] rounded-lg bg-violet-600 hover:bg-violet-700 text-white">Update Contract</Button>
+              <Button onClick={handleEdit} className="h-9 text-[13px] rounded-lg bg-teal-600 hover:bg-teal-700 text-white">Update Contract</Button>
             </div>
           </div>
         </DialogContent>
