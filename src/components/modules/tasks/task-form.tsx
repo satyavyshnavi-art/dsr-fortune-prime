@@ -36,11 +36,11 @@ interface TaskFormProps {
   onOpenChange: (open: boolean) => void;
   task?: Task | null;
   facilityId?: string | null;
-  onSave?: (data: Record<string, unknown>) => void;
-  onSaved?: () => void | Promise<void>;
+  onCreate?: (data: Record<string, unknown>) => Promise<unknown>;
+  onUpdate?: (id: string, data: Record<string, unknown>) => Promise<unknown>;
 }
 
-export function TaskForm({ open, onOpenChange, task, facilityId, onSave, onSaved }: TaskFormProps) {
+export function TaskForm({ open, onOpenChange, task, facilityId, onCreate, onUpdate }: TaskFormProps) {
   const isEditing = !!task;
 
   const [title, setTitle] = useState("");
@@ -167,33 +167,25 @@ export function TaskForm({ open, onOpenChange, task, facilityId, onSave, onSaved
       sopChecklist: checklistItems.filter((item) => item.trim() !== ""),
       attachment: fileName || null,
     };
-    if (!isEditing && facilityId) body.facilityId = facilityId;
-
-    try {
-      const url = isEditing ? `/api/v1/tasks/${task.id}` : "/api/v1/tasks";
-      const res = await fetch(url, {
-        method: isEditing ? "PUT" : "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      if (res.ok) {
-        toast.success(isEditing ? "Task updated successfully" : "Task created successfully");
-        if (onSaved) await onSaved();
-      } else {
-        const err = await res.json().catch(() => ({}));
-        const message =
-          err?.error?.message || err?.error || `Request failed (${res.status})`;
-        toast.error(typeof message === "string" ? message : "Request failed");
-        return;
-      }
-    } catch {
-      toast.error("Network error — could not reach API");
-      return;
+    if (!isEditing) {
+      body.status = "pending";
+      if (facilityId) body.facilityId = facilityId;
     }
 
-    if (onSave) onSave(body);
+    // Optimistic: close immediately, let the page insert/merge the row in
+    // local state via useApi (no full-list refetch round-trip).
     onOpenChange(false);
     resetForm();
+    toast.success(isEditing ? "Task updated" : "Task created");
+
+    const action =
+      isEditing && task ? onUpdate?.(task.id, body) : onCreate?.(body);
+
+    Promise.resolve(action).catch(() => {
+      toast.error(
+        isEditing ? "Failed to update task — please retry" : "Failed to create task — please retry"
+      );
+    });
   };
 
   return (

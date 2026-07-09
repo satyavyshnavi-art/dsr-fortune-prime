@@ -50,6 +50,7 @@ export default function TaskManagementPage() {
     loading,
     error: apiError,
     fetchData: refetchTasks,
+    create: createTask,
     update: updateTask,
     remove: removeTask,
   } = useApi<Task[]>({
@@ -175,21 +176,23 @@ export default function TaskManagementPage() {
     setShowForm(true);
   };
 
-  const handleStatusChange = async (taskId: string, newStatus: TaskStatus) => {
-    try {
-      await updateTask(taskId, { status: newStatus });
-      toast.success(`Task status updated to ${newStatus.replace(/_/g, " ")}`);
-    } catch {
-      toast.error("Failed to update status (API unavailable)");
-    }
+  const handleStatusChange = (taskId: string, newStatus: TaskStatus) => {
+    toast.success(`Task marked ${newStatus.replace(/_/g, " ")}`);
+    updateTask(taskId, { status: newStatus }).catch(() => {
+      toast.error("Failed to update status");
+      refetchTasks();
+    });
   };
+
+  const handleReassign = (taskId: string, assignedTo: string) =>
+    updateTask(taskId, { assignedTo });
 
   const handleDelete = async (taskId: string) => {
     try {
       await removeTask(taskId);
       toast.success("Task deleted");
     } catch {
-      toast.error("Failed to delete (API unavailable)");
+      toast.error("Failed to delete task");
     }
   };
 
@@ -245,6 +248,7 @@ export default function TaskManagementPage() {
             onEdit={handleEdit}
             onStatusChange={handleStatusChange}
             onDelete={handleDelete}
+            onReassign={handleReassign}
             onRefetch={refetchTasks}
           />
         )}
@@ -257,6 +261,7 @@ export default function TaskManagementPage() {
             onEdit={handleEdit}
             onStatusChange={handleStatusChange}
             onDelete={handleDelete}
+            onReassign={handleReassign}
             onRefetch={refetchTasks}
             filterAssignee={CURRENT_USER}
           />
@@ -297,7 +302,8 @@ export default function TaskManagementPage() {
         onOpenChange={setShowForm}
         task={editingTask}
         facilityId={facilityId}
-        onSaved={refetchTasks}
+        onCreate={createTask}
+        onUpdate={updateTask}
       />
     </div>
   );

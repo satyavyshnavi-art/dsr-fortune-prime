@@ -99,7 +99,7 @@ export function TaskDetail({
       }
       setNewComment("");
       toast.success("Comment posted");
-      if (onRefresh) await onRefresh();
+      if (onRefresh) onRefresh();
     } catch {
       toast.error("Network error — could not reach API");
     } finally {
@@ -145,7 +145,7 @@ export function TaskDetail({
       setShowEscalateForm(false);
       setEscalateReason("");
       setEscalateTo("");
-      if (onRefresh) await onRefresh();
+      if (onRefresh) onRefresh();
     } catch {
       toast.error("Network error — could not reach API");
     } finally {
@@ -222,10 +222,12 @@ export function TaskDetail({
                   <p className="text-[12px] text-slate-700">{task.eisenhowerMatrix}</p>
                 </div>
               )}
+              {task.frequency && (
               <div>
                 <p className="text-[10px] text-slate-400 uppercase">Frequency</p>
                 <p className="text-[12px] text-slate-700 capitalize">{task.frequency.replace(/_/g, " ")}</p>
               </div>
+              )}
             </div>
           </div>
 

@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { tasks } from "@/db/schema";
-import { eq, and, desc } from "drizzle-orm";
+import { tasks, taskEscalations, taskComments } from "@/db/schema";
+import { eq, and, desc, sql, type SQL } from "drizzle-orm";
 import { z } from "zod";
 import { sanitizeInput } from "@/lib/sanitize";
+import { cached, invalidate } from "@/lib/redis";
 
 const createTaskSchema = z.object({
   facilityId: z.string().uuid(),
@@ -32,16 +33,34 @@ export async function GET(request: NextRequest) {
       | "cancelled"
       | null;
 
-    const conditions = [];
+    const conditions: SQL[] = [];
     if (facilityId) conditions.push(eq(tasks.facilityId, facilityId));
     if (status) conditions.push(eq(tasks.status, status));
 
-    const query =
-      conditions.length > 0
+    const cacheKey = `tasks:${facilityId ?? "all"}:${status ?? "all"}`;
+    const result = await cached(cacheKey, 90, async () => {
+      const taskRows = await (conditions.length > 0
         ? db.select().from(tasks).where(and(...conditions)).orderBy(desc(tasks.createdAt))
-        : db.select().from(tasks).orderBy(desc(tasks.createdAt));
+        : db.select().from(tasks).orderBy(desc(tasks.createdAt)));
 
-    const result = await query;
+      if (taskRows.length === 0) return taskRows;
+
+      const taskIds = taskRows.map((t) => t.id);
+      const [allEscalations, allComments] = await Promise.all([
+        db.select().from(taskEscalations).where(
+          sql`${taskEscalations.taskId} IN (${sql.join(taskIds.map((id) => sql`${id}`), sql`, `)})`
+        ),
+        db.select().from(taskComments).where(
+          sql`${taskComments.taskId} IN (${sql.join(taskIds.map((id) => sql`${id}`), sql`, `)})`
+        ),
+      ]);
+
+      return taskRows.map((t) => ({
+        ...t,
+        escalations: allEscalations.filter((e) => e.taskId === t.id),
+        comments: allComments.filter((c) => c.taskId === t.id),
+      }));
+    });
     return NextResponse.json(result);
   } catch (error) {
     console.error("GET /api/v1/tasks error:", error);
@@ -62,7 +81,10 @@ export async function POST(request: NextRequest) {
     }
 
     const result = await db.insert(tasks).values(parsed.data).returning();
-    return NextResponse.json(result[0], { status: 201 });
+    const created = result[0];
+    invalidate("tasks:*", "dashboard:*").catch(() => {});
+
+    return NextResponse.json(created, { status: 201 });
   } catch (error) {
     console.error("POST /api/v1/tasks error:", error);
     return NextResponse.json({ error: "Failed to create task" }, { status: 500 });

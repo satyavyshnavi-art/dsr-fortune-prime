@@ -30,14 +30,16 @@ export function ApprovalsList({ onViewDetail }: ApprovalsListProps) {
   });
 
   const requests: ApprovalRequest[] = useMemo(() => {
-    if (apiError || !apiRequests || apiRequests.length === 0) {
-      return apiError
-        ? MOCK_REQUESTS
-        : (apiRequests ?? []).length === 0
-        ? MOCK_REQUESTS
-        : [];
+    const rows = Array.isArray(apiRequests)
+      ? apiRequests
+      : Array.isArray((apiRequests as any)?.data)
+        ? (apiRequests as any).data
+        : null;
+
+    if (apiError || !rows || rows.length === 0) {
+      return MOCK_REQUESTS;
     }
-    return apiRequests.map((r: any) => ({
+    return rows.map((r: any) => ({
       id: r.id,
       type: r.type ?? "advance",
       title: r.title ?? "",

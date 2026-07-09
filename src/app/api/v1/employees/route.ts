@@ -4,6 +4,7 @@ import { employees } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { sanitizeInput } from "@/lib/sanitize";
+import { cached, invalidate } from "@/lib/redis";
 
 const createEmployeeSchema = z.object({
   facilityId: z.string().uuid(),
@@ -25,11 +26,13 @@ export async function GET(request: NextRequest) {
     const { searchParams } = request.nextUrl;
     const facilityId = searchParams.get("facilityId");
 
-    const query = facilityId
-      ? db.select().from(employees).where(eq(employees.facilityId, facilityId))
-      : db.select().from(employees);
-
-    const result = await query;
+    const cacheKey = `employees:${facilityId ?? "all"}`;
+    const result = await cached(cacheKey, 120, () => {
+      const query = facilityId
+        ? db.select().from(employees).where(eq(employees.facilityId, facilityId))
+        : db.select().from(employees);
+      return query;
+    });
     return NextResponse.json(result);
   } catch (error) {
     console.error("GET /api/v1/employees error:", error);
@@ -50,6 +53,7 @@ export async function POST(request: NextRequest) {
     }
 
     const result = await db.insert(employees).values(parsed.data).returning();
+    invalidate("employees:*", "dashboard:*").catch(() => {});
     return NextResponse.json(result[0], { status: 201 });
   } catch (error) {
     console.error("POST /api/v1/employees error:", error);

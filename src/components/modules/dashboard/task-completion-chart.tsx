@@ -8,22 +8,20 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
 } from "recharts";
 
-interface ClusterTask {
-  cluster: string;
-  completed: number;
-  total: number;
+interface TaskBar {
+  label: string;
+  count: number;
 }
 
-const mockData: ClusterTask[] = [
-  { cluster: "Block A", completed: 18, total: 24 },
-  { cluster: "Block B", completed: 12, total: 20 },
-  { cluster: "Block C", completed: 22, total: 25 },
-  { cluster: "Block D", completed: 8, total: 15 },
-  { cluster: "Block E", completed: 14, total: 18 },
+const mockData: TaskBar[] = [
+  { label: "Pending", count: 3 },
+  { label: "In Progress", count: 2 },
+  { label: "Completed", count: 2 },
+  { label: "Overdue", count: 2 },
+  { label: "Unassigned", count: 2 },
 ];
 
 interface TaskCompletionChartProps {
@@ -31,14 +29,25 @@ interface TaskCompletionChartProps {
 }
 
 export function TaskCompletionChart({ data }: TaskCompletionChartProps) {
-  const chartData: ClusterTask[] = data?.tasksByCluster ?? mockData;
+  const t = data?.tasks;
+  const chartData: TaskBar[] = t?.byStatus
+    ? [
+        { label: "Pending", count: t.byStatus.pending ?? t.pending ?? 0 },
+        { label: "In Progress", count: t.byStatus.in_progress ?? t.inProgress ?? 0 },
+        { label: "Completed", count: t.byStatus.completed ?? t.completed ?? 0 },
+        { label: "Overdue", count: t.overdue ?? 0 },
+        { label: "Unassigned", count: t.byStatus.unassigned ?? t.unassigned ?? 0 },
+      ]
+    : mockData;
+
+  const totalTasks = chartData.reduce((sum, d) => sum + d.count, 0);
 
   return (
     <ChartCard
-      title="Task Completion by Cluster"
-      subtitle="Completed vs total tasks across clusters"
+      title="Task Status Breakdown"
+      subtitle={`${totalTasks} total tasks across all statuses`}
     >
-      <div className="h-[190px]" role="img" aria-label="Bar chart showing task completion by cluster">
+      <div className="h-[190px]" role="img" aria-label="Bar chart showing task status breakdown">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={chartData}
@@ -46,7 +55,7 @@ export function TaskCompletionChart({ data }: TaskCompletionChartProps) {
           >
             <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
             <XAxis
-              dataKey="cluster"
+              dataKey="label"
               tick={{ fontSize: 10, fill: "#94a3b8" }}
               axisLine={{ stroke: "#e2e8f0" }}
               tickLine={false}
@@ -56,6 +65,7 @@ export function TaskCompletionChart({ data }: TaskCompletionChartProps) {
               axisLine={{ stroke: "#e2e8f0" }}
               tickLine={false}
               width={30}
+              allowDecimals={false}
             />
             <Tooltip
               contentStyle={{
@@ -66,28 +76,12 @@ export function TaskCompletionChart({ data }: TaskCompletionChartProps) {
                 padding: "6px 10px",
               }}
             />
-            <Legend
-              verticalAlign="top"
-              height={24}
-              iconSize={8}
-              iconType="square"
-              formatter={(value: string) => (
-                <span className="text-[10px] text-slate-500">{value}</span>
-              )}
-            />
             <Bar
-              dataKey="total"
-              name="Total"
-              fill="#e2e8f0"
-              radius={[4, 4, 0, 0]}
-              barSize={14}
-            />
-            <Bar
-              dataKey="completed"
-              name="Completed"
+              dataKey="count"
+              name="Tasks"
               fill="#059669"
               radius={[4, 4, 0, 0]}
-              barSize={14}
+              barSize={20}
             />
           </BarChart>
         </ResponsiveContainer>

@@ -36,10 +36,16 @@ export function InventoryList({ onAddTransaction, onViewDetail }: InventoryListP
   });
 
   const items: InventoryItem[] = useMemo(() => {
-    if (apiError || !apiItems || apiItems.length === 0) {
-      return apiError ? MOCK_ITEMS : (apiItems ?? []).length === 0 ? MOCK_ITEMS : [];
+    const rows = Array.isArray(apiItems)
+      ? apiItems
+      : Array.isArray((apiItems as any)?.data)
+        ? (apiItems as any).data
+        : null;
+
+    if (apiError || !rows || rows.length === 0) {
+      return MOCK_ITEMS;
     }
-    return apiItems.map((r: any) => ({
+    return rows.map((r: any) => ({
       id: r.id,
       name: r.name ?? "",
       category: r.category ?? "",

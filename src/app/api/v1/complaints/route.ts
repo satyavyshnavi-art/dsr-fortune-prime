@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { complaints } from "@/db/schema";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, type SQL } from "drizzle-orm";
 import { z } from "zod";
 import { sanitizeInput } from "@/lib/sanitize";
+import { cached, invalidate } from "@/lib/redis";
 
 const createComplaintSchema = z.object({
   facilityId: z.string().uuid(),
@@ -28,16 +29,16 @@ export async function GET(request: NextRequest) {
       | "closed"
       | null;
 
-    const conditions = [];
+    const conditions: SQL[] = [];
     if (facilityId) conditions.push(eq(complaints.facilityId, facilityId));
     if (status) conditions.push(eq(complaints.status, status));
 
-    const query =
+    const cacheKey = `complaints:${facilityId ?? "all"}:${status ?? "all"}`;
+    const result = await cached(cacheKey, 90, () =>
       conditions.length > 0
         ? db.select().from(complaints).where(and(...conditions)).orderBy(desc(complaints.createdAt))
-        : db.select().from(complaints).orderBy(desc(complaints.createdAt));
-
-    const result = await query;
+        : db.select().from(complaints).orderBy(desc(complaints.createdAt))
+    );
     return NextResponse.json(result);
   } catch (error) {
     console.error("GET /api/v1/complaints error:", error);
@@ -58,6 +59,7 @@ export async function POST(request: NextRequest) {
     }
 
     const result = await db.insert(complaints).values(parsed.data).returning();
+    invalidate("complaints:*", "dashboard:*").catch(() => {});
     return NextResponse.json(result[0], { status: 201 });
   } catch (error) {
     console.error("POST /api/v1/complaints error:", error);

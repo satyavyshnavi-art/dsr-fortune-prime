@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { employees } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { invalidate } from "@/lib/redis";
 
 export async function GET(
   _request: NextRequest,
@@ -31,6 +32,7 @@ export async function PUT(
     if (result.length === 0) {
       return NextResponse.json({ error: "Employee not found" }, { status: 404 });
     }
+    invalidate("employees:*", "dashboard:*").catch(() => {});
     return NextResponse.json(result[0]);
   } catch (error) {
     console.error("PUT /api/v1/employees/[id] error:", error);
@@ -48,6 +50,7 @@ export async function DELETE(
     if (result.length === 0) {
       return NextResponse.json({ error: "Employee not found" }, { status: 404 });
     }
+    invalidate("employees:*", "dashboard:*").catch(() => {});
     return NextResponse.json({ message: "Employee deleted" });
   } catch (error) {
     console.error("DELETE /api/v1/employees/[id] error:", error);

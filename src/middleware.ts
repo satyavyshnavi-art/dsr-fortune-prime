@@ -6,7 +6,6 @@ import { NextRequest, NextResponse } from "next/server";
 const PUBLIC_PATHS = [
   "/login",
   "/api/auth",
-  "/api/v1/whatsapp/webhook",
   "/api/cron",
 ];
 
@@ -40,7 +39,7 @@ function applySecurityHeaders(response: NextResponse): NextResponse {
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   response.headers.set(
     "Permissions-Policy",
-    "camera=(), microphone=(), geolocation=(self)"
+    "camera=(self), microphone=(), geolocation=(self)"
   );
   return response;
 }

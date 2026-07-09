@@ -75,13 +75,6 @@ const INITIAL_CHANNELS: NotificationChannel[] = [
     })),
   },
   {
-    key: "whatsapp",
-    label: "WhatsApp Notifications",
-    icon: Send,
-    enabled: false,
-    roles: ROLES.map((r) => ({ name: r, active: false })),
-  },
-  {
     key: "push",
     label: "Push Notifications",
     icon: Smartphone,

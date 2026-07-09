@@ -1,14 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -20,10 +14,12 @@ import {
   LogIn,
   LogOut,
   Clock,
-  MapPin,
-  AlertTriangle,
+  Search,
   Timer,
   Shield,
+  Users,
+  UserCheck,
+  UserX,
 } from "lucide-react";
 import { toast } from "sonner";
 import { MOCK_EMPLOYEES } from "./mock-data";
@@ -51,6 +47,16 @@ interface CheckOutResponse {
   cooldownUntil: string | null;
 }
 
+interface EmpWithStatus {
+  id: string;
+  empId: string;
+  firstName: string;
+  lastName: string;
+  designation: string;
+  department: string;
+  status: AttendanceStatus | null;
+}
+
 const SHIFT_LABELS: Record<string, string> = {
   G: "General (G)",
   A: "Morning (A)",
@@ -64,19 +70,16 @@ const SHIFT_LABELS: Record<string, string> = {
 
 export function CheckInOut() {
   const [employeeList, setEmployeeList] = useState(MOCK_EMPLOYEES);
-  const [selectedEmployee, setSelectedEmployee] = useState("");
-  const [status, setStatus] = useState<AttendanceStatus | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [geoLoading, setGeoLoading] = useState(false);
-  const [geoCoords, setGeoCoords] = useState<{ lat: string; lng: string } | null>(null);
-  const [cooldownTimer, setCooldownTimer] = useState("");
+  const [statusMap, setStatusMap] = useState<Record<string, AttendanceStatus>>({});
+  const [loadingIds, setLoadingIds] = useState<Set<string>>(new Set());
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState<"all" | "in" | "out">("all");
+  const [statusLoading, setStatusLoading] = useState(true);
 
-  // Shift selection modal state
   const [shiftModalOpen, setShiftModalOpen] = useState(false);
   const [checkOutData, setCheckOutData] = useState<CheckOutResponse | null>(null);
   const [selectedShift, setSelectedShift] = useState("");
 
-  // Load employees from API
   useEffect(() => {
     fetch("/api/v1/employees")
       .then((r) => r.json())
@@ -101,171 +104,123 @@ export function CheckInOut() {
       .catch(() => {});
   }, []);
 
-  // Fetch attendance status when employee changes
-  const fetchStatus = useCallback(async (empId: string) => {
-    if (!empId) {
-      setStatus(null);
-      return;
-    }
-    try {
-      const res = await fetch(`/api/v1/attendance/status?employee_id=${empId}`);
-      if (res.ok) {
-        const json = await res.json();
-        setStatus(json.data);
-      }
-    } catch {
-      // Silently fail — status just won't display
-    }
+  const fetchAllStatuses = useCallback(async (emps: typeof MOCK_EMPLOYEES) => {
+    setStatusLoading(true);
+    const results: Record<string, AttendanceStatus> = {};
+    await Promise.all(
+      emps.map(async (emp) => {
+        try {
+          const res = await fetch(`/api/v1/attendance/status?employee_id=${emp.id}`);
+          if (res.ok) {
+            const json = await res.json();
+            if (json.data) results[emp.id] = json.data;
+          }
+        } catch {}
+      })
+    );
+    setStatusMap(results);
+    setStatusLoading(false);
   }, []);
 
   useEffect(() => {
-    if (selectedEmployee) {
-      fetchStatus(selectedEmployee);
-    } else {
-      setStatus(null);
-    }
-  }, [selectedEmployee, fetchStatus]);
+    if (employeeList.length > 0) fetchAllStatuses(employeeList);
+  }, [employeeList, fetchAllStatuses]);
 
-  // Cooldown countdown timer
-  useEffect(() => {
-    if (!status?.cooldown?.active || !status.cooldown.until) {
-      setCooldownTimer("");
-      return;
-    }
-
-    const update = () => {
-      const remaining = new Date(status.cooldown.until!).getTime() - Date.now();
-      if (remaining <= 0) {
-        setCooldownTimer("");
-        fetchStatus(selectedEmployee);
-        return;
-      }
-      const hrs = Math.floor(remaining / (1000 * 60 * 60));
-      const mins = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
-      const secs = Math.floor((remaining % (1000 * 60)) / 1000);
-      setCooldownTimer(
-        `${hrs.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`
-      );
-    };
-
-    update();
-    const interval = setInterval(update, 1000);
-    return () => clearInterval(interval);
-  }, [status?.cooldown?.active, status?.cooldown?.until, selectedEmployee, fetchStatus]);
-
-  // Capture geolocation
   const captureGeo = useCallback((): Promise<{ lat: string; lng: string } | null> => {
     return new Promise((resolve) => {
-      if (!navigator.geolocation) {
-        resolve(null);
-        return;
-      }
-      setGeoLoading(true);
+      if (!navigator.geolocation) { resolve(null); return; }
       navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const coords = {
-            lat: pos.coords.latitude.toFixed(7),
-            lng: pos.coords.longitude.toFixed(7),
-          };
-          setGeoCoords(coords);
-          setGeoLoading(false);
-          resolve(coords);
-        },
-        () => {
-          setGeoLoading(false);
-          resolve(null);
-        },
+        (pos) => resolve({ lat: pos.coords.latitude.toFixed(7), lng: pos.coords.longitude.toFixed(7) }),
+        () => resolve(null),
         { timeout: 10000, enableHighAccuracy: true }
       );
     });
   }, []);
 
-  // Check In
-  const handleCheckIn = async () => {
-    if (!selectedEmployee) return;
-    setLoading(true);
-
-    // Capture geo coordinates
+  const handleCheckIn = async (empId: string) => {
+    setLoadingIds((prev) => new Set(prev).add(empId));
     const coords = await captureGeo();
-
     try {
       const res = await fetch("/api/v1/attendance/check-in", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          employeeId: selectedEmployee,
-          source: "manual",
-          geoLat: coords?.lat,
-          geoLng: coords?.lng,
-        }),
+        body: JSON.stringify({ employeeId: empId, source: "manual", geoLat: coords?.lat, geoLng: coords?.lng }),
       });
-
       const json = await res.json();
-
       if (!res.ok) {
-        const msg = json.error?.message || json.error || "Check-in failed";
-        toast.error(msg);
-        setLoading(false);
-        return;
+        toast.error(json.error?.message || json.error || "Check-in failed");
+      } else {
+        const emp = employeeList.find((e) => e.id === empId);
+        toast.success(`${emp?.firstName} ${emp?.lastName} checked in`);
+        const statusRes = await fetch(`/api/v1/attendance/status?employee_id=${empId}`);
+        if (statusRes.ok) {
+          const statusJson = await statusRes.json();
+          if (statusJson.data) setStatusMap((prev) => ({ ...prev, [empId]: statusJson.data }));
+        }
       }
-
-      toast.success("Checked in successfully");
-      await fetchStatus(selectedEmployee);
     } catch {
       toast.error("Network error during check-in");
     }
-    setLoading(false);
+    setLoadingIds((prev) => { const next = new Set(prev); next.delete(empId); return next; });
   };
 
-  // Initiate Check Out (first call without shift to get hours/shift info)
-  const handleCheckOutInitiate = async () => {
-    if (!selectedEmployee) return;
-    setLoading(true);
-
+  const handleCheckOut = async (empId: string) => {
+    setLoadingIds((prev) => new Set(prev).add(empId));
     try {
       const res = await fetch("/api/v1/attendance/check-out", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ employeeId: selectedEmployee }),
+        body: JSON.stringify({ employeeId: empId }),
       });
-
       const json = await res.json();
-
       if (!res.ok) {
-        const msg = json.error?.message || json.error || "Check-out failed";
-        toast.error(msg);
-        setLoading(false);
-        return;
+        toast.error(json.error?.message || json.error || "Check-out failed");
+      } else {
+        const data = json.data as CheckOutResponse;
+        const emp = employeeList.find((e) => e.id === empId);
+        if (data.shiftCategory === "triple") {
+          toast.success(`${emp?.firstName} ${emp?.lastName} checked out — ${data.hoursWorked.toFixed(1)}h (Triple shift)`);
+        } else if (data.shiftCategory === "double") {
+          setCheckOutData(data);
+          setSelectedShift("");
+          setShiftModalOpen(true);
+          toast.success(`${emp?.firstName} ${emp?.lastName} checked out — ${data.hoursWorked.toFixed(1)}h (Double shift)`);
+        } else {
+          toast.success(`${emp?.firstName} ${emp?.lastName} checked out — ${data.hoursWorked.toFixed(1)}h`);
+        }
+        const statusRes = await fetch(`/api/v1/attendance/status?employee_id=${empId}`);
+        if (statusRes.ok) {
+          const statusJson = await statusRes.json();
+          if (statusJson.data) setStatusMap((prev) => ({ ...prev, [empId]: statusJson.data }));
+        }
       }
-
-      const data = json.data as CheckOutResponse;
-
-      // For triple shifts, auto-complete (no selection needed)
-      if (data.shiftCategory === "triple") {
-        toast.success(
-          `Checked out — ${data.hoursWorked.toFixed(1)}h worked (Triple shift ABC). 8h cooldown active.`
-        );
-        await fetchStatus(selectedEmployee);
-        setLoading(false);
-        return;
-      }
-
-      // For single/double, show shift selection modal
-      // But the checkout already happened — the modal is for display / confirmation
-      setCheckOutData(data);
-      setSelectedShift("");
-      setShiftModalOpen(true);
-      toast.success(
-        `Checked out — ${data.hoursWorked.toFixed(1)}h worked (${data.shiftCategory} shift)${data.cooldownUntil ? ". 8h cooldown active." : ""}`
-      );
-      await fetchStatus(selectedEmployee);
     } catch {
       toast.error("Network error during check-out");
     }
-    setLoading(false);
+    setLoadingIds((prev) => { const next = new Set(prev); next.delete(empId); return next; });
   };
 
-  const selectedEmp = employeeList.find((e) => e.id === selectedEmployee);
+  const filtered = useMemo(() => {
+    let result = employeeList;
+    if (search) {
+      const q = search.toLowerCase();
+      result = result.filter(
+        (e) =>
+          `${e.firstName} ${e.lastName}`.toLowerCase().includes(q) ||
+          e.empId.toLowerCase().includes(q) ||
+          e.department.toLowerCase().includes(q)
+      );
+    }
+    if (filter === "in") {
+      result = result.filter((e) => statusMap[e.id]?.isCheckedIn);
+    } else if (filter === "out") {
+      result = result.filter((e) => !statusMap[e.id]?.isCheckedIn);
+    }
+    return result;
+  }, [employeeList, search, filter, statusMap]);
+
+  const checkedInCount = employeeList.filter((e) => statusMap[e.id]?.isCheckedIn).length;
+  const checkedOutCount = employeeList.length - checkedInCount;
 
   return (
     <div className="space-y-4">
@@ -273,143 +228,161 @@ export function CheckInOut() {
         Check In / Check Out
       </h3>
 
-      <div className="max-w-md space-y-4">
-        {/* Employee Selection */}
-        <div>
-          <label className="text-[12px] text-slate-600 mb-1.5 block">
-            Select Employee
-          </label>
-          <Select
-            value={selectedEmployee}
-            onValueChange={(v) => setSelectedEmployee(v ?? "")}
-          >
-            <SelectTrigger className="h-9 text-[13px] rounded-lg">
-              <SelectValue placeholder="Select Employee" />
-            </SelectTrigger>
-            <SelectContent>
-              {employeeList.map((emp) => (
-                <SelectItem key={emp.id} value={emp.id} className="text-[13px]">
-                  {emp.firstName} {emp.lastName}{" "}
-                  <span className="text-slate-400">({emp.empId})</span>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+      {/* Summary Pills */}
+      <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
+          <Users className="h-3.5 w-3.5" />
+          <span>{employeeList.length} total</span>
         </div>
+        <div className="flex items-center gap-1.5 text-[11px] text-emerald-600">
+          <UserCheck className="h-3.5 w-3.5" />
+          <span>{checkedInCount} checked in</span>
+        </div>
+        <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
+          <UserX className="h-3.5 w-3.5" />
+          <span>{checkedOutCount} not checked in</span>
+        </div>
+      </div>
 
-        {/* Status Display */}
-        {selectedEmployee && status && (
-          <div className="rounded-md border border-slate-200 bg-white p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <p className="text-[12px] font-medium text-slate-700">
-                {selectedEmp?.firstName} {selectedEmp?.lastName}
-              </p>
-              <Badge
-                className={`text-[10px] px-1.5 py-0 h-[18px] ${
-                  status.isCheckedIn
-                    ? "bg-emerald-100 text-emerald-800 border-emerald-200"
-                    : "bg-slate-100 text-slate-600 border-slate-200"
+      {/* Search + Filter */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <div className="relative flex-1 min-w-[200px] max-w-sm">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+          <Input
+            placeholder="Search by name, ID, or department..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="h-8 text-[12px] pl-8 rounded-lg"
+          />
+        </div>
+        <div className="flex items-center gap-1">
+          {(["all", "in", "out"] as const).map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`px-2.5 py-1 text-[11px] font-medium rounded-md transition-colors ${
+                filter === f
+                  ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                  : "text-slate-500 hover:bg-slate-50 border border-transparent"
+              }`}
+            >
+              {f === "all" ? "All" : f === "in" ? "Checked In" : "Not In"}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Employee Grid */}
+      {statusLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="flex flex-col items-center gap-2">
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-300 border-t-emerald-700" />
+            <span className="text-[11px] text-slate-400">Loading employee statuses...</span>
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+          {filtered.map((emp) => {
+            const st = statusMap[emp.id];
+            const isIn = st?.isCheckedIn ?? false;
+            const isCooldown = st?.cooldown?.active ?? false;
+            const isLoading = loadingIds.has(emp.id);
+
+            return (
+              <div
+                key={emp.id}
+                className={`rounded-xl border p-3.5 space-y-2.5 transition-colors ${
+                  isIn
+                    ? "border-emerald-200 bg-emerald-50/40"
+                    : isCooldown
+                    ? "border-amber-200 bg-amber-50/30"
+                    : "border-slate-200 bg-white"
                 }`}
               >
-                {status.isCheckedIn ? "Checked In" : "Checked Out"}
-              </Badge>
-            </div>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="text-[12px] font-semibold text-slate-800 truncate">
+                      {emp.firstName} {emp.lastName}
+                    </p>
+                    <p className="text-[10px] text-slate-400 truncate">
+                      {emp.designation || emp.department || emp.empId}
+                    </p>
+                  </div>
+                  <Badge
+                    className={`text-[9px] px-1.5 py-0 h-[16px] shrink-0 ${
+                      isIn
+                        ? "bg-emerald-100 text-emerald-700 border-emerald-200"
+                        : isCooldown
+                        ? "bg-amber-100 text-amber-700 border-amber-200"
+                        : "bg-slate-100 text-slate-500 border-slate-200"
+                    }`}
+                  >
+                    {isIn ? "IN" : isCooldown ? "REST" : "OUT"}
+                  </Badge>
+                </div>
 
-            {/* Active Session Info */}
-            {status.isCheckedIn && status.activeSession && (
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
-                  <Clock className="h-3 w-3" />
-                  <span>
-                    Checked in at{" "}
-                    {new Date(status.activeSession.checkIn).toLocaleTimeString()}
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
-                  <Timer className="h-3 w-3" />
-                  <span>
-                    {status.activeSession.hoursWorked.toFixed(1)}h working
-                  </span>
-                </div>
-                {status.activeSession.geoLat && (
-                  <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
-                    <MapPin className="h-3 w-3" />
-                    <span>
-                      Location: {status.activeSession.geoLat},{" "}
-                      {status.activeSession.geoLng}
+                {isIn && st?.activeSession && (
+                  <div className="flex items-center gap-3 text-[10px] text-slate-500">
+                    <span className="flex items-center gap-1">
+                      <Clock className="h-2.5 w-2.5" />
+                      {new Date(st.activeSession.checkIn).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Timer className="h-2.5 w-2.5" />
+                      {st.activeSession.hoursWorked.toFixed(1)}h
                     </span>
                   </div>
                 )}
-              </div>
-            )}
 
-            {/* Cooldown Display */}
-            {status.cooldown.active && (
-              <div className="rounded-md bg-amber-50 border border-amber-200 p-2.5 space-y-1">
-                <div className="flex items-center gap-1.5">
-                  <Shield className="h-3.5 w-3.5 text-amber-600" />
-                  <p className="text-[11px] font-medium text-amber-800">
-                    Rest Cooldown Active
-                  </p>
-                </div>
-                <p className="text-[10px] text-amber-600">
-                  Multi-shift cooldown (8h mandatory rest). Check-in blocked
-                  until cooldown expires.
-                </p>
-                {cooldownTimer && (
-                  <p className="text-[16px] font-mono font-bold text-amber-700 text-center pt-1">
-                    {cooldownTimer}
-                  </p>
+                {isCooldown && (
+                  <div className="flex items-center gap-1.5 text-[10px] text-amber-600">
+                    <Shield className="h-2.5 w-2.5" />
+                    <span>8h rest cooldown active</span>
+                  </div>
                 )}
+
+                <div>
+                  {isIn ? (
+                    <Button
+                      onClick={() => handleCheckOut(emp.id)}
+                      disabled={isLoading}
+                      className="w-full h-7 text-[11px] bg-red-600 hover:bg-red-700 text-white gap-1"
+                    >
+                      <LogOut className="h-3 w-3" />
+                      {isLoading ? "..." : "Check Out"}
+                    </Button>
+                  ) : isCooldown ? (
+                    <Button
+                      disabled
+                      className="w-full h-7 text-[11px] bg-slate-200 text-slate-400 gap-1 cursor-not-allowed"
+                    >
+                      <Shield className="h-3 w-3" />
+                      Cooldown
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={() => handleCheckIn(emp.id)}
+                      disabled={isLoading}
+                      className="w-full h-7 text-[11px] bg-emerald-700 hover:bg-emerald-800 text-white gap-1"
+                    >
+                      <LogIn className="h-3 w-3" />
+                      {isLoading ? "..." : "Check In"}
+                    </Button>
+                  )}
+                </div>
               </div>
-            )}
+            );
+          })}
+        </div>
+      )}
 
-            {/* Action Buttons */}
-            <div className="pt-1">
-              {!status.isCheckedIn && !status.cooldown.active && (
-                <Button
-                  onClick={handleCheckIn}
-                  disabled={loading || geoLoading}
-                  className="w-full h-9 text-[12px] bg-emerald-700 hover:bg-emerald-800 text-white gap-1.5"
-                >
-                  <LogIn className="h-3.5 w-3.5" />
-                  {geoLoading ? "Capturing Location..." : loading ? "Checking In..." : "Check In"}
-                </Button>
-              )}
-              {!status.isCheckedIn && status.cooldown.active && (
-                <Button
-                  disabled
-                  className="w-full h-9 text-[12px] bg-slate-300 text-slate-500 gap-1.5 cursor-not-allowed"
-                >
-                  <AlertTriangle className="h-3.5 w-3.5" />
-                  Cooldown Active — Check-in Blocked
-                </Button>
-              )}
-              {status.isCheckedIn && (
-                <Button
-                  onClick={handleCheckOutInitiate}
-                  disabled={loading}
-                  className="w-full h-9 text-[12px] bg-red-600 hover:bg-red-700 text-white gap-1.5"
-                >
-                  <LogOut className="h-3.5 w-3.5" />
-                  {loading ? "Checking Out..." : "Check Out"}
-                </Button>
-              )}
-            </div>
-          </div>
-        )}
+      {!statusLoading && filtered.length === 0 && (
+        <div className="text-center py-8">
+          <p className="text-[12px] text-slate-400">No employees match your search.</p>
+        </div>
+      )}
 
-        {/* Empty state */}
-        {selectedEmployee && !status && (
-          <div className="rounded-md border border-slate-200 bg-white p-4 text-center">
-            <p className="text-[11px] text-slate-400">
-              Loading attendance status...
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* Shift Selection Modal (shown after checkout) */}
+      {/* Shift Selection Modal */}
       <Dialog open={shiftModalOpen} onOpenChange={setShiftModalOpen}>
         <DialogContent className="sm:max-w-[400px]">
           <DialogHeader>
@@ -423,7 +396,6 @@ export function CheckInOut() {
                 ? "Single shift detected (up to 12 hours). Select the shift worked:"
                 : "Double shift detected (12-18 hours). Select the shift combination:"}
             </p>
-
             <div className="grid grid-cols-2 gap-2">
               {checkOutData?.allowedShifts.map((shift) => (
                 <button
@@ -439,20 +411,13 @@ export function CheckInOut() {
                 </button>
               ))}
             </div>
-
             {checkOutData?.cooldownUntil && (
               <div className="rounded-md bg-amber-50 border border-amber-200 p-2 text-[11px] text-amber-700">
-                <strong>Note:</strong> 8-hour mandatory rest cooldown has been
-                activated for this multi-shift session.
+                <strong>Note:</strong> 8-hour mandatory rest cooldown has been activated.
               </div>
             )}
-
             <div className="flex justify-end gap-2 pt-1">
-              <Button
-                variant="outline"
-                onClick={() => setShiftModalOpen(false)}
-                className="h-9 text-[13px] rounded-lg"
-              >
+              <Button variant="outline" onClick={() => setShiftModalOpen(false)} className="h-9 text-[13px] rounded-lg">
                 Close
               </Button>
             </div>

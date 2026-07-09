@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { TopBar } from "@/components/layout/top-bar";
 import { KPICard, HeroBanner, HeroBadge, HeroButton } from "@/components/shared";
 import {
@@ -56,7 +56,9 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [dashboardData, setDashboardData] = useState<any>(null);
 
-  useEffect(() => {
+  const intervalRef = useRef<ReturnType<typeof setInterval>>(null);
+
+  const fetchDashboard = useCallback(() => {
     fetch("/api/v1/dashboard/summary")
       .then((r) => r.json())
       .then((d) => {
@@ -64,6 +66,12 @@ export default function DashboardPage() {
       })
       .catch(() => {});
   }, []);
+
+  useEffect(() => {
+    fetchDashboard();
+    intervalRef.current = setInterval(fetchDashboard, 30_000);
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, [fetchDashboard]);
 
   const hasUnappliedChanges =
     startDate !== appliedRange.start || endDate !== appliedRange.end;

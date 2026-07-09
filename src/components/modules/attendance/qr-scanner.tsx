@@ -29,6 +29,17 @@ export function QRScanner() {
   // Start real camera scanner
   const startScanning = useCallback(async () => {
     setScanError("");
+
+    // getUserMedia only exists in a secure context (https:// or localhost).
+    // Over a LAN IP (e.g. http://10.x.x.x:3000) the browser blocks camera
+    // access entirely, which surfaces as an opaque error from html5-qrcode.
+    if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) {
+      setScanError(
+        "Camera requires a secure connection. Open this page via https:// or http://localhost, then try again."
+      );
+      return;
+    }
+
     setScanning(true);
 
     try {
@@ -68,14 +79,26 @@ export function QRScanner() {
           // QR code not detected in this frame — ignore
         }
       );
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Camera error:", err);
-      if (err?.message?.includes("NotAllowedError") || err?.name === "NotAllowedError") {
+      // html5-qrcode may reject with a DOMException, an Error, or a plain
+      // string, so normalize before matching.
+      const detail =
+        typeof err === "string"
+          ? err
+          : (err as { name?: string; message?: string })?.name ||
+            (err as { message?: string })?.message ||
+            "";
+      if (detail.includes("NotAllowedError") || detail.includes("Permission")) {
         setScanError("Camera permission denied. Please allow camera access and try again.");
-      } else if (err?.message?.includes("NotFoundError") || err?.name === "NotFoundError") {
+      } else if (detail.includes("NotFoundError") || detail.includes("NotFound")) {
         setScanError("No camera found on this device.");
+      } else if (detail.includes("NotReadableError") || detail.includes("TrackStart")) {
+        setScanError("Camera is in use by another app. Close it and try again.");
+      } else if (detail.includes("Overconstrained")) {
+        setScanError("No camera matches the requested settings.");
       } else {
-        setScanError(`Camera error: ${err?.message || "Unknown error"}`);
+        setScanError(`Camera error: ${detail || "could not start the camera"}`);
       }
       setScanning(false);
     }

@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { assets } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, type SQL } from "drizzle-orm";
 import { z } from "zod";
 import { sanitizeInput } from "@/lib/sanitize";
+import { cached, invalidate } from "@/lib/redis";
 
 const createAssetSchema = z.object({
   facilityId: z.string().uuid(),
@@ -24,16 +25,16 @@ export async function GET(request: NextRequest) {
     const facilityId = searchParams.get("facilityId");
     const categoryId = searchParams.get("categoryId");
 
-    const conditions = [];
+    const conditions: SQL[] = [];
     if (facilityId) conditions.push(eq(assets.facilityId, facilityId));
     if (categoryId) conditions.push(eq(assets.categoryId, categoryId));
 
-    const query =
+    const cacheKey = `assets:${facilityId ?? "all"}:${categoryId ?? "all"}`;
+    const result = await cached(cacheKey, 120, () =>
       conditions.length > 0
         ? db.select().from(assets).where(and(...conditions))
-        : db.select().from(assets);
-
-    const result = await query;
+        : db.select().from(assets)
+    );
     return NextResponse.json(result);
   } catch (error) {
     console.error("GET /api/v1/assets error:", error);
@@ -54,6 +55,7 @@ export async function POST(request: NextRequest) {
     }
 
     const result = await db.insert(assets).values(parsed.data).returning();
+    invalidate("assets:*", "dashboard:*").catch(() => {});
     return NextResponse.json(result[0], { status: 201 });
   } catch (error) {
     console.error("POST /api/v1/assets error:", error);

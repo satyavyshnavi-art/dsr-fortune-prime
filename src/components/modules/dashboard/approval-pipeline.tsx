@@ -28,14 +28,27 @@ interface ApprovalPipelineProps {
 }
 
 export function ApprovalPipeline({ data }: ApprovalPipelineProps) {
-  const chartData: ApprovalItem[] = data?.approvals?.byType ?? mockData;
+  const complaints = data?.complaints;
+  const vendorTickets = data?.vendorTickets;
+  const tasks = data?.tasks;
+
+  const chartData: ApprovalItem[] =
+    complaints && vendorTickets && tasks
+      ? [
+          { type: "Complaints", pending: complaints.open ?? 0 },
+          { type: "Vendor Tickets", pending: vendorTickets.open ?? 0 },
+          { type: "Tasks", pending: tasks.pending ?? 0 },
+          { type: "In Progress", pending: (complaints.inProgress ?? 0) + (vendorTickets.inProgress ?? 0) + (tasks.inProgress ?? 0) },
+          { type: "Overdue", pending: tasks.overdue ?? 0 },
+        ]
+      : mockData;
 
   const totalPending = chartData.reduce((sum, d) => sum + d.pending, 0);
 
   return (
     <ChartCard
-      title="Pending Approvals"
-      subtitle={`${totalPending} approvals awaiting action`}
+      title="Pending Actions"
+      subtitle={`${totalPending} items awaiting action`}
     >
       <div className="h-[200px]">
         <ResponsiveContainer width="100%" height="100%">

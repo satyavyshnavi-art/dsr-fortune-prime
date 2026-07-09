@@ -815,7 +815,7 @@ export const taskTemplates = pgTable("task_templates", {
 export const taskChecklistItems = pgTable("task_checklist_items", {
   id: uuid("id").defaultRandom().primaryKey(),
   taskId: uuid("task_id")
-    .references(() => tasks.id)
+    .references(() => tasks.id, { onDelete: "cascade" })
     .notNull(),
   label: varchar("label", { length: 255 }).notNull(),
   isChecked: boolean("is_checked").default(false),
@@ -826,7 +826,7 @@ export const taskChecklistItems = pgTable("task_checklist_items", {
 export const taskEscalations = pgTable("task_escalations", {
   id: uuid("id").defaultRandom().primaryKey(),
   taskId: uuid("task_id")
-    .references(() => tasks.id)
+    .references(() => tasks.id, { onDelete: "cascade" })
     .notNull(),
   escalatedTo: uuid("escalated_to"),
   escalatedAt: timestamp("escalated_at").defaultNow(),
@@ -837,7 +837,7 @@ export const taskEscalations = pgTable("task_escalations", {
 export const taskComments = pgTable("task_comments", {
   id: uuid("id").defaultRandom().primaryKey(),
   taskId: uuid("task_id")
-    .references(() => tasks.id)
+    .references(() => tasks.id, { onDelete: "cascade" })
     .notNull(),
   userId: uuid("user_id"),
   body: text("body"),
@@ -1163,57 +1163,6 @@ export const scheduledReports = pgTable("scheduled_reports", {
   frequency: varchar("frequency", { length: 50 }),
   recipients: jsonb("recipients"),
   nextRunAt: timestamp("next_run_at"),
-});
-
-// ==================== WHATSAPP ====================
-
-export const whatsappMessageDirectionEnum = pgEnum("whatsapp_message_direction", [
-  "inbound",
-  "outbound",
-]);
-
-export const whatsappMessageStatusEnum = pgEnum("whatsapp_message_status", [
-  "sent",
-  "delivered",
-  "read",
-  "failed",
-]);
-
-export const whatsappTemplateStatusEnum = pgEnum("whatsapp_template_status", [
-  "approved",
-  "pending",
-  "rejected",
-]);
-
-export const whatsappTemplates = pgTable("whatsapp_templates", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  orgId: uuid("org_id")
-    .references(() => organizations.id)
-    .notNull(),
-  name: varchar("name", { length: 255 }).notNull(),
-  language: varchar("language", { length: 10 }).default("en"),
-  category: varchar("category", { length: 50 }),
-  components: jsonb("components"),
-  status: whatsappTemplateStatusEnum("status").default("pending"),
-  metaTemplateId: varchar("meta_template_id", { length: 255 }),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
-
-export const whatsappMessages = pgTable("whatsapp_messages", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  facilityId: uuid("facility_id").references(() => facilities.id),
-  direction: whatsappMessageDirectionEnum("direction").notNull(),
-  waMessageId: varchar("wa_message_id", { length: 255 }),
-  fromNumber: varchar("from_number", { length: 20 }).notNull(),
-  toNumber: varchar("to_number", { length: 20 }).notNull(),
-  body: text("body"),
-  templateId: uuid("template_id").references(() => whatsappTemplates.id),
-  status: whatsappMessageStatusEnum("status").default("sent"),
-  parsedCommand: varchar("parsed_command", { length: 50 }),
-  parsedPayload: jsonb("parsed_payload"),
-  errorMessage: text("error_message"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 // ==================== IoT ====================

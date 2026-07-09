@@ -25,12 +25,12 @@ interface AlertSummaryProps {
 export function AlertSummary({ data }: AlertSummaryProps) {
   const alertData = data?.alerts;
 
-  const alerts: AlertCount[] = alertData?.bySeverity
+  const alerts: AlertCount[] = alertData && typeof alertData.critical === "number"
     ? [
-        { severity: "Critical", count: alertData.bySeverity.critical ?? 0, color: "text-red-700", bgColor: "bg-red-50 border-red-200", icon: AlertTriangle },
-        { severity: "High", count: alertData.bySeverity.high ?? 0, color: "text-orange-700", bgColor: "bg-orange-50 border-orange-200", icon: AlertCircle },
-        { severity: "Medium", count: alertData.bySeverity.medium ?? 0, color: "text-yellow-700", bgColor: "bg-yellow-50 border-yellow-200", icon: Bell },
-        { severity: "Low", count: alertData.bySeverity.low ?? 0, color: "text-blue-700", bgColor: "bg-blue-50 border-blue-200", icon: Info },
+        { severity: "Critical", count: alertData.critical ?? 0, color: "text-red-700", bgColor: "bg-red-50 border-red-200", icon: AlertTriangle },
+        { severity: "High", count: alertData.high ?? 0, color: "text-orange-700", bgColor: "bg-orange-50 border-orange-200", icon: AlertCircle },
+        { severity: "Medium", count: alertData.medium ?? 0, color: "text-yellow-700", bgColor: "bg-yellow-50 border-yellow-200", icon: Bell },
+        { severity: "Low", count: alertData.low ?? 0, color: "text-blue-700", bgColor: "bg-blue-50 border-blue-200", icon: Info },
       ]
     : mockAlerts;
 

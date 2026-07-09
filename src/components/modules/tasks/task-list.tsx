@@ -46,6 +46,7 @@ interface TaskListProps {
   onEdit: (task: Task) => void;
   onStatusChange?: (taskId: string, status: TaskStatus) => void | Promise<void>;
   onDelete?: (taskId: string) => void | Promise<void>;
+  onReassign?: (taskId: string, assignedTo: string) => Promise<unknown>;
   onRefetch?: () => void | Promise<void>;
   filterAssignee?: string;
 }
@@ -65,6 +66,7 @@ export function TaskList({
   onEdit,
   onStatusChange,
   onDelete,
+  onReassign,
   onRefetch,
   filterAssignee,
 }: TaskListProps) {
@@ -110,27 +112,26 @@ export function TaskList({
       toast.error("Please select an employee");
       return;
     }
+    const target = reassignTo;
+    const taskId = reassignTask.id;
     setReassignSaving(true);
+    // Optimistic: close + toast immediately; the page updates local state via
+    // useApi.update. Fall back to a refetch only if no optimistic handler.
+    closeReassign();
+    toast.success(`Task reassigned to ${target}`);
     try {
-      const res = await fetch(`/api/v1/tasks/${reassignTask.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ assignedTo: reassignTo }),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        const message =
-          err?.error?.message ||
-          (typeof err?.error === "string" ? err.error : null) ||
-          `Failed to reassign (${res.status})`;
-        toast.error(typeof message === "string" ? message : "Failed to reassign");
-        return;
+      if (onReassign) {
+        await onReassign(taskId, target);
+      } else if (onRefetch) {
+        await fetch(`/api/v1/tasks/${taskId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ assignedTo: target }),
+        });
+        await onRefetch();
       }
-      toast.success(`Task reassigned to ${reassignTo}`);
-      if (onRefetch) await onRefetch();
-      closeReassign();
     } catch {
-      toast.error("Network error — could not reach API");
+      toast.error("Failed to reassign — please retry");
     } finally {
       setReassignSaving(false);
     }

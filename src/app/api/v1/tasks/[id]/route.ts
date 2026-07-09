@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { tasks } from "@/db/schema";
+import { tasks, taskChecklistItems, taskEscalations, taskComments } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { sanitizeInput } from "@/lib/sanitize";
+import { invalidate } from "@/lib/redis";
 
 const updateTaskSchema = z.object({
   title: z.string().min(1).max(255).transform(sanitizeInput).optional(),
@@ -56,6 +57,7 @@ export async function PUT(
     if (result.length === 0) {
       return NextResponse.json({ error: "Task not found" }, { status: 404 });
     }
+    invalidate("tasks:*", "dashboard:*").catch(() => {});
     return NextResponse.json(result[0]);
   } catch (error) {
     console.error("PUT /api/v1/tasks/[id] error:", error);
@@ -69,10 +71,16 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
+    await Promise.all([
+      db.delete(taskChecklistItems).where(eq(taskChecklistItems.taskId, id)),
+      db.delete(taskEscalations).where(eq(taskEscalations.taskId, id)),
+      db.delete(taskComments).where(eq(taskComments.taskId, id)),
+    ]);
     const result = await db.delete(tasks).where(eq(tasks.id, id)).returning();
     if (result.length === 0) {
       return NextResponse.json({ error: "Task not found" }, { status: 404 });
     }
+    invalidate("tasks:*", "dashboard:*").catch(() => {});
     return NextResponse.json({ message: "Task deleted" });
   } catch (error) {
     console.error("DELETE /api/v1/tasks/[id] error:", error);

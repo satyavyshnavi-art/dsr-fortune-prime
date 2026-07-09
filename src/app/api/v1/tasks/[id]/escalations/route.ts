@@ -4,6 +4,7 @@ import { taskEscalations } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { z } from "zod";
 import { sanitizeInput } from "@/lib/sanitize";
+import { invalidate } from "@/lib/redis";
 
 const createEscalationSchema = z.object({
   escalatedTo: z.string().uuid().optional(),
@@ -56,6 +57,7 @@ export async function POST(
       .insert(taskEscalations)
       .values({ ...parsed.data, taskId: id })
       .returning();
+    invalidate("tasks:*").catch(() => {});
     return NextResponse.json(result[0], { status: 201 });
   } catch (error) {
     console.error("POST /api/v1/tasks/[id]/escalations error:", error);
