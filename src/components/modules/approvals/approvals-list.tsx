@@ -39,18 +39,40 @@ export function ApprovalsList({ onViewDetail }: ApprovalsListProps) {
     if (apiError || !rows || rows.length === 0) {
       return MOCK_REQUESTS;
     }
-    return rows.map((r: any) => ({
-      id: r.id,
-      type: r.type ?? "advance",
-      title: r.title ?? "",
-      description: r.description ?? "",
-      amount: r.amount ?? 0,
-      requestedBy: r.requestedBy ?? "",
-      requestedAt: r.requestedAt ?? "",
-      status: r.status ?? "pending",
-      currentStep: r.currentStep ?? 0,
-      steps: r.steps ?? [],
-    }));
+    const roleLabel = (role: string | null) =>
+      (role ?? "Approver")
+        .replace(/_/g, " ")
+        .replace(/\b\w/g, (c: string) => c.toUpperCase());
+
+    return rows.map((r: any) => {
+      const description = r.description ?? "";
+      const steps = (r.steps ?? []).map((s: any) => ({
+        id: s.id,
+        role: roleLabel(s.approverRole),
+        approverName: s.approverName ?? roleLabel(s.approverRole),
+        status: s.status ?? "waiting",
+        actedAt: s.actedAt ? new Date(s.actedAt).toLocaleDateString("en-IN") : null,
+        comments: s.comments ?? "",
+      }));
+      return {
+        id: r.id,
+        type: r.type ?? "advance",
+        title:
+          r.title ??
+          (description.length > 60 ? `${description.slice(0, 60)}…` : description),
+        description,
+        amount: Number(r.amount ?? 0),
+        requestedBy: r.requestedBy ?? "Site Staff",
+        requestedAt: r.createdAt
+          ? new Date(r.createdAt).toLocaleDateString("en-IN")
+          : (r.requestedAt ?? ""),
+        status: r.status ?? "pending",
+        currentStep:
+          r.currentStep ??
+          steps.findIndex((s: any) => s.status === "pending") + 1,
+        steps,
+      };
+    });
   }, [apiRequests, apiError]);
 
   const [activeTab, setActiveTab] = useState<FilterTab>("all");

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { approvalRequests, approvalWorkflows, approvalSteps } from "@/db/schema";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, inArray, asc } from "drizzle-orm";
 import { z } from "zod";
 
 const createApprovalRequestSchema = z.object({
@@ -38,9 +38,32 @@ export async function GET(request: NextRequest) {
       .limit(limit)
       .offset(offset);
 
+    // Attach workflow steps so the UI can render the approval chain
+    const requestIds = result.map((r) => r.id);
+    const steps =
+      requestIds.length > 0
+        ? await db
+            .select()
+            .from(approvalSteps)
+            .where(inArray(approvalSteps.requestId, requestIds))
+            .orderBy(asc(approvalSteps.stepOrder))
+        : [];
+
+    const stepsByRequest = new Map<string, typeof steps>();
+    for (const step of steps) {
+      const list = stepsByRequest.get(step.requestId) ?? [];
+      list.push(step);
+      stepsByRequest.set(step.requestId, list);
+    }
+
+    const data = result.map((r) => ({
+      ...r,
+      steps: stepsByRequest.get(r.id) ?? [],
+    }));
+
     return NextResponse.json({
-      data: result,
-      meta: { total: result.length, page, limit },
+      data,
+      meta: { total: data.length, page, limit },
     });
   } catch (error) {
     console.error("GET /api/v1/approvals error:", error);

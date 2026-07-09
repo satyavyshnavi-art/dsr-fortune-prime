@@ -29,6 +29,7 @@ export default function ApprovalsPage() {
   const [activeTab, setActiveTab] = useState<TabId>("requests");
   const [selectedRequest, setSelectedRequest] = useState<ApprovalRequest | null>(null);
   const [showDetail, setShowDetail] = useState(false);
+  const [listVersion, setListVersion] = useState(0);
 
   // KPI calculations
   const pendingCount = MOCK_REQUESTS.filter((r) => r.status === "pending").length;
@@ -97,13 +98,16 @@ export default function ApprovalsPage() {
       <div>
         {activeTab === "requests" && (
           <ApprovalsList
+            key={listVersion}
             onViewDetail={(req) => {
               setSelectedRequest(req);
               setShowDetail(true);
             }}
           />
         )}
-        {activeTab === "submit" && <SubmitRequest />}
+        {activeTab === "submit" && (
+          <SubmitRequest onSubmitted={() => setActiveTab("requests")} />
+        )}
       </div>
 
       {/* Detail Modal */}
@@ -111,6 +115,7 @@ export default function ApprovalsPage() {
         open={showDetail}
         onOpenChange={setShowDetail}
         request={selectedRequest}
+        onActed={() => setListVersion((v) => v + 1)}
       />
     </div>
   );

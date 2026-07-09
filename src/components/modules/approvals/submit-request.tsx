@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,12 +16,28 @@ import { Send, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { REQUEST_TYPE_LABELS, type RequestType } from "./mock-data";
 
-export function SubmitRequest() {
+interface SubmitRequestProps {
+  onSubmitted?: () => void;
+}
+
+export function SubmitRequest({ onSubmitted }: SubmitRequestProps) {
   const [type, setType] = useState<RequestType | "">("");
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [fileName, setFileName] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [facilityId, setFacilityId] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/v1/facilities")
+      .then((res) => res.json())
+      .then((data) => {
+        const rows = Array.isArray(data) ? data : data?.data;
+        if (Array.isArray(rows) && rows.length > 0) setFacilityId(rows[0].id);
+      })
+      .catch(() => {});
+  }, []);
 
   const handleFileSelect = () => {
     const input = document.createElement("input");
@@ -47,30 +63,39 @@ export function SubmitRequest() {
     }
     setErrors({});
 
+    if (!facilityId) {
+      toast.error("Facility not loaded yet — please try again in a moment");
+      return;
+    }
+
+    setSubmitting(true);
     try {
       const res = await fetch("/api/v1/approvals", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          facilityId,
           type,
-          amount: parseFloat(amount),
+          amount: String(parseFloat(amount)),
           description,
-          fileName: fileName || null,
+          attachments: fileName ? [{ fileName }] : undefined,
         }),
       });
-      if (res.ok) {
-        toast.success("Request submitted successfully");
-      } else {
-        throw new Error("API error");
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.error?.message || "Failed to submit request");
       }
-    } catch {
-      toast.success("Request submitted (offline)");
+      toast.success("Request submitted successfully");
+      setType("");
+      setAmount("");
+      setDescription("");
+      setFileName("");
+      onSubmitted?.();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to submit request");
+    } finally {
+      setSubmitting(false);
     }
-
-    setType("");
-    setAmount("");
-    setDescription("");
-    setFileName("");
   };
 
   return (
@@ -162,10 +187,11 @@ export function SubmitRequest() {
         {/* Submit */}
         <Button
           onClick={handleSubmit}
+          disabled={submitting}
           className="w-full bg-emerald-700 hover:bg-emerald-800 text-white h-9 text-[13px] rounded-lg"
         >
           <Send className="h-3.5 w-3.5 mr-1.5" />
-          Submit Request
+          {submitting ? "Submitting..." : "Submit Request"}
         </Button>
       </div>
     </div>

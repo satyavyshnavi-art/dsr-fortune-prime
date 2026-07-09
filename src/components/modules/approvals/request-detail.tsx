@@ -20,9 +20,10 @@ interface RequestDetailProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   request: ApprovalRequest | null;
+  onActed?: () => void;
 }
 
-export function RequestDetail({ open, onOpenChange, request }: RequestDetailProps) {
+export function RequestDetail({ open, onOpenChange, request, onActed }: RequestDetailProps) {
   const [actionType, setActionType] = useState<"approve" | "reject" | null>(null);
   const [comment, setComment] = useState("");
 
@@ -33,24 +34,22 @@ export function RequestDetail({ open, onOpenChange, request }: RequestDetailProp
       const res = await fetch(`/api/v1/approvals/${request.id}/action`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: actionType, comment }),
+        body: JSON.stringify({ action: actionType, comments: comment || undefined }),
       });
-      if (res.ok) {
-        toast.success(
-          actionType === "approve" ? "Request approved" : "Request rejected"
-        );
-      } else {
-        throw new Error("API error");
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.error?.message || "Action failed");
       }
-    } catch {
       toast.success(
-        `Request ${actionType === "approve" ? "approved" : "rejected"} (offline)`
+        actionType === "approve" ? "Request approved" : "Request rejected"
       );
+      setActionType(null);
+      setComment("");
+      onOpenChange(false);
+      onActed?.();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Action failed");
     }
-
-    setActionType(null);
-    setComment("");
-    onOpenChange(false);
   };
 
   if (!request) return null;
